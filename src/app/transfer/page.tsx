@@ -40,13 +40,11 @@ const ACCOUNTS = [
 ];
 
 export default function TransferPage() {
-  const [fromAccount, setFromAccount] = useState('mt5_1');
-  const [toAccount, setToAccount] = useState('mt5_2');
+  const [fundingAccount, setFundingAccount] = useState('btc');
   const [copied, setCopied] = useState(false);
   const { toast } = useToast();
 
-  const selectedFrom = ACCOUNTS.find(a => a.id === fromAccount);
-  const selectedTo = ACCOUNTS.find(a => a.id === toAccount);
+  const selectedFunding = ACCOUNTS.find(a => a.id === fundingAccount);
 
   const handleCopy = (address: string) => {
     navigator.clipboard.writeText(address);
@@ -78,79 +76,30 @@ export default function TransferPage() {
           </div>
 
           <div className="space-y-8">
-            {/* From Account */}
+            {/* From Funding Account - Active Dropdown & Features */}
             <div className="space-y-3">
               <Label className="text-muted-foreground font-semibold ml-1 uppercase text-[11px] tracking-wider">FROM YOUR FUNDING ACCOUNT</Label>
-              <Select value={fromAccount} onValueChange={setFromAccount}>
+              <Select value={fundingAccount} onValueChange={setFundingAccount}>
                 <SelectTrigger className="h-auto p-5 bg-white border border-border rounded-xl flex items-center justify-between hover:bg-muted/50 transition-all">
                   <div className="flex items-center gap-4">
-                    {selectedFrom?.type === 'MT5' ? (
+                    {selectedFunding?.type === 'MT5' ? (
                       <div className="px-3 py-1 rounded bg-primary/10 border border-primary/20 text-primary text-xs font-black uppercase tracking-wider">
                         MT5
                       </div>
                     ) : (
-                      selectedFrom?.icon && <selectedFrom.icon className={cn("h-6 w-6", selectedFrom.color)} />
+                      selectedFunding?.icon && <selectedFunding.icon className={cn("h-6 w-6", selectedFunding.color)} />
                     )}
                     <div className="text-left">
                       <span className="font-mono text-xl tracking-tight text-foreground block leading-none mb-1">
-                        {selectedFrom?.type === 'MT5' ? selectedFrom.sub : selectedFrom?.name}
+                        {selectedFunding?.type === 'MT5' ? selectedFunding.sub : selectedFunding?.name}
                       </span>
-                      {selectedFrom?.type !== 'MT5' && (
-                        <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">{selectedFrom?.sub}</span>
+                      {selectedFunding?.type !== 'MT5' && (
+                        <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">{selectedFunding?.sub}</span>
                       )}
                     </div>
                   </div>
                   <div className="flex items-center gap-4">
-                    <span className="font-black text-lg">{selectedFrom?.balance}</span>
-                  </div>
-                </SelectTrigger>
-                <SelectContent className="max-h-[400px]">
-                  {ACCOUNTS.map((acc) => (
-                    <SelectItem key={acc.id} value={acc.id} className="cursor-pointer py-3">
-                      <div className="flex items-center justify-between w-full min-w-[300px] md:min-w-[500px]">
-                        <div className="flex items-center gap-3">
-                          {acc.type === 'MT5' ? (
-                            <div className="px-2 py-0.5 rounded bg-primary/5 border border-primary/10 text-primary text-[10px] font-bold">MT5</div>
-                          ) : (
-                            acc.icon && <acc.icon className={cn("h-5 w-5", acc.color)} />
-                          )}
-                          <div className="flex flex-col">
-                            <span className="font-bold text-sm">{acc.type === 'MT5' ? `Account ${acc.sub}` : acc.name}</span>
-                            <span className="text-[10px] text-muted-foreground uppercase font-medium">{acc.sub}</span>
-                          </div>
-                        </div>
-                        <span className="font-mono text-xs font-bold">{acc.balance}</span>
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* To Account */}
-            <div className="space-y-3">
-              <Label className="text-muted-foreground font-semibold ml-1 uppercase text-[11px] tracking-wider">TO COPY TRADING ACCOUNT</Label>
-              <Select value={toAccount} onValueChange={setToAccount}>
-                <SelectTrigger className="h-auto p-5 bg-white border border-border rounded-xl flex items-center justify-between hover:bg-muted/50 transition-all">
-                  <div className="flex items-center gap-4">
-                    {selectedTo?.type === 'MT5' ? (
-                      <div className="px-3 py-1 rounded bg-primary/10 border border-primary/20 text-primary text-xs font-black uppercase tracking-wider">
-                        MT5
-                      </div>
-                    ) : (
-                      selectedTo?.icon && <selectedTo.icon className={cn("h-6 w-6", selectedTo.color)} />
-                    )}
-                    <div className="text-left">
-                      <span className="font-mono text-xl tracking-tight text-foreground block leading-none mb-1">
-                        {selectedTo?.type === 'MT5' ? selectedTo.sub : selectedTo?.name}
-                      </span>
-                      {selectedTo?.type !== 'MT5' && (
-                        <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">{selectedTo?.sub}</span>
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-4">
-                    <span className="font-black text-lg">{selectedTo?.balance}</span>
+                    <span className="font-black text-lg">{selectedFunding?.balance}</span>
                   </div>
                 </SelectTrigger>
                 <SelectContent className="max-h-[400px]">
@@ -175,33 +124,51 @@ export default function TransferPage() {
                 </SelectContent>
               </Select>
 
-              {/* Wallet Address Display */}
-              {selectedTo?.address && (
+              {/* Wallet Address Display - Now moved to Funding section */}
+              {selectedFunding?.address && (
                 <div className="mt-4 p-5 bg-primary/5 border border-primary/10 rounded-xl space-y-3 animate-in fade-in slide-in-from-top-2 duration-300">
                   <div className="flex items-center justify-between">
                     <Label className="text-[10px] text-primary font-black uppercase tracking-[0.2em]">Your Wallet Address</Label>
-                    <span className={cn("text-[10px] font-bold px-2 py-0.5 rounded-full bg-white border border-primary/10", selectedTo.color)}>
-                      {selectedTo.sub} Network
+                    <span className={cn("text-[10px] font-bold px-2 py-0.5 rounded-full bg-white border border-primary/10", selectedFunding.color)}>
+                      {selectedFunding.sub} Network
                     </span>
                   </div>
                   <div className="flex items-center gap-3 bg-white p-3 rounded-lg border border-border shadow-inner">
                     <span className="flex-1 font-mono text-xs break-all text-muted-foreground font-medium">
-                      {selectedTo.address}
+                      {selectedFunding.address}
                     </span>
                     <Button 
                       variant="ghost" 
                       size="icon" 
                       className="shrink-0 hover:bg-primary/10 text-primary"
-                      onClick={() => handleCopy(selectedTo.address!)}
+                      onClick={() => handleCopy(selectedFunding.address!)}
                     >
                       {copied ? <Check className="h-4 w-4 text-green-600" /> : <Copy className="h-4 w-4" />}
                     </Button>
                   </div>
                   <p className="text-[10px] text-muted-foreground font-medium italic">
-                    * Send only {selectedTo.sub} to this address. Sending any other asset may result in permanent loss of funds.
+                    * Send only {selectedFunding.sub} to this address. Sending any other asset may result in permanent loss of funds.
                   </p>
                 </div>
               )}
+            </div>
+
+            {/* To Copy Trading Account - Dormant Section as requested */}
+            <div className="space-y-3">
+              <Label className="text-muted-foreground font-semibold ml-1 uppercase text-[11px] tracking-wider">TO COPY TRADING ACCOUNT</Label>
+              <div className="h-auto p-5 bg-white border border-border rounded-xl flex items-center justify-between shadow-sm">
+                <div className="flex items-center gap-8">
+                  <div className="px-3 py-1 rounded bg-primary/10 border border-primary/20 text-primary text-xs font-black uppercase tracking-wider">
+                    MT5
+                  </div>
+                  <span className="font-mono text-xl tracking-tight text-foreground font-bold">
+                    699478516
+                  </span>
+                </div>
+                <div className="flex items-center gap-4">
+                  <span className="font-black text-lg">0.00 USD</span>
+                </div>
+              </div>
             </div>
 
             <div className="space-y-3">
@@ -212,12 +179,12 @@ export default function TransferPage() {
                   placeholder="0.00"
                 />
                 <div className="absolute right-6 top-1/2 -translate-y-1/2 text-muted-foreground font-black text-xl">
-                  {selectedFrom?.balance.split(' ')[1] || 'USD'}
+                  {selectedFunding?.balance.split(' ')[1] || 'USD'}
                 </div>
               </div>
               <div className="flex justify-between px-1">
-                <p className="text-[11px] text-muted-foreground font-bold uppercase tracking-wide">Min: 0.01 {selectedFrom?.balance.split(' ')[1] || 'USD'}</p>
-                <p className="text-[11px] text-muted-foreground font-bold uppercase tracking-wide">Available: {selectedFrom?.balance}</p>
+                <p className="text-[11px] text-muted-foreground font-bold uppercase tracking-wide">Min: 0.01 {selectedFunding?.balance.split(' ')[1] || 'USD'}</p>
+                <p className="text-[11px] text-muted-foreground font-bold uppercase tracking-wide">Available: {selectedFunding?.balance}</p>
               </div>
             </div>
 
