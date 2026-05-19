@@ -1,4 +1,3 @@
-
 "use client";
 
 import { Navbar } from "@/components/navbar";
@@ -81,7 +80,7 @@ export default function TransferPage() {
           <div className="space-y-8">
             {/* From Account */}
             <div className="space-y-3">
-              <Label className="text-muted-foreground font-semibold ml-1">From account</Label>
+              <Label className="text-muted-foreground font-semibold ml-1 uppercase text-[11px] tracking-wider">FROM YOUR FUNDING ACCOUNT</Label>
               <Select value={fromAccount} onValueChange={setFromAccount}>
                 <SelectTrigger className="h-auto p-5 bg-white border border-border rounded-xl flex items-center justify-between hover:bg-muted/50 transition-all">
                   <div className="flex items-center gap-4">
@@ -130,7 +129,7 @@ export default function TransferPage() {
 
             {/* To Account */}
             <div className="space-y-3">
-              <Label className="text-muted-foreground font-semibold ml-1">To account</Label>
+              <Label className="text-muted-foreground font-semibold ml-1 uppercase text-[11px] tracking-wider">TO COPY TRADING ACCOUNT</Label>
               <Select value={toAccount} onValueChange={setToAccount}>
                 <SelectTrigger className="h-auto p-5 bg-white border border-border rounded-xl flex items-center justify-between hover:bg-muted/50 transition-all">
                   <div className="flex items-center gap-4">
