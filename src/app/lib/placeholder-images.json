@@ -1,0 +1,35 @@
+
+{
+  "placeholderImages": [
+    {
+      "id": "hero-trading",
+      "description": "Professional trading desk with multiple screens",
+      "imageUrl": "https://picsum.photos/seed/trading1/1200/800",
+      "imageHint": "trading desk"
+    },
+    {
+      "id": "trader-1",
+      "description": "Professional master trader portrait",
+      "imageUrl": "https://picsum.photos/seed/trader1/400/400",
+      "imageHint": "businessman portrait"
+    },
+    {
+      "id": "trader-2",
+      "description": "Successful female trader portrait",
+      "imageUrl": "https://picsum.photos/seed/trader2/400/400",
+      "imageHint": "businesswoman portrait"
+    },
+    {
+      "id": "trader-3",
+      "description": "Experienced analyst portrait",
+      "imageUrl": "https://picsum.photos/seed/trader3/400/400",
+      "imageHint": "expert portrait"
+    },
+    {
+      "id": "chart-preview",
+      "description": "Financial stock market chart",
+      "imageUrl": "https://picsum.photos/seed/chart1/600/400",
+      "imageHint": "stock chart"
+    }
+  ]
+}
