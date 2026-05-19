@@ -11,7 +11,8 @@ import {
   ArrowRightLeft, 
   ArrowUpRight,
   TrendingUp,
-  LineChart
+  LineChart,
+  Smartphone
 } from "lucide-react";
 import Image from "next/image";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
@@ -19,19 +20,19 @@ import { PlaceHolderImages } from "@/lib/placeholder-images";
 export default function Dashboard() {
   const [counter, setCounter] = useState(7420.55);
   const chartImage = PlaceHolderImages.find(img => img.id === "chart-preview");
+  const btcImage = PlaceHolderImages.find(img => img.id === "btc-chart");
 
   useEffect(() => {
     // Mimic forex market movements: small random ticks at a slower interval
     const interval = setInterval(() => {
       setCounter(prev => {
-        const change = (Math.random() - 0.48) * 1.25; // Slight upward bias, small increments
+        const change = (Math.random() - 0.48) * 1.25;
         const newValue = prev + change;
-        // Keep it within a reasonable range for the demonstration
         if (newValue > 9000) return 7000;
         if (newValue < 5000) return 6000;
         return Number(newValue.toFixed(2));
       });
-    }, 1500); // Slower "market" tick speed
+    }, 2000);
     return () => clearInterval(interval);
   }, []);
 
@@ -40,49 +41,46 @@ export default function Dashboard() {
       <Navbar />
       
       <main className="container mx-auto px-4 py-8 space-y-6 max-w-6xl">
-        {/* Top Banners */}
+        {/* Top Banners Cloned from Image */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Box 1: Forex Chart Background */}
+          {/* Box 1: Proven Strategy */}
           <Card className="bg-accent/15 border-none overflow-hidden h-[180px] flex items-center relative group">
             <CardContent className="p-8 flex justify-between items-center w-full z-10">
-              <div className="max-w-[65%] space-y-2">
-                <h2 className="text-2xl font-bold leading-tight tracking-tight">
+              <div className="max-w-[65%] space-y-3">
+                <h2 className="text-2xl font-bold leading-tight tracking-tight text-foreground">
                   Ready to start today with a proven strategy?
                 </h2>
-                <div className="flex items-center gap-2 opacity-70">
-                  <LineChart className="h-4 w-4" />
-                  <p className="text-sm font-bold tracking-wide uppercase">Live Market Feed</p>
-                </div>
+                <p className="text-sm font-bold text-primary/80 tracking-wide">CopyTrade Now!</p>
               </div>
-              <div className="relative w-40 h-32 opacity-90 transition-transform group-hover:scale-105 duration-700">
+              <div className="relative w-32 h-32 opacity-90 transition-transform group-hover:scale-105 duration-700">
                 <Image 
                   src={chartImage?.imageUrl || "https://picsum.photos/seed/forex1/600/400"} 
-                  alt="Forex Live Chart" 
+                  alt="Forex Chart" 
                   fill 
-                  className="object-cover rounded-xl shadow-lg border border-white/10"
+                  className="object-contain"
                   data-ai-hint="forex chart"
                 />
               </div>
             </CardContent>
           </Card>
 
-          {/* Box 2: Real-time Market Data Counter */}
+          {/* Box 2: Precision Meets Performance */}
           <Card className="bg-primary/10 border-none overflow-hidden h-[180px] flex items-center relative group">
             <CardContent className="p-8 flex justify-between items-center w-full z-10">
-              <div className="max-w-[60%] space-y-2">
-                <h2 className="text-2xl font-bold leading-tight tracking-tight">
-                  Real-time Data Flow
+              <div className="max-w-[65%] space-y-3">
+                <h2 className="text-2xl font-bold leading-tight tracking-tight text-foreground">
+                  Where precision meets performance
                 </h2>
-                <p className="text-sm font-bold opacity-70 tracking-wide uppercase">Institutional Liquidity</p>
+                <p className="text-sm font-bold text-accent tracking-wide">Trade with 3.5x less slippage</p>
               </div>
-              <div className="flex flex-col items-end">
-                <div className="flex items-center gap-2 text-primary">
-                  <TrendingUp className="h-5 w-5 animate-pulse" />
-                  <span className="text-xs font-bold uppercase tracking-widest">Market Open</span>
-                </div>
-                <div className="text-4xl md:text-5xl font-black tracking-tighter tabular-nums text-primary/80">
-                  ${counter.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                </div>
+              <div className="relative w-32 h-32 opacity-90 transition-transform group-hover:scale-105 duration-700">
+                <Image 
+                  src={btcImage?.imageUrl || "https://picsum.photos/seed/btc99/400/400"} 
+                  alt="Trading App" 
+                  fill 
+                  className="object-contain"
+                  data-ai-hint="bitcoin chart"
+                />
               </div>
             </CardContent>
           </Card>
@@ -101,9 +99,11 @@ export default function Dashboard() {
               <div className="text-center flex-1">
                 <div className="flex items-center justify-center gap-1.5 mb-2">
                   <span className="text-3xl font-medium text-slate-500 mt-1">$</span>
-                  <span className="text-6xl font-bold tracking-tighter">0.00</span>
+                  <span className="text-6xl font-bold tracking-tighter">
+                    {counter.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  </span>
                 </div>
-                <p className="text-sm text-slate-500 font-bold uppercase tracking-widest opacity-80">Total Funds</p>
+                <p className="text-sm text-slate-500 font-bold uppercase tracking-widest opacity-80">Live Equity</p>
               </div>
 
               {/* Notification */}
