@@ -16,7 +16,8 @@ import {
   CircleDollarSign,
   Zap,
   Copy,
-  Check
+  Check,
+  SendHorizontal
 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
@@ -42,6 +43,7 @@ const ACCOUNTS = [
 export default function TransferPage() {
   const [fundingAccount, setFundingAccount] = useState('btc');
   const [copied, setCopied] = useState(false);
+  const [transactionId, setTransactionId] = useState('');
   const { toast } = useToast();
 
   const selectedFunding = ACCOUNTS.find(a => a.id === fundingAccount);
@@ -56,6 +58,22 @@ export default function TransferPage() {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const handleSubmitApproval = () => {
+    if (!transactionId) {
+      toast({
+        variant: "destructive",
+        title: "Missing Information",
+        description: "Please provide a Transaction ID to continue.",
+      });
+      return;
+    }
+    toast({
+      title: "Submission Received",
+      description: "Your transaction is now being reviewed by our compliance team.",
+    });
+    setTransactionId('');
+  };
+
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground font-body">
       <Navbar />
@@ -63,7 +81,7 @@ export default function TransferPage() {
       <main className="flex-1 container mx-auto px-4 py-12 max-w-3xl">
         <div className="space-y-10">
           <header className="space-y-2">
-            <h1 className="text-3xl font-bold tracking-tight">Internal Transfer</h1>
+            <h1 className="text-3xl font-bold tracking-tight text-primary">Internal Transfer</h1>
             <p className="text-muted-foreground font-medium">Move funds between your trading accounts instantly.</p>
           </header>
 
@@ -126,29 +144,53 @@ export default function TransferPage() {
 
               {/* Wallet Address Display */}
               {selectedFunding?.address && (
-                <div className="mt-4 p-5 bg-primary/5 border border-primary/10 rounded-xl space-y-3 animate-in fade-in slide-in-from-top-2 duration-300">
-                  <div className="flex items-center justify-between">
-                    <Label className="text-[10px] text-primary font-black uppercase tracking-[0.2em]">Your Wallet Address</Label>
-                    <span className={cn("text-[10px] font-bold px-2 py-0.5 rounded-full bg-white border border-primary/10", selectedFunding.color)}>
-                      {selectedFunding.sub} Network
-                    </span>
+                <div className="space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
+                  <div className="p-5 bg-primary/5 border border-primary/10 rounded-xl space-y-3">
+                    <div className="flex items-center justify-between">
+                      <Label className="text-[10px] text-primary font-black uppercase tracking-[0.2em]">Your Wallet Address</Label>
+                      <span className={cn("text-[10px] font-bold px-2 py-0.5 rounded-full bg-white border border-primary/10", selectedFunding.color)}>
+                        {selectedFunding.sub} Network
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-3 bg-white p-3 rounded-lg border border-border shadow-inner">
+                      <span className="flex-1 font-mono text-xs break-all text-muted-foreground font-medium">
+                        {selectedFunding.address}
+                      </span>
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="shrink-0 hover:bg-primary/10 text-primary"
+                        onClick={() => handleCopy(selectedFunding.address!)}
+                      >
+                        {copied ? <Check className="h-4 w-4 text-green-600" /> : <Copy className="h-4 w-4" />}
+                      </Button>
+                    </div>
+                    <p className="text-[10px] text-muted-foreground font-medium italic">
+                      * Deposit only {selectedFunding.sub} to this address. Depositing any other asset may result in permanent loss of funds.
+                    </p>
                   </div>
-                  <div className="flex items-center gap-3 bg-white p-3 rounded-lg border border-border shadow-inner">
-                    <span className="flex-1 font-mono text-xs break-all text-muted-foreground font-medium">
-                      {selectedFunding.address}
-                    </span>
+
+                  {/* Transaction ID Submission Box */}
+                  <div className="p-5 bg-white border border-border rounded-xl shadow-sm space-y-4">
+                    <div className="space-y-2">
+                      <Label className="text-[11px] font-black uppercase tracking-widest text-muted-foreground ml-1">Transaction ID (TXID)</Label>
+                      <div className="relative">
+                        <Input 
+                          placeholder="Paste your transaction hash here..."
+                          className="h-12 bg-background border-border pl-10 focus-visible:ring-primary"
+                          value={transactionId}
+                          onChange={(e) => setTransactionId(e.target.value)}
+                        />
+                        <SendHorizontal className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      </div>
+                    </div>
                     <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      className="shrink-0 hover:bg-primary/10 text-primary"
-                      onClick={() => handleCopy(selectedFunding.address!)}
+                      onClick={handleSubmitApproval}
+                      className="w-full h-12 bg-primary text-primary-foreground font-black uppercase tracking-wider hover:bg-primary/90 transition-all shadow-md active:scale-[0.98]"
                     >
-                      {copied ? <Check className="h-4 w-4 text-green-600" /> : <Copy className="h-4 w-4" />}
+                      Submit for Approval
                     </Button>
                   </div>
-                  <p className="text-[10px] text-muted-foreground font-medium italic">
-                    * Deposit only {selectedFunding.sub} to this address. Depositing any other asset may result in permanent loss of funds.
-                  </p>
                 </div>
               )}
             </div>
@@ -175,7 +217,7 @@ export default function TransferPage() {
               <Label className="text-muted-foreground font-semibold ml-1">Amount</Label>
               <div className="relative group">
                 <Input 
-                  className="h-20 bg-white border-border text-3xl font-black pr-20 focus-visible:ring-primary rounded-xl" 
+                  className="h-20 bg-white border-border text-3xl font-black pr-20 focus-visible:ring-primary rounded-xl shadow-inner" 
                   placeholder="0.00"
                 />
                 <div className="absolute right-6 top-1/2 -translate-y-1/2 text-muted-foreground font-black text-xl">
@@ -195,7 +237,7 @@ export default function TransferPage() {
 
           <div className="space-y-10 pt-10 border-t border-border">
             <section className="space-y-4">
-              <h3 className="text-2xl font-black tracking-tight">Terms</h3>
+              <h3 className="text-2xl font-black tracking-tight text-primary">Terms</h3>
               <div className="space-y-2">
                 <div className="flex justify-between items-center text-sm border-b border-border pb-2">
                   <span className="text-muted-foreground font-medium">Average payment time</span>
