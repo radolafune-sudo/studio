@@ -76,7 +76,7 @@ export default function TransferPage() {
           </div>
 
           <div className="space-y-8">
-            {/* From Funding Account - Active Dropdown & Features */}
+            {/* From Funding Account */}
             <div className="space-y-3">
               <Label className="text-muted-foreground font-semibold ml-1 uppercase text-[11px] tracking-wider">FROM YOUR FUNDING ACCOUNT</Label>
               <Select value={fundingAccount} onValueChange={setFundingAccount}>
@@ -124,7 +124,7 @@ export default function TransferPage() {
                 </SelectContent>
               </Select>
 
-              {/* Wallet Address Display - Now moved to Funding section */}
+              {/* Wallet Address Display */}
               {selectedFunding?.address && (
                 <div className="mt-4 p-5 bg-primary/5 border border-primary/10 rounded-xl space-y-3 animate-in fade-in slide-in-from-top-2 duration-300">
                   <div className="flex items-center justify-between">
@@ -147,13 +147,13 @@ export default function TransferPage() {
                     </Button>
                   </div>
                   <p className="text-[10px] text-muted-foreground font-medium italic">
-                    * Send only {selectedFunding.sub} to this address. Sending any other asset may result in permanent loss of funds.
+                    * Deposit only {selectedFunding.sub} to this address. Depositing any other asset may result in permanent loss of funds.
                   </p>
                 </div>
               )}
             </div>
 
-            {/* To Copy Trading Account - Dormant Section as requested */}
+            {/* To Copy Trading Account - Dormant */}
             <div className="space-y-3">
               <Label className="text-muted-foreground font-semibold ml-1 uppercase text-[11px] tracking-wider">TO COPY TRADING ACCOUNT</Label>
               <div className="h-auto p-5 bg-white border border-border rounded-xl flex items-center justify-between shadow-sm">
