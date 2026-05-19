@@ -15,7 +15,9 @@ import {
   Bitcoin,
   Coins,
   CircleDollarSign,
-  Zap
+  Zap,
+  Copy,
+  Check
 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
@@ -26,23 +28,36 @@ import {
   SelectTrigger,
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
+import { useToast } from "@/hooks/use-toast";
 
 const ACCOUNTS = [
   { id: 'mt5_1', name: 'Account 332323752', sub: '332323752', balance: '0.00 USD', type: 'MT5' },
   { id: 'mt5_2', name: 'Account 699478516', sub: '699478516', balance: '0.00 USD', type: 'MT5' },
-  { id: 'btc', name: 'Crypto wallet (BTC)', sub: 'Bitcoin', balance: '0.00 BTC', color: 'text-orange-500', icon: Bitcoin },
-  { id: 'usdt', name: 'Crypto wallet (USDT TRC20)', sub: 'Tether', balance: '0.00 USDT', color: 'text-green-600', icon: CircleDollarSign },
-  { id: 'trx', name: 'TRON (TRX)', sub: 'Tron Network', balance: '0.00 TRX', color: 'text-red-600', icon: Zap },
-  { id: 'eth', name: 'Ethereum (ETH)', sub: 'Ether', balance: '0.00 ETH', color: 'text-indigo-600', icon: Coins },
-  { id: 'usdc', name: 'USD Coin (USDC ERC20)', sub: 'USD Coin', balance: '0.00 USDC', color: 'text-blue-500', icon: CircleDollarSign },
+  { id: 'btc', name: 'Crypto wallet (BTC)', sub: 'Bitcoin', balance: '0.00 BTC', color: 'text-orange-500', icon: Bitcoin, address: '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa' },
+  { id: 'usdt', name: 'Crypto wallet (USDT TRC20)', sub: 'Tether', balance: '0.00 USDT', color: 'text-green-600', icon: CircleDollarSign, address: 'TXxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx' },
+  { id: 'trx', name: 'TRON (TRX)', sub: 'Tron Network', balance: '0.00 TRX', color: 'text-red-600', icon: Zap, address: 'Txxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx' },
+  { id: 'eth', name: 'Ethereum (ETH)', sub: 'Ether', balance: '0.00 ETH', color: 'text-indigo-600', icon: Coins, address: '0x742d35Cc6634C0532925a3b844Bc454e4438f44e' },
+  { id: 'usdc', name: 'USD Coin (USDC ERC20)', sub: 'USD Coin', balance: '0.00 USDC', color: 'text-blue-500', icon: CircleDollarSign, address: '0x88dC783616640532925a3b844Bc454e4438f44e' },
 ];
 
 export default function TransferPage() {
   const [fromAccount, setFromAccount] = useState('mt5_1');
   const [toAccount, setToAccount] = useState('mt5_2');
+  const [copied, setCopied] = useState(false);
+  const { toast } = useToast();
 
   const selectedFrom = ACCOUNTS.find(a => a.id === fromAccount);
   const selectedTo = ACCOUNTS.find(a => a.id === toAccount);
+
+  const handleCopy = (address: string) => {
+    navigator.clipboard.writeText(address);
+    setCopied(true);
+    toast({
+      title: "Address Copied",
+      description: "Wallet address has been copied to your clipboard.",
+    });
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground font-body">
@@ -55,7 +70,6 @@ export default function TransferPage() {
             <p className="text-muted-foreground font-medium">Move funds between your trading accounts instantly.</p>
           </header>
 
-          {/* Header Action Selector */}
           <div className="flex items-center justify-between p-5 bg-white border border-border rounded-xl cursor-pointer hover:bg-muted/50 transition-all shadow-sm">
             <div className="flex items-center gap-4">
               <ArrowRightLeft className="h-6 w-6 text-primary" />
@@ -64,8 +78,8 @@ export default function TransferPage() {
             <ChevronDown className="h-5 w-5 text-muted-foreground" />
           </div>
 
-          {/* Transfer Form Details */}
           <div className="space-y-8">
+            {/* From Account */}
             <div className="space-y-3">
               <Label className="text-muted-foreground font-semibold ml-1">From account</Label>
               <Select value={fromAccount} onValueChange={setFromAccount}>
@@ -94,7 +108,7 @@ export default function TransferPage() {
                 <SelectContent className="max-h-[400px]">
                   {ACCOUNTS.map((acc) => (
                     <SelectItem key={acc.id} value={acc.id} className="cursor-pointer py-3">
-                      <div className="flex items-center justify-between w-[350px] md:w-[500px]">
+                      <div className="flex items-center justify-between w-full min-w-[300px] md:min-w-[500px]">
                         <div className="flex items-center gap-3">
                           {acc.type === 'MT5' ? (
                             <div className="px-2 py-0.5 rounded bg-primary/5 border border-primary/10 text-primary text-[10px] font-bold">MT5</div>
@@ -114,6 +128,7 @@ export default function TransferPage() {
               </Select>
             </div>
 
+            {/* To Account */}
             <div className="space-y-3">
               <Label className="text-muted-foreground font-semibold ml-1">To account</Label>
               <Select value={toAccount} onValueChange={setToAccount}>
@@ -142,7 +157,7 @@ export default function TransferPage() {
                 <SelectContent className="max-h-[400px]">
                   {ACCOUNTS.map((acc) => (
                     <SelectItem key={acc.id} value={acc.id} className="cursor-pointer py-3">
-                      <div className="flex items-center justify-between w-[350px] md:w-[500px]">
+                      <div className="flex items-center justify-between w-full min-w-[300px] md:min-w-[500px]">
                         <div className="flex items-center gap-3">
                           {acc.type === 'MT5' ? (
                             <div className="px-2 py-0.5 rounded bg-primary/5 border border-primary/10 text-primary text-[10px] font-bold">MT5</div>
@@ -160,6 +175,34 @@ export default function TransferPage() {
                   ))}
                 </SelectContent>
               </Select>
+
+              {/* Wallet Address Display */}
+              {selectedTo?.address && (
+                <div className="mt-4 p-5 bg-primary/5 border border-primary/10 rounded-xl space-y-3 animate-in fade-in slide-in-from-top-2 duration-300">
+                  <div className="flex items-center justify-between">
+                    <Label className="text-[10px] text-primary font-black uppercase tracking-[0.2em]">Your Wallet Address</Label>
+                    <span className={cn("text-[10px] font-bold px-2 py-0.5 rounded-full bg-white border border-primary/10", selectedTo.color)}>
+                      {selectedTo.sub} Network
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-3 bg-white p-3 rounded-lg border border-border shadow-inner">
+                    <span className="flex-1 font-mono text-xs break-all text-muted-foreground font-medium">
+                      {selectedTo.address}
+                    </span>
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="shrink-0 hover:bg-primary/10 text-primary"
+                      onClick={() => handleCopy(selectedTo.address!)}
+                    >
+                      {copied ? <Check className="h-4 w-4 text-green-600" /> : <Copy className="h-4 w-4" />}
+                    </Button>
+                  </div>
+                  <p className="text-[10px] text-muted-foreground font-medium italic">
+                    * Send only {selectedTo.sub} to this address. Sending any other asset may result in permanent loss of funds.
+                  </p>
+                </div>
+              )}
             </div>
 
             <div className="space-y-3">
@@ -184,7 +227,6 @@ export default function TransferPage() {
             </Button>
           </div>
 
-          {/* Detailed Info Sections */}
           <div className="space-y-10 pt-10 border-t border-border">
             <section className="space-y-4">
               <h3 className="text-2xl font-black tracking-tight">Terms</h3>
@@ -215,7 +257,6 @@ export default function TransferPage() {
         </div>
       </main>
 
-      {/* Global Disclaimer Footer */}
       <footer className="mt-auto border-t border-border pt-16 pb-12 bg-secondary/30">
         <div className="container mx-auto px-4 max-w-6xl">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-10 mb-16">
