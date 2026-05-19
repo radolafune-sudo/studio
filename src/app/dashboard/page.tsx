@@ -9,30 +9,28 @@ import {
   Bell, 
   ArrowRightLeft, 
   ArrowUpRight,
-  TrendingUp,
   Activity
 } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 
 export default function Dashboard() {
   const [marketValue, setMarketValue] = useState(7240.50);
 
-  // Slow Forex-style counter
   useEffect(() => {
     const interval = setInterval(() => {
       setMarketValue(prev => {
-        const change = (Math.random() - 0.5) * 2.5; // Small stochastic moves
+        const change = (Math.random() - 0.5) * 2.5;
         const next = prev + change;
         if (next > 9000) return 8900;
         if (next < 5000) return 5100;
         return next;
       });
-    }, 2000); // Slower updates
+    }, 2000);
     return () => clearInterval(interval);
   }, []);
 
-  const bannerPerson = PlaceHolderImages.find(img => img.id === "trader-1");
   const bannerChart = PlaceHolderImages.find(img => img.id === "chart-preview");
   const btcChart = PlaceHolderImages.find(img => img.id === "btc-chart");
 
@@ -41,9 +39,7 @@ export default function Dashboard() {
       <Navbar />
       
       <main className="container mx-auto px-4 py-8 space-y-6 max-w-7xl">
-        {/* Top Banners - Original Blue/Cyan Theme */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          {/* Box 1: Proven Strategy */}
           <Card className="bg-primary/5 border-primary/10 overflow-hidden h-[200px] rounded-[1.5rem] flex items-center relative group shadow-sm">
             <CardContent className="p-8 flex justify-between items-center w-full z-10">
               <div className="max-w-[65%] space-y-2">
@@ -62,11 +58,9 @@ export default function Dashboard() {
                 />
               </div>
             </CardContent>
-            {/* Background blending detail */}
             <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent pointer-events-none" />
           </Card>
 
-          {/* Box 2: Precision Meets Performance */}
           <Card className="bg-accent/5 border-accent/10 overflow-hidden h-[200px] rounded-[1.5rem] flex items-center relative group shadow-sm">
             <CardContent className="p-8 flex justify-between items-center w-full z-10">
               <div className="max-w-[65%] space-y-2">
@@ -93,19 +87,15 @@ export default function Dashboard() {
           </Card>
         </div>
 
-        {/* Account Section - Dark Card with Blue/Cyan Accents */}
         <Card className="bg-slate-950 text-white border-none shadow-2xl overflow-hidden rounded-[1.5rem] relative">
-          {/* Subtle Blue Gradient Accent */}
           <div className="absolute top-0 right-0 w-[60%] h-full bg-gradient-to-l from-primary/20 to-transparent pointer-events-none" />
           
           <CardContent className="p-8 md:p-12 space-y-10 relative z-10">
             <div className="flex justify-between items-start">
-              {/* Profile Avatar */}
               <div className="w-12 h-12 bg-primary/20 rounded-full flex items-center justify-center font-bold text-accent text-sm border border-accent/20">
                 MT
               </div>
               
-              {/* Balance Center */}
               <div className="text-center">
                 <div className="flex items-start justify-center">
                   <span className="text-xl font-medium text-white/50 mt-1 mr-1">$</span>
@@ -114,7 +104,6 @@ export default function Dashboard() {
                 <p className="text-xs text-slate-500 font-bold uppercase tracking-[0.2em] mt-2">Total Funds</p>
               </div>
 
-              {/* Notification */}
               <div className="relative">
                 <div className="p-3 bg-white/5 rounded-full hover:bg-white/10 transition-all cursor-pointer border border-white/5">
                   <Bell className="h-6 w-6 text-slate-300" />
@@ -125,15 +114,16 @@ export default function Dashboard() {
               </div>
             </div>
 
-            {/* Actions Bottom */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl mx-auto">
-              <Button 
-                variant="secondary" 
-                className="w-full h-14 rounded-full bg-white/5 hover:bg-white/10 text-white border-white/10 flex items-center justify-center gap-2 font-bold text-base"
-              >
-                <ArrowRightLeft className="h-5 w-5" />
-                Transfer
-              </Button>
+              <Link href="/transfer" className="w-full">
+                <Button 
+                  variant="secondary" 
+                  className="w-full h-14 rounded-full bg-white/5 hover:bg-white/10 text-white border-white/10 flex items-center justify-center gap-2 font-bold text-base"
+                >
+                  <ArrowRightLeft className="h-5 w-5" />
+                  Transfer
+                </Button>
+              </Link>
               <Button 
                 className="w-full h-14 rounded-full bg-accent hover:bg-accent/90 text-accent-foreground flex items-center justify-center gap-2 font-bold text-base shadow-lg shadow-accent/20"
               >
