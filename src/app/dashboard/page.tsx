@@ -10,23 +10,28 @@ import {
   Bell, 
   ArrowRightLeft, 
   ArrowUpRight,
-  TrendingUp
+  TrendingUp,
+  LineChart
 } from "lucide-react";
 import Image from "next/image";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 
 export default function Dashboard() {
-  const [counter, setCounter] = useState(5000);
-  const btcImage = PlaceHolderImages.find(img => img.id === "btc-chart");
+  const [counter, setCounter] = useState(7420.55);
+  const chartImage = PlaceHolderImages.find(img => img.id === "chart-preview");
 
   useEffect(() => {
+    // Mimic forex market movements: small random ticks at a slower interval
     const interval = setInterval(() => {
       setCounter(prev => {
-        if (prev >= 9000) return 5000;
-        // Random increment to simulate "real-time" flipping
-        return prev + Math.floor(Math.random() * 85) + 10;
+        const change = (Math.random() - 0.48) * 1.25; // Slight upward bias, small increments
+        const newValue = prev + change;
+        // Keep it within a reasonable range for the demonstration
+        if (newValue > 9000) return 7000;
+        if (newValue < 5000) return 6000;
+        return Number(newValue.toFixed(2));
       });
-    }, 80);
+    }, 1500); // Slower "market" tick speed
     return () => clearInterval(interval);
   }, []);
 
@@ -37,43 +42,46 @@ export default function Dashboard() {
       <main className="container mx-auto px-4 py-8 space-y-6 max-w-6xl">
         {/* Top Banners */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Box 1: BTC & Chart Background */}
+          {/* Box 1: Forex Chart Background */}
           <Card className="bg-accent/15 border-none overflow-hidden h-[180px] flex items-center relative group">
             <CardContent className="p-8 flex justify-between items-center w-full z-10">
               <div className="max-w-[65%] space-y-2">
                 <h2 className="text-2xl font-bold leading-tight tracking-tight">
                   Ready to start today with a proven strategy?
                 </h2>
-                <p className="text-sm font-bold opacity-70 tracking-wide uppercase">CopyTrade Now!</p>
+                <div className="flex items-center gap-2 opacity-70">
+                  <LineChart className="h-4 w-4" />
+                  <p className="text-sm font-bold tracking-wide uppercase">Live Market Feed</p>
+                </div>
               </div>
-              <div className="relative w-36 h-36 opacity-90 transition-transform group-hover:scale-110 duration-500">
+              <div className="relative w-40 h-32 opacity-90 transition-transform group-hover:scale-105 duration-700">
                 <Image 
-                  src={btcImage?.imageUrl || "https://picsum.photos/seed/btc1/300/300"} 
-                  alt="Bitcoin and Charts" 
+                  src={chartImage?.imageUrl || "https://picsum.photos/seed/forex1/600/400"} 
+                  alt="Forex Live Chart" 
                   fill 
-                  className="object-contain rounded-xl"
-                  data-ai-hint="bitcoin chart"
+                  className="object-cover rounded-xl shadow-lg border border-white/10"
+                  data-ai-hint="forex chart"
                 />
               </div>
             </CardContent>
           </Card>
 
-          {/* Box 2: Real-time Flipping Counter */}
+          {/* Box 2: Real-time Market Data Counter */}
           <Card className="bg-primary/10 border-none overflow-hidden h-[180px] flex items-center relative group">
             <CardContent className="p-8 flex justify-between items-center w-full z-10">
               <div className="max-w-[60%] space-y-2">
                 <h2 className="text-2xl font-bold leading-tight tracking-tight">
-                  Live Trading Volume
+                  Real-time Data Flow
                 </h2>
-                <p className="text-sm font-bold opacity-70 tracking-wide uppercase">Processing Real-time</p>
+                <p className="text-sm font-bold opacity-70 tracking-wide uppercase">Institutional Liquidity</p>
               </div>
               <div className="flex flex-col items-end">
                 <div className="flex items-center gap-2 text-primary">
                   <TrendingUp className="h-5 w-5 animate-pulse" />
-                  <span className="text-xs font-bold uppercase tracking-widest">Live</span>
+                  <span className="text-xs font-bold uppercase tracking-widest">Market Open</span>
                 </div>
                 <div className="text-4xl md:text-5xl font-black tracking-tighter tabular-nums text-primary/80">
-                  ${counter.toLocaleString()}
+                  ${counter.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </div>
               </div>
             </CardContent>

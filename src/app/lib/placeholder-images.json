@@ -27,9 +27,9 @@
     },
     {
       "id": "chart-preview",
-      "description": "Financial stock market chart",
-      "imageUrl": "https://picsum.photos/seed/chart1/600/400",
-      "imageHint": "stock chart"
+      "description": "Real-time Forex market chart",
+      "imageUrl": "https://picsum.photos/seed/forexchart99/600/400",
+      "imageHint": "forex chart"
     },
     {
       "id": "btc-chart",
