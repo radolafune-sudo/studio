@@ -10,126 +10,110 @@ import {
   Bell, 
   ArrowRightLeft, 
   ArrowUpRight,
-  TrendingUp,
-  LineChart,
-  Smartphone
+  TrendingUp
 } from "lucide-react";
 import Image from "next/image";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 
 export default function Dashboard() {
-  const [counter, setCounter] = useState(7420.55);
-  const chartImage = PlaceHolderImages.find(img => img.id === "chart-preview");
-  const btcImage = PlaceHolderImages.find(img => img.id === "btc-chart");
-
-  useEffect(() => {
-    // Mimic forex market movements: small random ticks at a slower interval
-    const interval = setInterval(() => {
-      setCounter(prev => {
-        const change = (Math.random() - 0.48) * 1.25;
-        const newValue = prev + change;
-        if (newValue > 9000) return 7000;
-        if (newValue < 5000) return 6000;
-        return Number(newValue.toFixed(2));
-      });
-    }, 2000);
-    return () => clearInterval(interval);
-  }, []);
+  const bannerPerson = PlaceHolderImages.find(img => img.id === "banner-person");
+  const bannerPhone = PlaceHolderImages.find(img => img.id === "banner-phone");
 
   return (
-    <div className="flex flex-col min-h-screen bg-background">
+    <div className="flex flex-col min-h-screen bg-black">
       <Navbar />
       
-      <main className="container mx-auto px-4 py-8 space-y-6 max-w-6xl">
-        {/* Top Banners Cloned from Image */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <main className="container mx-auto px-4 py-8 space-y-6 max-w-7xl">
+        {/* Top Banners - Exact Clone from Image */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           {/* Box 1: Proven Strategy */}
-          <Card className="bg-accent/15 border-none overflow-hidden h-[180px] flex items-center relative group">
+          <Card className="bg-[#dcf3e8] border-none overflow-hidden h-[180px] rounded-[1.5rem] flex items-center relative group">
             <CardContent className="p-8 flex justify-between items-center w-full z-10">
-              <div className="max-w-[65%] space-y-3">
-                <h2 className="text-2xl font-bold leading-tight tracking-tight text-foreground">
+              <div className="max-w-[70%] space-y-2">
+                <h2 className="text-2xl md:text-3xl font-extrabold leading-tight tracking-tight text-slate-900">
                   Ready to start today with a proven strategy?
                 </h2>
-                <p className="text-sm font-bold text-primary/80 tracking-wide">CopyTrade Now!</p>
+                <p className="text-sm font-semibold text-slate-700 tracking-wide">CopyTrade Now!</p>
               </div>
-              <div className="relative w-32 h-32 opacity-90 transition-transform group-hover:scale-105 duration-700">
+              <div className="relative w-32 h-32 md:w-40 md:h-40 transition-transform group-hover:scale-105 duration-700">
                 <Image 
-                  src={chartImage?.imageUrl || "https://picsum.photos/seed/forex1/600/400"} 
-                  alt="Forex Chart" 
+                  src={bannerPerson?.imageUrl || "https://picsum.photos/seed/p1/400/400"} 
+                  alt="Trader Illustration" 
                   fill 
                   className="object-contain"
-                  data-ai-hint="forex chart"
+                  data-ai-hint="person money"
                 />
               </div>
             </CardContent>
           </Card>
 
           {/* Box 2: Precision Meets Performance */}
-          <Card className="bg-primary/10 border-none overflow-hidden h-[180px] flex items-center relative group">
+          <Card className="bg-[#dcf3e8] border-none overflow-hidden h-[180px] rounded-[1.5rem] flex items-center relative group">
             <CardContent className="p-8 flex justify-between items-center w-full z-10">
-              <div className="max-w-[65%] space-y-3">
-                <h2 className="text-2xl font-bold leading-tight tracking-tight text-foreground">
+              <div className="max-w-[70%] space-y-2">
+                <h2 className="text-2xl md:text-3xl font-extrabold leading-tight tracking-tight text-slate-900">
                   Where precision meets performance
                 </h2>
-                <p className="text-sm font-bold text-accent tracking-wide">Trade with 3.5x less slippage</p>
+                <p className="text-sm font-semibold text-slate-700 tracking-wide">Trade with 3.5x less slippage</p>
               </div>
-              <div className="relative w-32 h-32 opacity-90 transition-transform group-hover:scale-105 duration-700">
+              <div className="relative w-32 h-32 md:w-40 md:h-40 transition-transform group-hover:scale-105 duration-700">
                 <Image 
-                  src={btcImage?.imageUrl || "https://picsum.photos/seed/btc99/400/400"} 
-                  alt="Trading App" 
+                  src={bannerPhone?.imageUrl || "https://picsum.photos/seed/p2/400/400"} 
+                  alt="App Illustration" 
                   fill 
                   className="object-contain"
-                  data-ai-hint="bitcoin chart"
+                  data-ai-hint="smartphone app"
                 />
               </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Account Section */}
-        <Card className="bg-slate-950 text-white border-none shadow-2xl overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-slate-950 via-slate-950 to-primary/20">
-          <CardContent className="p-10 md:p-14 space-y-12">
+        {/* Account Section - Exact Clone from Image */}
+        <Card className="bg-[#0a0a0a] text-white border-none shadow-2xl overflow-hidden rounded-[1.5rem] relative">
+          {/* Subtle Green Gradient Accent */}
+          <div className="absolute top-0 right-0 w-[50%] h-full bg-gradient-to-l from-green-900/20 to-transparent pointer-events-none" />
+          
+          <CardContent className="p-6 md:p-8 space-y-8">
             <div className="flex justify-between items-start">
               {/* Profile Avatar */}
-              <div className="w-14 h-14 bg-slate-900 rounded-full flex items-center justify-center font-bold text-slate-400 border border-slate-800 text-lg shadow-inner">
+              <div className="w-10 h-10 bg-slate-800 rounded-full flex items-center justify-center font-bold text-slate-400 text-sm">
                 MT
               </div>
               
-              {/* Balance */}
-              <div className="text-center flex-1">
-                <div className="flex items-center justify-center gap-1.5 mb-2">
-                  <span className="text-3xl font-medium text-slate-500 mt-1">$</span>
-                  <span className="text-6xl font-bold tracking-tighter">
-                    {counter.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                  </span>
+              {/* Balance Center */}
+              <div className="text-center">
+                <div className="flex items-start justify-center">
+                  <span className="text-lg font-medium text-white/70 mt-1 mr-1">$</span>
+                  <span className="text-5xl font-bold tracking-tight">0.00</span>
                 </div>
-                <p className="text-sm text-slate-500 font-bold uppercase tracking-widest opacity-80">Live Equity</p>
+                <p className="text-[10px] text-slate-500 font-semibold uppercase tracking-wider mt-1">Total Funds</p>
               </div>
 
               {/* Notification */}
               <div className="relative">
-                <div className="p-4 bg-slate-900/80 rounded-full hover:bg-slate-800 transition-all cursor-pointer border border-slate-800/50 shadow-lg">
-                  <Bell className="h-7 w-7 text-slate-300" />
-                  <Badge className="absolute top-1 right-1 h-5 w-5 p-0 flex items-center justify-center bg-destructive text-[10px] font-bold border-2 border-slate-950 rounded-full">
+                <div className="p-2.5 bg-slate-800/50 rounded-full hover:bg-slate-700 transition-all cursor-pointer">
+                  <Bell className="h-5 w-5 text-slate-300" />
+                  <div className="absolute top-0 right-0 h-4 w-4 bg-red-500 rounded-full border-2 border-[#0a0a0a] flex items-center justify-center text-[8px] font-bold">
                     1
-                  </Badge>
+                  </div>
                 </div>
               </div>
             </div>
 
-            {/* Actions */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            {/* Actions Bottom */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Button 
-                variant="outline" 
-                className="w-full h-16 rounded-2xl bg-slate-900/40 border-slate-800 hover:bg-slate-800 hover:text-white text-white border-2 flex items-center justify-center gap-3 text-xl font-bold transition-all shadow-md"
+                variant="secondary" 
+                className="w-full h-12 rounded-full bg-slate-800/40 hover:bg-slate-700 text-white border-none flex items-center justify-center gap-2 font-bold"
               >
-                <ArrowRightLeft className="h-6 w-6 opacity-70" />
+                <ArrowRightLeft className="h-4 w-4" />
                 Transfer
               </Button>
               <Button 
-                className="w-full h-16 rounded-2xl bg-white hover:bg-slate-200 text-black flex items-center justify-center gap-3 text-xl font-bold transition-all shadow-lg"
+                className="w-full h-12 rounded-full bg-white hover:bg-slate-200 text-black flex items-center justify-center gap-2 font-bold"
               >
-                <ArrowUpRight className="h-6 w-6" />
+                <ArrowUpRight className="h-4 w-4" />
                 Withdraw
               </Button>
             </div>

@@ -36,6 +36,18 @@
       "description": "Bitcoin icon with financial chart",
       "imageUrl": "https://picsum.photos/seed/btc99/400/400",
       "imageHint": "bitcoin chart"
+    },
+    {
+      "id": "banner-person",
+      "description": "Person holding phone and money illustration",
+      "imageUrl": "https://picsum.photos/seed/moneyphone/400/400",
+      "imageHint": "person money"
+    },
+    {
+      "id": "banner-phone",
+      "description": "Hands holding a smartphone with trading app",
+      "imageUrl": "https://picsum.photos/seed/tradingapp/400/400",
+      "imageHint": "smartphone app"
     }
   ]
 }
