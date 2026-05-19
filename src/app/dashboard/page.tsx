@@ -2,199 +2,112 @@
 "use client";
 
 import { Navbar } from "@/components/navbar";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
 import { 
-  TrendingUp, 
-  TrendingDown, 
-  ArrowUpRight, 
-  Wallet, 
-  Activity, 
-  History,
-  MoreVertical,
-  Plus
+  Bell, 
+  ArrowRightLeft, 
+  ArrowUpRight 
 } from "lucide-react";
-import { PerformanceChart } from "@/components/performance-chart";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import Image from "next/image";
 
 export default function Dashboard() {
-  const activeCopies = [
-    { name: "Alex Sterling", strategy: "Forex Alpha", allocated: "$5,000", profit: "+$420.50", status: "Active" },
-    { name: "Elena Vance", strategy: "Crypto Mo", allocated: "$2,000", profit: "-$84.10", status: "Active" },
-    { name: "Sarah Jenkins", strategy: "Dividends", allocated: "$10,000", profit: "+$120.00", status: "Paused" },
-  ];
-
-  const recentTrades = [
-    { symbol: "EUR/USD", type: "BUY", price: "1.0842", time: "10:24 AM", result: "+$12.50", trader: "Alex Sterling" },
-    { symbol: "BTC/USDT", type: "SELL", price: "64,210.50", time: "09:15 AM", result: "-$4.20", trader: "Elena Vance" },
-    { symbol: "AAPL", type: "BUY", price: "182.10", time: "Yesterday", result: "+$45.00", trader: "Sarah Jenkins" },
-  ];
-
   return (
     <div className="flex flex-col min-h-screen bg-background">
       <Navbar />
       
-      <main className="container mx-auto px-4 py-8">
-        <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
-          <div>
-            <h1 className="text-2xl font-bold">Account Overview</h1>
-            <p className="text-muted-foreground text-sm">Welcome back, John Doe. Here is your portfolio status.</p>
-          </div>
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm" className="bg-white">Add Funds</Button>
-            <Button size="sm" className="bg-primary">Withdraw</Button>
-          </div>
-        </header>
+      <main className="container mx-auto px-4 py-8 space-y-6 max-w-6xl">
+        {/* Top Banners */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <Card className="bg-accent/15 border-none overflow-hidden h-[180px] flex items-center relative group">
+            <CardContent className="p-8 flex justify-between items-center w-full z-10">
+              <div className="max-w-[65%] space-y-2">
+                <h2 className="text-2xl font-bold leading-tight tracking-tight">
+                  Ready to start today with a proven strategy?
+                </h2>
+                <p className="text-sm font-bold opacity-70 tracking-wide">CopyTrade Now!</p>
+              </div>
+              <div className="relative w-36 h-36 opacity-90 transition-transform group-hover:scale-105 duration-300">
+                <Image 
+                  src="https://picsum.photos/seed/dash1/300/300" 
+                  alt="Trading strategy" 
+                  fill 
+                  className="object-contain"
+                  data-ai-hint="trading illustration"
+                />
+              </div>
+            </CardContent>
+          </Card>
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <Card className="border-none shadow-sm">
-            <CardContent className="p-6">
-              <div className="flex justify-between items-start mb-4">
-                <div className="p-2 bg-primary/10 rounded-lg text-primary">
-                  <Wallet className="h-5 w-5" />
-                </div>
-                <Badge className="bg-green-100 text-green-700 hover:bg-green-100 border-none">+12.4%</Badge>
+          <Card className="bg-accent/15 border-none overflow-hidden h-[180px] flex items-center relative group">
+            <CardContent className="p-8 flex justify-between items-center w-full z-10">
+              <div className="max-w-[65%] space-y-2">
+                <h2 className="text-2xl font-bold leading-tight tracking-tight">
+                  Where precision meets performance
+                </h2>
+                <p className="text-sm font-bold opacity-70 tracking-wide">Trade with 3.5x less slippage</p>
               </div>
-              <p className="text-sm text-muted-foreground mb-1">Total Equity</p>
-              <h3 className="text-2xl font-bold">$24,582.40</h3>
-            </CardContent>
-          </Card>
-          <Card className="border-none shadow-sm">
-            <CardContent className="p-6">
-              <div className="flex justify-between items-start mb-4">
-                <div className="p-2 bg-accent/10 rounded-lg text-accent">
-                  <Activity className="h-5 w-5" />
-                </div>
-                <Badge className="bg-blue-100 text-blue-700 hover:bg-blue-100 border-none">3 Masters</Badge>
+              <div className="relative w-36 h-36 opacity-90 transition-transform group-hover:scale-105 duration-300">
+                <Image 
+                  src="https://picsum.photos/seed/dash2/300/300" 
+                  alt="Precision performance" 
+                  fill 
+                  className="object-contain"
+                  data-ai-hint="finance illustration"
+                />
               </div>
-              <p className="text-sm text-muted-foreground mb-1">Copying Traders</p>
-              <h3 className="text-2xl font-bold">$17,000.00</h3>
-            </CardContent>
-          </Card>
-          <Card className="border-none shadow-sm">
-            <CardContent className="p-6">
-              <div className="flex justify-between items-start mb-4">
-                <div className="p-2 bg-green-500/10 rounded-lg text-green-600">
-                  <TrendingUp className="h-5 w-5" />
-                </div>
-              </div>
-              <p className="text-sm text-muted-foreground mb-1">Total Profit</p>
-              <h3 className="text-2xl font-bold text-green-600">+$456.40</h3>
-            </CardContent>
-          </Card>
-          <Card className="border-none shadow-sm">
-            <CardContent className="p-6">
-              <div className="flex justify-between items-start mb-4">
-                <div className="p-2 bg-destructive/10 rounded-lg text-destructive">
-                  <History className="h-5 w-5" />
-                </div>
-              </div>
-              <p className="text-sm text-muted-foreground mb-1">Win Rate</p>
-              <h3 className="text-2xl font-bold">68.5%</h3>
-              <Progress value={68.5} className="h-1 mt-2" />
             </CardContent>
           </Card>
         </div>
 
-        <div className="grid lg:grid-cols-3 gap-8">
-          {/* Main Chart */}
-          <Card className="lg:col-span-2 border-none shadow-sm">
-            <CardHeader>
-              <div className="flex justify-between items-center">
-                <div>
-                  <CardTitle>Portfolio Growth</CardTitle>
-                  <CardDescription>Visualizing your wealth journey over time</CardDescription>
+        {/* Account Section */}
+        <Card className="bg-slate-950 text-white border-none shadow-2xl overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-slate-950 via-slate-950 to-primary/20">
+          <CardContent className="p-10 md:p-14 space-y-12">
+            <div className="flex justify-between items-start">
+              {/* Profile Avatar */}
+              <div className="w-14 h-14 bg-slate-900 rounded-full flex items-center justify-center font-bold text-slate-400 border border-slate-800 text-lg shadow-inner">
+                MT
+              </div>
+              
+              {/* Balance */}
+              <div className="text-center flex-1">
+                <div className="flex items-center justify-center gap-1.5 mb-2">
+                  <span className="text-3xl font-medium text-slate-500 mt-1">$</span>
+                  <span className="text-6xl font-bold tracking-tighter">0.00</span>
                 </div>
-                <div className="flex gap-1">
-                  <Button variant="ghost" size="sm" className="h-8">1W</Button>
-                  <Button variant="ghost" size="sm" className="h-8 bg-primary/10 text-primary">1M</Button>
-                  <Button variant="ghost" size="sm" className="h-8">ALL</Button>
+                <p className="text-sm text-slate-500 font-bold uppercase tracking-widest opacity-80">Total Funds</p>
+              </div>
+
+              {/* Notification */}
+              <div className="relative">
+                <div className="p-4 bg-slate-900/80 rounded-full hover:bg-slate-800 transition-all cursor-pointer border border-slate-800/50 shadow-lg">
+                  <Bell className="h-7 w-7 text-slate-300" />
+                  <Badge className="absolute top-1 right-1 h-5 w-5 p-0 flex items-center justify-center bg-destructive text-[10px] font-bold border-2 border-slate-950 rounded-full">
+                    1
+                  </Badge>
                 </div>
               </div>
-            </CardHeader>
-            <CardContent>
-              <PerformanceChart />
-            </CardContent>
-          </Card>
+            </div>
 
-          {/* Active Copies */}
-          <Card className="border-none shadow-sm">
-            <CardHeader className="flex flex-row items-center justify-between">
-              <div>
-                <CardTitle>Active Master Traders</CardTitle>
-                <CardDescription>Strategies you are currently following</CardDescription>
-              </div>
-              <Button variant="ghost" size="icon"><Plus className="h-4 w-4" /></Button>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {activeCopies.map((copy, i) => (
-                <div key={i} className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/30 transition-colors">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-secondary rounded-full flex items-center justify-center font-bold text-primary">
-                      {copy.name[0]}
-                    </div>
-                    <div>
-                      <p className="font-semibold text-sm">{copy.name}</p>
-                      <p className="text-xs text-muted-foreground">{copy.strategy}</p>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <p className={`text-sm font-bold ${copy.profit.startsWith('+') ? 'text-green-600' : 'text-destructive'}`}>
-                      {copy.profit}
-                    </p>
-                    <Badge variant={copy.status === 'Active' ? 'default' : 'secondary'} className="text-[10px] h-4">
-                      {copy.status}
-                    </Badge>
-                  </div>
-                </div>
-              ))}
-              <Button variant="outline" className="w-full text-xs h-9">View All Connections</Button>
-            </CardContent>
-          </Card>
-
-          {/* Recent Trades Table */}
-          <Card className="lg:col-span-3 border-none shadow-sm">
-            <CardHeader>
-              <CardTitle>Real-time Execution History</CardTitle>
-              <CardDescription>Last executed trades replicated across your accounts</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Symbol</TableHead>
-                    <TableHead>Side</TableHead>
-                    <TableHead>Price</TableHead>
-                    <TableHead>Replicated From</TableHead>
-                    <TableHead>Time</TableHead>
-                    <TableHead className="text-right">Net P/L</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {recentTrades.map((trade, i) => (
-                    <TableRow key={i}>
-                      <TableCell className="font-medium">{trade.symbol}</TableCell>
-                      <TableCell>
-                        <Badge variant={trade.type === 'BUY' ? 'secondary' : 'outline'} className={trade.type === 'BUY' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}>
-                          {trade.type}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>{trade.price}</TableCell>
-                      <TableCell className="text-muted-foreground">{trade.trader}</TableCell>
-                      <TableCell className="text-muted-foreground text-xs">{trade.time}</TableCell>
-                      <TableCell className={`text-right font-bold ${trade.result.startsWith('+') ? 'text-green-600' : 'text-destructive'}`}>
-                        {trade.result}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-        </div>
+            {/* Actions */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <Button 
+                variant="outline" 
+                className="w-full h-16 rounded-2xl bg-slate-900/40 border-slate-800 hover:bg-slate-800 hover:text-white text-white border-2 flex items-center justify-center gap-3 text-xl font-bold transition-all shadow-md"
+              >
+                <ArrowRightLeft className="h-6 w-6 opacity-70" />
+                Transfer
+              </Button>
+              <Button 
+                className="w-full h-16 rounded-2xl bg-white hover:bg-slate-200 text-black flex items-center justify-center gap-3 text-xl font-bold transition-all shadow-lg"
+              >
+                <ArrowUpRight className="h-6 w-6" />
+                Withdraw
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       </main>
     </div>
   );
