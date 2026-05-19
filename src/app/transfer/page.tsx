@@ -15,7 +15,6 @@ import {
   Bitcoin,
   Coins,
   CircleDollarSign,
-  Wallet,
   Zap
 } from "lucide-react";
 import Link from "next/link";
@@ -25,12 +24,12 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 
 const ACCOUNTS = [
-  { id: 'mt5_1', name: 'MT5 Account', sub: '332323752', balance: '0.00 USD', type: 'MT5' },
+  { id: 'mt5_1', name: 'Account 332323752', sub: '332323752', balance: '0.00 USD', type: 'MT5' },
+  { id: 'mt5_2', name: 'Account 699478516', sub: '699478516', balance: '0.00 USD', type: 'MT5' },
   { id: 'btc', name: 'Crypto wallet (BTC)', sub: 'Bitcoin', balance: '0.00 BTC', color: 'text-orange-500', icon: Bitcoin },
   { id: 'usdt', name: 'Crypto wallet (USDT TRC20)', sub: 'Tether', balance: '0.00 USDT', color: 'text-green-600', icon: CircleDollarSign },
   { id: 'trx', name: 'TRON (TRX)', sub: 'Tron Network', balance: '0.00 TRX', color: 'text-red-600', icon: Zap },
@@ -43,6 +42,7 @@ export default function TransferPage() {
   const [toAccount, setToAccount] = useState('mt5_2');
 
   const selectedFrom = ACCOUNTS.find(a => a.id === fromAccount);
+  const selectedTo = ACCOUNTS.find(a => a.id === toAccount);
 
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground font-body">
@@ -99,7 +99,7 @@ export default function TransferPage() {
                           {acc.type === 'MT5' ? (
                             <div className="px-2 py-0.5 rounded bg-primary/5 border border-primary/10 text-primary text-[10px] font-bold">MT5</div>
                           ) : (
-                            <acc.icon className={cn("h-5 w-5", acc.color)} />
+                            acc.icon && <acc.icon className={cn("h-5 w-5", acc.color)} />
                           )}
                           <div className="flex flex-col">
                             <span className="font-bold text-sm">{acc.type === 'MT5' ? `Account ${acc.sub}` : acc.name}</span>
@@ -116,18 +116,50 @@ export default function TransferPage() {
 
             <div className="space-y-3">
               <Label className="text-muted-foreground font-semibold ml-1">To account</Label>
-              <div className="p-5 bg-white border border-border rounded-xl flex items-center justify-between cursor-pointer hover:bg-muted/50 transition-all">
-                <div className="flex items-center gap-4">
-                  <div className="px-3 py-1 rounded bg-primary/10 border border-primary/20 text-primary text-xs font-black uppercase tracking-wider">
-                    MT5
+              <Select value={toAccount} onValueChange={setToAccount}>
+                <SelectTrigger className="h-auto p-5 bg-white border border-border rounded-xl flex items-center justify-between hover:bg-muted/50 transition-all">
+                  <div className="flex items-center gap-4">
+                    {selectedTo?.type === 'MT5' ? (
+                      <div className="px-3 py-1 rounded bg-primary/10 border border-primary/20 text-primary text-xs font-black uppercase tracking-wider">
+                        MT5
+                      </div>
+                    ) : (
+                      selectedTo?.icon && <selectedTo.icon className={cn("h-6 w-6", selectedTo.color)} />
+                    )}
+                    <div className="text-left">
+                      <span className="font-mono text-xl tracking-tight text-foreground block leading-none mb-1">
+                        {selectedTo?.type === 'MT5' ? selectedTo.sub : selectedTo?.name}
+                      </span>
+                      {selectedTo?.type !== 'MT5' && (
+                        <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">{selectedTo?.sub}</span>
+                      )}
+                    </div>
                   </div>
-                  <span className="font-mono text-xl tracking-tight text-foreground">699478516</span>
-                </div>
-                <div className="flex items-center gap-4">
-                  <span className="font-black text-lg">0.00 USD</span>
-                  <ChevronDown className="h-5 w-5 text-muted-foreground" />
-                </div>
-              </div>
+                  <div className="flex items-center gap-4">
+                    <span className="font-black text-lg">{selectedTo?.balance}</span>
+                  </div>
+                </SelectTrigger>
+                <SelectContent className="max-h-[400px]">
+                  {ACCOUNTS.map((acc) => (
+                    <SelectItem key={acc.id} value={acc.id} className="cursor-pointer py-3">
+                      <div className="flex items-center justify-between w-[350px] md:w-[500px]">
+                        <div className="flex items-center gap-3">
+                          {acc.type === 'MT5' ? (
+                            <div className="px-2 py-0.5 rounded bg-primary/5 border border-primary/10 text-primary text-[10px] font-bold">MT5</div>
+                          ) : (
+                            acc.icon && <acc.icon className={cn("h-5 w-5", acc.color)} />
+                          )}
+                          <div className="flex flex-col">
+                            <span className="font-bold text-sm">{acc.type === 'MT5' ? `Account ${acc.sub}` : acc.name}</span>
+                            <span className="text-[10px] text-muted-foreground uppercase font-medium">{acc.sub}</span>
+                          </div>
+                        </div>
+                        <span className="font-mono text-xs font-bold">{acc.balance}</span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="space-y-3">
