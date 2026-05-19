@@ -13,13 +13,11 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { PlaceHolderImages } from "@/lib/placeholder-images";
 
 export default function Dashboard() {
   const [marketValue, setMarketValue] = useState(7240.50);
 
   useEffect(() => {
-    // Simulating slow, stochastic Forex market movement
     const interval = setInterval(() => {
       setMarketValue(prev => {
         const change = (Math.random() - 0.5) * 0.85;
@@ -38,9 +36,9 @@ export default function Dashboard() {
       
       <main className="container mx-auto px-4 py-8 space-y-6 max-w-7xl">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          {/* Banner 1: Ready to Start */}
+          {/* Banner 1: Proven Strategy */}
           <Card className="bg-primary border-none overflow-hidden h-[200px] rounded-[1.5rem] flex items-center relative group shadow-lg">
-            <CardContent className="p-8 flex justify-between items-center w-full z-10 text-white">
+            <CardContent className="p-8 flex justify-between items-center w-full z-10 text-primary-foreground">
               <div className="max-w-[65%] space-y-2">
                 <h2 className="text-2xl md:text-3xl font-extrabold leading-tight tracking-tight">
                   Ready to start today with a proven strategy?
@@ -61,7 +59,7 @@ export default function Dashboard() {
           </Card>
 
           {/* Banner 2: Precision meets performance */}
-          <Card className="bg-accent/15 border border-accent/20 overflow-hidden h-[200px] rounded-[1.5rem] flex items-center relative group shadow-sm">
+          <Card className="bg-white border border-border overflow-hidden h-[200px] rounded-[1.5rem] flex items-center relative group shadow-sm">
             <CardContent className="p-8 flex justify-between items-center w-full z-10">
               <div className="max-w-[65%] space-y-2">
                 <h2 className="text-2xl md:text-3xl font-extrabold leading-tight tracking-tight text-foreground">
@@ -88,27 +86,27 @@ export default function Dashboard() {
         </div>
 
         {/* Account Summary Card */}
-        <Card className="bg-[#0a0a14] text-white border-none shadow-2xl overflow-hidden rounded-[2rem] relative">
-          <div className="absolute top-0 right-0 w-[60%] h-full bg-gradient-to-l from-primary/20 to-transparent pointer-events-none" />
+        <Card className="bg-white text-foreground border border-border shadow-xl overflow-hidden rounded-[2rem] relative">
+          <div className="absolute top-0 right-0 w-[40%] h-full bg-gradient-to-l from-primary/5 to-transparent pointer-events-none" />
           
           <CardContent className="p-10 md:p-16 space-y-12 relative z-10">
             <div className="flex justify-between items-start">
-              <div className="w-12 h-12 bg-accent/20 rounded-full flex items-center justify-center font-bold text-accent text-sm border border-accent/30">
+              <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center font-bold text-primary text-sm border border-primary/20">
                 MT
               </div>
               
               <div className="text-center">
                 <div className="flex items-start justify-center">
-                  <span className="text-2xl font-medium text-white/40 mt-1 mr-1">$</span>
-                  <span className="text-7xl font-black tracking-tighter">0.00</span>
+                  <span className="text-2xl font-medium text-muted-foreground mt-1 mr-1">$</span>
+                  <span className="text-7xl font-black tracking-tighter text-foreground">0.00</span>
                 </div>
-                <p className="text-xs text-slate-500 font-bold uppercase tracking-[0.25em] mt-4">Total Funds</p>
+                <p className="text-xs text-muted-foreground font-bold uppercase tracking-[0.25em] mt-4">Total Funds</p>
               </div>
 
               <div className="relative">
-                <div className="p-3 bg-white/5 rounded-full hover:bg-white/10 transition-all cursor-pointer border border-white/10 group">
-                  <Bell className="h-6 w-6 text-slate-400 group-hover:text-white transition-colors" />
-                  <div className="absolute top-0 right-0 h-4 w-4 bg-accent rounded-full border-2 border-[#0a0a14] flex items-center justify-center text-[8px] font-bold text-black">
+                <div className="p-3 bg-secondary rounded-full hover:bg-secondary/80 transition-all cursor-pointer border border-border group">
+                  <Bell className="h-6 w-6 text-muted-foreground group-hover:text-primary transition-colors" />
+                  <div className="absolute top-0 right-0 h-4 w-4 bg-accent rounded-full border-2 border-white flex items-center justify-center text-[8px] font-bold text-white">
                     1
                   </div>
                 </div>
@@ -118,15 +116,15 @@ export default function Dashboard() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto">
               <Link href="/transfer" className="w-full">
                 <Button 
-                  variant="secondary" 
-                  className="w-full h-16 rounded-full bg-white/5 hover:bg-white/10 text-white border-white/10 flex items-center justify-center gap-3 font-bold text-lg transition-all"
+                  variant="outline" 
+                  className="w-full h-16 rounded-full bg-background hover:bg-muted text-foreground border-border flex items-center justify-center gap-3 font-bold text-lg transition-all"
                 >
-                  <ArrowRightLeft className="h-6 w-6" />
+                  <ArrowRightLeft className="h-6 w-6 text-primary" />
                   Transfer
                 </Button>
               </Link>
               <Button 
-                className="w-full h-16 rounded-full bg-accent hover:bg-accent/90 text-accent-foreground flex items-center justify-center gap-3 font-bold text-lg shadow-xl shadow-accent/10 transition-all"
+                className="w-full h-16 rounded-full bg-accent hover:bg-accent/90 text-accent-foreground flex items-center justify-center gap-3 font-bold text-lg shadow-xl shadow-accent/10 transition-all border-none"
               >
                 <ArrowUpRight className="h-6 w-6" />
                 Withdraw
