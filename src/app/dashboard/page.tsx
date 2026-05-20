@@ -85,48 +85,50 @@ export default function Dashboard() {
           </Card>
         </div>
 
-        {/* Account Summary Card */}
-        <Card className="bg-white text-foreground border border-border shadow-xl overflow-hidden rounded-[2rem] relative">
-          <div className="absolute top-0 right-0 w-[40%] h-full bg-gradient-to-l from-primary/5 to-transparent pointer-events-none" />
-          
-          <CardContent className="p-10 md:p-16 space-y-12 relative z-10">
-            <div className="flex justify-between items-start">
-              <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center font-bold text-primary text-sm border border-primary/20">
+        {/* Account Summary Card - Matches Reference Image */}
+        <Card className="bg-white text-foreground border-none shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden rounded-[2.5rem]">
+          <CardContent className="p-8 md:p-12 space-y-8">
+            <div className="flex justify-between items-center">
+              {/* Left Side Avatar */}
+              <div className="w-12 h-12 bg-[#F1F3F9] rounded-full flex items-center justify-center font-bold text-[#4B5563] text-sm">
                 MT
               </div>
               
+              {/* Center Balance */}
               <div className="text-center">
-                <div className="flex items-start justify-center">
-                  <span className="text-2xl font-medium text-muted-foreground mt-1 mr-1">$</span>
-                  <span className="text-7xl font-black tracking-tighter text-foreground">0.00</span>
+                <div className="flex items-start justify-center text-[#1F2937]">
+                  <span className="text-2xl font-medium mt-2 mr-1 opacity-50">$</span>
+                  <span className="text-7xl font-bold tracking-tight">0.00</span>
                 </div>
-                <p className="text-xs text-muted-foreground font-bold uppercase tracking-[0.25em] mt-4">Total Funds</p>
+                <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-[0.2em] mt-3">Total Funds</p>
               </div>
 
+              {/* Right Side Notification */}
               <div className="relative">
-                <div className="p-3 bg-secondary rounded-full hover:bg-secondary/80 transition-all cursor-pointer border border-border group">
-                  <Bell className="h-6 w-6 text-muted-foreground group-hover:text-primary transition-colors" />
-                  <div className="absolute top-0 right-0 h-4 w-4 bg-accent rounded-full border-2 border-white flex items-center justify-center text-[8px] font-bold text-white">
+                <div className="w-12 h-12 bg-[#F1F3F9] rounded-full flex items-center justify-center cursor-pointer hover:bg-muted transition-colors">
+                  <Bell className="h-5 w-5 text-muted-foreground" />
+                  <div className="absolute top-0 right-0 h-4 w-4 bg-accent rounded-full border-2 border-white flex items-center justify-center text-[8px] font-bold text-white shadow-sm">
                     1
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto">
-              <Link href="/transfer" className="w-full">
+            {/* Bottom Buttons Container */}
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
+              <Link href="/transfer" className="w-full sm:w-[280px]">
                 <Button 
                   variant="outline" 
-                  className="w-full h-16 rounded-full bg-background hover:bg-muted text-foreground border-border flex items-center justify-center gap-3 font-bold text-lg transition-all"
+                  className="w-full h-[64px] rounded-full bg-[#F1F3F9] hover:bg-[#E5E7EB] text-foreground border-none flex items-center justify-center gap-3 font-bold text-lg transition-all"
                 >
-                  <ArrowRightLeft className="h-6 w-6 text-primary" />
+                  <ArrowRightLeft className="h-5 w-5 text-[#1F2937]" />
                   Transfer
                 </Button>
               </Link>
               <Button 
-                className="w-full h-16 rounded-full bg-accent hover:bg-accent/90 text-accent-foreground flex items-center justify-center gap-3 font-bold text-lg shadow-xl shadow-accent/10 transition-all border-none"
+                className="w-full sm:w-[280px] h-[64px] rounded-full bg-accent hover:bg-accent/90 text-white flex items-center justify-center gap-3 font-bold text-lg border-none shadow-lg shadow-accent/20 transition-all"
               >
-                <ArrowUpRight className="h-6 w-6" />
+                <ArrowUpRight className="h-5 w-5" />
                 Withdraw
               </Button>
             </div>
@@ -136,3 +138,4 @@ export default function Dashboard() {
     </div>
   );
 }
+
