@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   Select,
   SelectContent,
@@ -41,6 +42,7 @@ const ACCOUNTS = [
 ];
 
 export default function TransferPage() {
+  const router = useRouter();
   const [fundingAccount, setFundingAccount] = useState('mt5_1');
   const [copied, setCopied] = useState(false);
   const [transactionId, setTransactionId] = useState('');
@@ -91,8 +93,11 @@ export default function TransferPage() {
       title: "Submission Received",
       description: "Your request is now being reviewed by our compliance team.",
     });
-    setTransactionId('');
-    setAmount('');
+    
+    // Redirect to copied trades portfolio
+    setTimeout(() => {
+      router.push('/copied-trades');
+    }, 1000);
   };
 
   return (
@@ -316,41 +321,6 @@ export default function TransferPage() {
           </div>
         </div>
       </main>
-
-      <footer className="mt-auto border-t border-border pt-16 pb-12 bg-secondary/30">
-        <div className="container mx-auto px-4 max-w-6xl">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-10 mb-16">
-            <div className="flex flex-wrap gap-8 text-[11px] font-black uppercase tracking-widest text-muted-foreground">
-              <Link href="#" className="hover:text-primary transition-colors">Risk Disclosure</Link>
-              <Link href="#" className="hover:text-primary transition-colors">Terms and Conditions</Link>
-              <Link href="#" className="hover:text-primary transition-colors">AML Policy</Link>
-              <Link href="#" className="hover:text-primary transition-colors">Privacy Policy</Link>
-            </div>
-            <div className="flex gap-4">
-              {[Facebook, Twitter, Instagram, Linkedin].map((Icon, i) => (
-                <div key={i} className="p-3 bg-white rounded-full hover:bg-primary hover:text-white transition-all cursor-pointer border border-border shadow-sm">
-                  <Icon className="h-5 w-5" />
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="space-y-8 text-[11px] text-muted-foreground font-medium leading-relaxed">
-            <p>
-              JUST MARKETS Capital Incorporation does not provide personalized investment, tax, or legal advice. All information, educational materials, and communications provided by the Company are for general informational purposes only and do not constitute investment advice or recommendations. Customers should ensure they fully understand the nature of Contracts for Difference (CFDs), foreign exchange (FX), and crypto derivative products, as well as the risks involved, before engaging in any trading activity.
-            </p>
-            <p>
-              Customers who are unsure about the risks associated with trading CFDs, FX, or crypto derivatives are strongly encouraged to seek independent advice from a qualified financial advisor prior to making any investment decisions.
-            </p>
-            <p>
-              CFDs, FX, and crypto derivatives are complex financial instruments and come with a high risk of losing money rapidly due to leverage. These products may not be suitable for all investors. The value of investments can fluctuate significantly, and customers may lose some or all of their invested capital. By choosing to trade, customers acknowledge and accept full responsibility for any losses or damages incurred as a result of their trading activities.
-            </p>
-            <div className="pt-4 text-center opacity-60">
-              <p className="font-bold tracking-[0.3em]">&copy; {new Date().getFullYear()} JUST MARKETS. ALL RIGHTS RESERVED.</p>
-            </div>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 }

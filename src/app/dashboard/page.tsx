@@ -10,7 +10,8 @@ import {
   ArrowRightLeft, 
   ArrowUpRight,
   Activity,
-  CheckCircle2
+  CheckCircle2,
+  Home as HomeIcon
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -28,16 +29,21 @@ export default function Dashboard() {
   useEffect(() => {
     setIsMounted(true);
     
-    // Simulate MT5 live trading digit movement
+    // Simulate erratic MT5 live trading digit movement
     const interval = setInterval(() => {
       setLiveBalance((prev) => {
-        const change = (Math.random() - 0.48) * 1.5; // Slight upward bias
+        // Random erratic change
+        const volatility = Math.random() > 0.8 ? 5.0 : 0.8;
+        const direction = Math.random() > 0.49 ? 1 : -1;
+        const change = direction * Math.random() * volatility;
+        
         let newVal = prev + change;
+        // Keep within user specified bounds
         if (newVal < 5000) newVal = 5000;
         if (newVal > 50000) newVal = 50000;
         return newVal;
       });
-    }, 150); // Fast updates for that live feel
+    }, 120); // Fast erratic updates
 
     return () => clearInterval(interval);
   }, []);
@@ -141,7 +147,15 @@ export default function Dashboard() {
 
             {/* Bottom Buttons Container */}
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
-              <Link href="/transfer" className="w-full sm:w-[280px]">
+              <Link href="/" className="w-full sm:w-[200px]">
+                <Button 
+                  className="w-full h-[64px] rounded-full bg-secondary hover:bg-secondary/80 text-foreground border-none flex items-center justify-center gap-3 font-bold text-lg transition-all shadow-sm"
+                >
+                  <HomeIcon className="h-5 w-5" />
+                  Home
+                </Button>
+              </Link>
+              <Link href="/transfer" className="w-full sm:w-[200px]">
                 <Button 
                   className="w-full h-[64px] rounded-full bg-primary/10 hover:bg-primary/20 text-primary border-none flex items-center justify-center gap-3 font-bold text-lg transition-all shadow-sm"
                 >
@@ -149,7 +163,7 @@ export default function Dashboard() {
                   Transfer
                 </Button>
               </Link>
-              <Link href="/withdraw" className="w-full sm:w-[280px]">
+              <Link href="/withdraw" className="w-full sm:w-[200px]">
                 <Button 
                   className="w-full h-[64px] rounded-full bg-accent hover:bg-accent/90 text-white flex items-center justify-center gap-3 font-bold text-lg border-none shadow-lg shadow-accent/20 transition-all"
                 >
