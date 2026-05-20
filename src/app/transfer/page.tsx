@@ -32,7 +32,6 @@ import { useToast } from "@/hooks/use-toast";
 
 const ACCOUNTS = [
   { id: 'mt5_1', name: 'Account 332323752', sub: '332323752', balance: '0.00 USD', type: 'MT5' },
-  { id: 'mt5_2', name: 'Account 699478516', sub: '699478516', balance: '0.00 USD', type: 'MT5' },
   { id: 'btc', name: 'Crypto wallet (BTC)', sub: 'Bitcoin', balance: '0.00 BTC', color: 'text-orange-500', icon: Bitcoin, address: '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa' },
   { id: 'usdt', name: 'Crypto wallet (USDT TRC20)', sub: 'Tether', balance: '0.00 USDT', color: 'text-green-600', icon: CircleDollarSign, address: 'TXxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx' },
   { id: 'trx', name: 'TRON (TRX)', sub: 'Tron Network', balance: '0.00 TRX', color: 'text-red-600', icon: Zap, address: 'Txxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx' },
@@ -137,7 +136,6 @@ export default function TransferPage() {
                             <span className="text-[10px] text-muted-foreground uppercase font-medium">{acc.sub}</span>
                           </div>
                         </div>
-                        <span className="font-mono text-xs font-bold">{acc.balance}</span>
                       </div>
                     </SelectItem>
                   ))}
