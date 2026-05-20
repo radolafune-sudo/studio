@@ -31,10 +31,10 @@ export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
 
   // Check if we are on an authenticated page (dashboard or transfer)
-  const isAuthenticated = pathname?.startsWith('/dashboard') || pathname?.startsWith('/transfer');
+  const isAuthenticated = pathname?.startsWith('/dashboard') || pathname?.startsWith('/transfer') || pathname?.startsWith('/copied-trades');
 
   const navItems = [
-    { name: "TRADING", href: "#" },
+    { name: "TRADING", href: isAuthenticated ? "/dashboard" : "/login" },
     { name: "MARKETS", href: "/traders" },
     { name: "COMPANY", href: "#" },
   ];
@@ -62,13 +62,13 @@ export function Navbar() {
           </div>
 
           <div className="hidden lg:block">
-            <div className="ml-10 flex items-baseline space-x-8">
+            <div className="ml-10 flex items-baseline space-x-12">
               {navItems.map((item) => (
                 <Link
                   key={item.name}
                   href={item.href}
                   className={cn(
-                    "text-[13px] font-black transition-colors hover:text-primary tracking-widest text-[#555]",
+                    "text-[13px] font-black transition-colors hover:text-primary tracking-[0.2em] text-[#555] uppercase",
                     pathname === item.href ? "text-primary" : ""
                   )}
                 >
