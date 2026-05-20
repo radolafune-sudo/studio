@@ -18,16 +18,8 @@ export default function Dashboard() {
   const [marketValue, setMarketValue] = useState(7240.50);
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setMarketValue(prev => {
-        const change = (Math.random() - 0.5) * 0.85;
-        const next = prev + change;
-        if (next > 9000) return 8900;
-        if (next < 5000) return 5100;
-        return next;
-      });
-    }, 1500);
-    return () => clearInterval(interval);
+    const [randomVal, setRandomVal] = useState<number | null>(null);
+    setRandomVal(Math.random());
   }, []);
 
   return (
@@ -68,7 +60,7 @@ export default function Dashboard() {
                 <div className="flex items-center gap-2 text-primary font-bold">
                   <Activity className="h-4 w-4" />
                   <span className="text-lg font-mono tracking-tighter">
-                    ${marketValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    $7,240.50
                   </span>
                 </div>
               </div>
@@ -119,9 +111,9 @@ export default function Dashboard() {
               <Link href="/transfer" className="w-full sm:w-[280px]">
                 <Button 
                   variant="outline" 
-                  className="w-full h-[64px] rounded-full bg-[#F1F3F9] hover:bg-[#E5E7EB] text-foreground border-none flex items-center justify-center gap-3 font-bold text-lg transition-all"
+                  className="w-full h-[64px] rounded-full bg-primary/10 hover:bg-primary/20 text-primary border-primary/20 flex items-center justify-center gap-3 font-bold text-lg transition-all shadow-sm"
                 >
-                  <ArrowRightLeft className="h-5 w-5 text-[#1F2937]" />
+                  <ArrowRightLeft className="h-5 w-5" />
                   Transfer
                 </Button>
               </Link>
@@ -138,4 +130,3 @@ export default function Dashboard() {
     </div>
   );
 }
-

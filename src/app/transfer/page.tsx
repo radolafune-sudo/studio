@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Navbar } from "@/components/navbar";
@@ -31,12 +32,12 @@ import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 
 const ACCOUNTS = [
-  { id: 'mt5_1', name: 'Account 332323752', sub: '332323752', balance: 'USD', type: 'MT5' },
-  { id: 'btc', name: 'Crypto wallet (BTC)', sub: 'Bitcoin', balance: 'BTC', color: 'text-orange-500', icon: Bitcoin, address: '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa' },
-  { id: 'usdt', name: 'Crypto wallet (USDT TRC20)', sub: 'Tether', balance: 'USDT', color: 'text-green-600', icon: CircleDollarSign, address: 'TXxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx' },
-  { id: 'trx', name: 'TRON (TRX)', sub: 'Tron Network', balance: 'TRX', color: 'text-red-600', icon: Zap, address: 'Txxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx' },
-  { id: 'eth', name: 'Ethereum (ETH)', sub: 'Ether', balance: 'ETH', color: 'text-indigo-600', icon: Coins, address: '0x742d35Cc6634C0532925a3b844Bc454e4438f44e' },
-  { id: 'usdc', name: 'USD Coin (USDC ERC20)', sub: 'USD Coin', balance: 'USDC', color: 'text-blue-500', icon: CircleDollarSign, address: '0x88dC783616640532925a3b844Bc454e4438f44e' },
+  { id: 'mt5_1', name: 'Account 699478516', sub: '699478516', type: 'MT5' },
+  { id: 'btc', name: 'Crypto wallet (BTC)', sub: 'Bitcoin', color: 'text-orange-500', icon: Bitcoin, address: '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa' },
+  { id: 'usdt', name: 'Crypto wallet (USDT TRC20)', sub: 'Tether', color: 'text-green-600', icon: CircleDollarSign, address: 'TXxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx' },
+  { id: 'trx', name: 'TRON (TRX)', sub: 'Tron Network', color: 'text-red-600', icon: Zap, address: 'Txxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx' },
+  { id: 'eth', name: 'Ethereum (ETH)', sub: 'Ether', color: 'text-indigo-600', icon: Coins, address: '0x742d35Cc6634C0532925a3b844Bc454e4438f44e' },
+  { id: 'usdc', name: 'USD Coin (USDC ERC20)', sub: 'USD Coin', color: 'text-blue-500', icon: CircleDollarSign, address: '0x88dC783616640532925a3b844Bc454e4438f44e' },
 ];
 
 export default function TransferPage() {
@@ -100,8 +101,8 @@ export default function TransferPage() {
       
       <main className="flex-1 container mx-auto px-4 py-12 max-w-3xl">
         <div className="space-y-10">
-          <header className="space-y-2">
-            <h1 className="text-3xl font-bold tracking-tight text-primary">Internal Transfer</h1>
+          <header className="space-y-2 text-center md:text-left">
+            <h1 className="text-3xl font-black tracking-tight text-primary uppercase">Internal Transfer</h1>
             <p className="text-muted-foreground font-medium">Move funds between your trading accounts instantly.</p>
           </header>
 
@@ -116,7 +117,7 @@ export default function TransferPage() {
           <div className="space-y-8">
             {/* From Funding Account */}
             <div className="space-y-3">
-              <Label className="text-muted-foreground font-semibold ml-1 uppercase text-[11px] tracking-wider">FROM YOUR FUNDING ACCOUNT</Label>
+              <Label className="text-muted-foreground font-black ml-1 uppercase text-[11px] tracking-[0.2em]">FROM YOUR FUNDING ACCOUNT</Label>
               <Select value={fundingAccount} onValueChange={setFundingAccount}>
                 <SelectTrigger className="h-auto p-5 bg-white border border-border rounded-xl flex items-center justify-between hover:bg-muted/50 transition-all shadow-sm">
                   <div className="flex items-center gap-4">
@@ -163,11 +164,11 @@ export default function TransferPage() {
               {selectedFunding?.address && (
                 <div className="mt-4 p-6 bg-white border border-border rounded-2xl shadow-sm space-y-6 animate-in fade-in slide-in-from-top-4 duration-300">
                   <div className="space-y-4">
-                    <div className="flex items-center justify-between">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
                       <Label className="text-[11px] text-primary font-black uppercase tracking-[0.2em]">
                         USE THE WALLET BELOW TO FUND YOUR COPY TRADING ACCOUNT
                       </Label>
-                      <span className={cn("text-[10px] font-bold px-2 py-0.5 rounded-full bg-primary/5 border border-primary/10", selectedFunding.color)}>
+                      <span className={cn("text-[10px] font-bold px-2 py-0.5 rounded-full bg-primary/5 border border-primary/10 w-fit", selectedFunding.color)}>
                         {selectedFunding.sub} Network
                       </span>
                     </div>
@@ -238,7 +239,7 @@ export default function TransferPage() {
 
             {/* To Copy Trading Account - Dormant */}
             <div className="space-y-3">
-              <Label className="text-muted-foreground font-semibold ml-1 uppercase text-[11px] tracking-wider">TO COPY TRADING ACCOUNT</Label>
+              <Label className="text-muted-foreground font-black ml-1 uppercase text-[11px] tracking-[0.2em]">TO COPY TRADING ACCOUNT</Label>
               <div className="h-auto p-5 bg-white border border-border rounded-xl flex items-center justify-between shadow-sm">
                 <div className="flex items-center gap-8">
                   <div className="px-3 py-1 rounded bg-primary/10 border border-primary/20 text-primary text-xs font-black uppercase tracking-wider">
@@ -257,7 +258,7 @@ export default function TransferPage() {
             {/* Standard Amount Box (Shown for Internal MT5 transfers) */}
             {!selectedFunding?.address && (
               <div className="space-y-3">
-                <Label className="text-muted-foreground font-semibold ml-1 uppercase text-[11px] tracking-wider">Amount to Trade</Label>
+                <Label className="text-muted-foreground font-black ml-1 uppercase text-[11px] tracking-[0.2em]">Amount to Trade</Label>
                 <div className="relative group">
                   <Input 
                     className="h-20 bg-white border-border text-3xl font-black pr-24 focus-visible:ring-primary rounded-xl shadow-inner" 
@@ -267,12 +268,12 @@ export default function TransferPage() {
                     onChange={(e) => setAmount(e.target.value)}
                   />
                   <div className="absolute right-6 top-1/2 -translate-y-1/2 text-muted-foreground font-black text-xl">
-                    {selectedFunding?.balance || 'USD'}
+                    USD
                   </div>
                 </div>
                 <div className="flex justify-between px-1">
-                  <p className="text-[11px] text-muted-foreground font-bold uppercase tracking-wide">Min: 25 {selectedFunding?.balance || 'USD'}</p>
-                  <p className="text-[11px] text-muted-foreground font-bold uppercase tracking-wide">Available: 0.00 {selectedFunding?.balance || 'USD'}</p>
+                  <p className="text-[11px] text-muted-foreground font-bold uppercase tracking-wide">Min: 25 USD</p>
+                  <p className="text-[11px] text-muted-foreground font-bold uppercase tracking-wide">Available: 0.00 USD</p>
                 </div>
               </div>
             )}
@@ -280,7 +281,7 @@ export default function TransferPage() {
             {!selectedFunding?.address && (
               <Button 
                 onClick={handleSubmitTrade}
-                className="w-full h-20 bg-primary text-primary-foreground font-black text-2xl hover:bg-primary/90 rounded-full shadow-xl border-none transition-all active:scale-[0.98]"
+                className="w-full h-20 bg-primary text-primary-foreground font-black text-2xl hover:bg-primary/90 rounded-full shadow-xl border-none transition-all active:scale-[0.98] uppercase tracking-widest"
               >
                 COPY TRADE
               </Button>
@@ -289,7 +290,7 @@ export default function TransferPage() {
 
           <div className="space-y-10 pt-10 border-t border-border">
             <section className="space-y-4">
-              <h3 className="text-2xl font-black tracking-tight text-primary">Terms</h3>
+              <h3 className="text-2xl font-black tracking-tight text-primary uppercase">Terms</h3>
               <div className="space-y-2">
                 <div className="flex justify-between items-center text-sm border-b border-border pb-2">
                   <span className="text-muted-foreground font-medium">Average payment time</span>
@@ -303,7 +304,7 @@ export default function TransferPage() {
             </section>
 
             <section className="space-y-4">
-              <h3 className="text-2xl font-black tracking-tight text-primary">FAQ</h3>
+              <h3 className="text-2xl font-black tracking-tight text-primary uppercase">FAQ</h3>
               <div className="space-y-4">
                 <div className="space-y-2 bg-muted/30 p-5 rounded-xl border border-border">
                   <h4 className="font-black text-sm">General transfer rules</h4>
