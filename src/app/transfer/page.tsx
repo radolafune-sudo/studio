@@ -31,12 +31,12 @@ import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 
 const ACCOUNTS = [
-  { id: 'mt5_1', name: 'Account 332323752', sub: '332323752', balance: '0.00 USD', type: 'MT5' },
-  { id: 'btc', name: 'Crypto wallet (BTC)', sub: 'Bitcoin', balance: '0.00 BTC', color: 'text-orange-500', icon: Bitcoin, address: '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa' },
-  { id: 'usdt', name: 'Crypto wallet (USDT TRC20)', sub: 'Tether', balance: '0.00 USDT', color: 'text-green-600', icon: CircleDollarSign, address: 'TXxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx' },
-  { id: 'trx', name: 'TRON (TRX)', sub: 'Tron Network', balance: '0.00 TRX', color: 'text-red-600', icon: Zap, address: 'Txxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx' },
-  { id: 'eth', name: 'Ethereum (ETH)', sub: 'Ether', balance: '0.00 ETH', color: 'text-indigo-600', icon: Coins, address: '0x742d35Cc6634C0532925a3b844Bc454e4438f44e' },
-  { id: 'usdc', name: 'USD Coin (USDC ERC20)', sub: 'USD Coin', balance: '0.00 USDC', color: 'text-blue-500', icon: CircleDollarSign, address: '0x88dC783616640532925a3b844Bc454e4438f44e' },
+  { id: 'mt5_1', name: 'Account 332323752', sub: '332323752', balance: 'USD', type: 'MT5' },
+  { id: 'btc', name: 'Crypto wallet (BTC)', sub: 'Bitcoin', balance: 'BTC', color: 'text-orange-500', icon: Bitcoin, address: '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa' },
+  { id: 'usdt', name: 'Crypto wallet (USDT TRC20)', sub: 'Tether', balance: 'USDT', color: 'text-green-600', icon: CircleDollarSign, address: 'TXxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx' },
+  { id: 'trx', name: 'TRON (TRX)', sub: 'Tron Network', balance: 'TRX', color: 'text-red-600', icon: Zap, address: 'Txxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx' },
+  { id: 'eth', name: 'Ethereum (ETH)', sub: 'Ether', balance: 'ETH', color: 'text-indigo-600', icon: Coins, address: '0x742d35Cc6634C0532925a3b844Bc454e4438f44e' },
+  { id: 'usdc', name: 'USD Coin (USDC ERC20)', sub: 'USD Coin', balance: 'USDC', color: 'text-blue-500', icon: CircleDollarSign, address: '0x88dC783616640532925a3b844Bc454e4438f44e' },
 ];
 
 export default function TransferPage() {
@@ -117,9 +117,7 @@ export default function TransferPage() {
                       )}
                     </div>
                   </div>
-                  <div className="flex items-center gap-4">
-                    <span className="font-black text-lg">{selectedFunding?.balance}</span>
-                  </div>
+                  <ChevronDown className="h-5 w-5 text-muted-foreground" />
                 </SelectTrigger>
                 <SelectContent className="max-h-[400px]">
                   {ACCOUNTS.map((acc) => (
@@ -178,7 +176,7 @@ export default function TransferPage() {
                   {/* Amount & Transaction Details Row */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label className="text-[11px] font-black uppercase tracking-widest text-muted-foreground ml-1">Amount</Label>
+                      <Label className="text-[11px] font-black uppercase tracking-widest text-muted-foreground ml-1">Amount to Trade</Label>
                       <div className="relative">
                         <Input 
                           placeholder="0.00"
@@ -190,6 +188,9 @@ export default function TransferPage() {
                         <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-black text-[10px] uppercase">
                           {selectedFunding.sub.substring(0, 3)}
                         </div>
+                      </div>
+                      <div className="flex justify-between px-1">
+                        <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wide">Min: 25 {selectedFunding.sub.substring(0, 3)}</p>
                       </div>
                     </div>
                     <div className="space-y-2">
@@ -237,19 +238,19 @@ export default function TransferPage() {
             {/* Standard Amount Box (Hidden for Crypto to prevent redundancy) */}
             {!selectedFunding?.address && (
               <div className="space-y-3">
-                <Label className="text-muted-foreground font-semibold ml-1">Amount</Label>
+                <Label className="text-muted-foreground font-semibold ml-1">Amount to Trade</Label>
                 <div className="relative group">
                   <Input 
                     className="h-20 bg-white border-border text-3xl font-black pr-20 focus-visible:ring-primary rounded-xl shadow-inner" 
                     placeholder="0.00"
                   />
                   <div className="absolute right-6 top-1/2 -translate-y-1/2 text-muted-foreground font-black text-xl">
-                    {selectedFunding?.balance.split(' ')[1] || 'USD'}
+                    {selectedFunding?.balance || 'USD'}
                   </div>
                 </div>
                 <div className="flex justify-between px-1">
-                  <p className="text-[11px] text-muted-foreground font-bold uppercase tracking-wide">Min: 0.01 {selectedFunding?.balance.split(' ')[1] || 'USD'}</p>
-                  <p className="text-[11px] text-muted-foreground font-bold uppercase tracking-wide">Available: {selectedFunding?.balance}</p>
+                  <p className="text-[11px] text-muted-foreground font-bold uppercase tracking-wide">Min: 25 {selectedFunding?.balance || 'USD'}</p>
+                  <p className="text-[11px] text-muted-foreground font-bold uppercase tracking-wide">Available: 0.00 {selectedFunding?.balance || 'USD'}</p>
                 </div>
               </div>
             )}
