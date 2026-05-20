@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from "react";
 import { Navbar } from "@/components/navbar";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { 
   Bell, 
@@ -11,41 +11,60 @@ import {
   ArrowUpRight,
   Activity,
   CheckCircle2,
-  Home as HomeIcon
+  Home as HomeIcon,
+  TrendingUp,
+  Star,
+  Users
 } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
+import Image from "next/image";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { Badge } from "@/components/ui/badge";
 
 export default function Dashboard() {
   const [isMounted, setIsMounted] = useState(false);
   const [hasNotification, setHasNotification] = useState(true);
   const [liveBalance, setLiveBalance] = useState(7240.50);
+  const [traderData, setTraderData] = useState([
+    { id: 1, name: "Alex Sterling", return: 42.5, success: 68, followers: 842 },
+    { id: 2, name: "Elena Vance", return: 112.8, success: 54, followers: 1250 },
+    { id: 3, name: "Marcus Chen", return: 28.1, success: 72, followers: 615 },
+  ]);
 
   useEffect(() => {
     setIsMounted(true);
     
-    // Simulate erratic MT5 live trading digit movement
-    const interval = setInterval(() => {
+    // Erratic live digit movement
+    const balanceInterval = setInterval(() => {
       setLiveBalance((prev) => {
-        // Random erratic change
         const volatility = Math.random() > 0.8 ? 5.0 : 0.8;
         const direction = Math.random() > 0.49 ? 1 : -1;
         const change = direction * Math.random() * volatility;
-        
         let newVal = prev + change;
-        // Keep within user specified bounds
         if (newVal < 5000) newVal = 5000;
         if (newVal > 50000) newVal = 50000;
         return newVal;
       });
-    }, 120); // Fast erratic updates
+    }, 120);
 
-    return () => clearInterval(interval);
+    // Live trader statistics updates
+    const statsInterval = setInterval(() => {
+      setTraderData(prev => prev.map(t => ({
+        ...t,
+        return: t.return + (Math.random() > 0.5 ? 0.01 : -0.01),
+        success: Math.min(100, Math.max(0, t.success + (Math.random() > 0.5 ? 0.1 : -0.1))),
+        followers: t.followers + (Math.random() > 0.9 ? 1 : Math.random() < 0.1 ? -1 : 0)
+      })));
+    }, 500);
+
+    return () => {
+      clearInterval(balanceInterval);
+      clearInterval(statsInterval);
+    };
   }, []);
 
   if (!isMounted) return null;
@@ -54,27 +73,21 @@ export default function Dashboard() {
     <div className="flex flex-col min-h-screen bg-background font-body">
       <Navbar />
       
-      <main className="container mx-auto px-4 py-8 space-y-6 max-w-7xl">
+      <main className="container mx-auto px-4 py-8 space-y-12 max-w-7xl">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          {/* Banner 1: Proven Strategy */}
+          {/* Banner 1: Blanked content as requested */}
           <Card className="bg-white border border-border overflow-hidden h-[200px] rounded-[1.5rem] flex items-center relative group shadow-sm">
             <CardContent className="p-8 flex justify-between items-center w-full z-10">
               <div className="max-w-full space-y-2">
-                <h2 className="text-2xl md:text-3xl font-extrabold leading-tight tracking-tight text-foreground">
-                  Ready to start today with a proven strategy?
-                </h2>
-                <p className="text-sm font-semibold text-accent tracking-wide uppercase">CopyTrade Now!</p>
+                {/* Blank top section as requested */}
               </div>
             </CardContent>
           </Card>
 
-          {/* Banner 2: Precision meets performance */}
+          {/* Banner 2: Blanked content as requested */}
           <Card className="bg-white border border-border overflow-hidden h-[200px] rounded-[1.5rem] flex items-center relative group shadow-sm">
             <CardContent className="p-8 flex justify-between items-center w-full z-10">
               <div className="max-w-full space-y-2">
-                <h2 className="text-2xl md:text-3xl font-extrabold leading-tight tracking-tight text-foreground">
-                  Where precision meets performance
-                </h2>
                 <div className="flex items-center gap-2 text-primary font-bold">
                   <Activity className="h-4 w-4" />
                   <span className="text-lg font-mono tracking-tighter">
@@ -90,12 +103,10 @@ export default function Dashboard() {
         <Card className="bg-white text-foreground border-none shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden rounded-[2.5rem]">
           <CardContent className="p-8 md:p-12 space-y-8">
             <div className="flex justify-between items-center">
-              {/* Left Side Avatar */}
               <div className="w-12 h-12 bg-[#F1F3F9] rounded-full flex items-center justify-center font-bold text-[#4B5563] text-sm">
                 MT
               </div>
               
-              {/* Center Balance */}
               <div className="text-center">
                 <div className="flex items-start justify-center text-[#1F2937]">
                   <span className="text-2xl font-medium mt-2 mr-1 opacity-50">$</span>
@@ -104,7 +115,6 @@ export default function Dashboard() {
                 <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-[0.2em] mt-3">Total Funds</p>
               </div>
 
-              {/* Right Side Notification Bell with Popover */}
               <div className="relative">
                 <Popover onOpenChange={(open) => { if(open) setHasNotification(false); }}>
                   <PopoverTrigger asChild>
@@ -129,44 +139,32 @@ export default function Dashboard() {
                         <div className="space-y-1">
                           <p className="text-sm font-bold text-foreground leading-tight">Welcome to JUST MARKETS!</p>
                           <p className="text-xs text-muted-foreground leading-relaxed">
-                            We're thrilled to have you here. Start exploring our master traders or use our AI Matchmaker to find your perfect strategy.
+                            We're thrilled to have you here. Start exploring our master traders.
                           </p>
                           <p className="text-[10px] text-accent font-bold uppercase pt-1">Just Now</p>
                         </div>
                       </div>
-                    </div>
-                    <div className="p-3 bg-muted/30 text-center border-t border-border">
-                      <button className="text-[10px] font-black text-primary uppercase tracking-widest hover:underline">
-                        View all activity
-                      </button>
                     </div>
                   </PopoverContent>
                 </Popover>
               </div>
             </div>
 
-            {/* Bottom Buttons Container */}
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
               <Link href="/" className="w-full sm:w-[200px]">
-                <Button 
-                  className="w-full h-[64px] rounded-full bg-secondary hover:bg-secondary/80 text-foreground border-none flex items-center justify-center gap-3 font-bold text-lg transition-all shadow-sm"
-                >
+                <Button className="w-full h-[64px] rounded-full bg-secondary hover:bg-secondary/80 text-foreground border-none flex items-center justify-center gap-3 font-bold text-lg transition-all shadow-sm">
                   <HomeIcon className="h-5 w-5" />
                   Home
                 </Button>
               </Link>
               <Link href="/transfer" className="w-full sm:w-[200px]">
-                <Button 
-                  className="w-full h-[64px] rounded-full bg-primary/10 hover:bg-primary/20 text-primary border-none flex items-center justify-center gap-3 font-bold text-lg transition-all shadow-sm"
-                >
+                <Button className="w-full h-[64px] rounded-full bg-primary/10 hover:bg-primary/20 text-primary border-none flex items-center justify-center gap-3 font-bold text-lg transition-all shadow-sm">
                   <ArrowRightLeft className="h-5 w-5" />
                   Transfer
                 </Button>
               </Link>
               <Link href="/withdraw" className="w-full sm:w-[200px]">
-                <Button 
-                  className="w-full h-[64px] rounded-full bg-accent hover:bg-accent/90 text-white flex items-center justify-center gap-3 font-bold text-lg border-none shadow-lg shadow-accent/20 transition-all"
-                >
+                <Button className="w-full h-[64px] rounded-full bg-accent hover:bg-accent/90 text-white flex items-center justify-center gap-3 font-bold text-lg border-none shadow-lg shadow-accent/20 transition-all">
                   <ArrowUpRight className="h-5 w-5" />
                   Withdraw
                 </Button>
@@ -174,6 +172,75 @@ export default function Dashboard() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Active Copy Traders Section */}
+        <section className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+          <div className="flex items-center justify-between">
+            <h2 className="text-3xl font-black uppercase tracking-tight text-foreground flex items-center gap-3">
+              <TrendingUp className="h-8 w-8 text-primary" />
+              Active Copy Traders
+            </h2>
+            <Link href="/traders">
+              <Button variant="ghost" className="font-bold text-primary hover:text-primary/80 uppercase tracking-widest text-xs">
+                View All Markets
+              </Button>
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {traderData.map((trader) => (
+              <Card key={trader.id} className="group overflow-hidden border-none shadow-md hover:shadow-xl transition-all rounded-[2rem] bg-white">
+                <CardHeader className="pb-4">
+                  <div className="flex items-center gap-4">
+                    <div className="relative w-14 h-14 rounded-full overflow-hidden bg-muted flex items-center justify-center text-primary font-black text-xl border-2 border-primary/10">
+                      {trader.name[0]}
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-black leading-none group-hover:text-primary transition-colors uppercase tracking-tight">
+                        {trader.name}
+                      </h3>
+                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-1">Master Trader</p>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="bg-[#F8FAFC] p-4 rounded-2xl">
+                      <p className="text-[9px] text-muted-foreground uppercase font-black tracking-widest mb-1">Return</p>
+                      <p className="text-xl font-mono font-black text-primary">
+                        +{trader.return.toFixed(2)}%
+                      </p>
+                    </div>
+                    <div className="bg-[#F8FAFC] p-4 rounded-2xl">
+                      <p className="text-[9px] text-muted-foreground uppercase font-black tracking-widest mb-1">Success</p>
+                      <p className="text-xl font-mono font-black text-foreground">
+                        {trader.success.toFixed(1)}%
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex justify-between items-center text-[10px] px-2">
+                    <div className="flex items-center gap-1.5 font-bold text-muted-foreground uppercase">
+                      <Users className="h-3 w-3" />
+                      {trader.followers.toLocaleString()} Followers
+                    </div>
+                    <div className="flex items-center gap-1 font-bold text-accent uppercase">
+                      <Star className="h-3 w-3 fill-accent" />
+                      4.9 Rating
+                    </div>
+                  </div>
+                </CardContent>
+                <div className="p-6 pt-0">
+                  <Link href="/traders" className="w-full">
+                    <Button className="w-full h-12 bg-primary/5 hover:bg-primary/10 text-primary font-black uppercase tracking-widest rounded-xl border-none">
+                      Copy Strategy
+                    </Button>
+                  </Link>
+                </div>
+              </Card>
+            ))}
+          </div>
+        </section>
       </main>
     </div>
   );
