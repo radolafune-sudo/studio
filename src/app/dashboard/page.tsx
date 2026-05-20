@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from "react";
 import { Navbar } from "@/components/navbar";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { 
   Bell, 
@@ -11,19 +11,17 @@ import {
   ArrowUpRight,
   Activity,
   CheckCircle2,
-  Home as HomeIcon,
   TrendingUp,
   Star,
   Users
 } from "lucide-react";
-import Link from "next/link";
 import Image from "next/image";
+import Link from "next/link";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Badge } from "@/components/ui/badge";
 
 export default function Dashboard() {
   const [isMounted, setIsMounted] = useState(false);
@@ -38,7 +36,7 @@ export default function Dashboard() {
   useEffect(() => {
     setIsMounted(true);
     
-    // Erratic live digit movement
+    // Erratic live balance movement
     const balanceInterval = setInterval(() => {
       setLiveBalance((prev) => {
         const volatility = Math.random() > 0.8 ? 5.0 : 0.8;
@@ -84,16 +82,28 @@ export default function Dashboard() {
             </CardContent>
           </Card>
 
-          {/* Banner 2: Blanked content as requested */}
+          {/* Banner 2: Precision meets performance */}
           <Card className="bg-white border border-border overflow-hidden h-[200px] rounded-[1.5rem] flex items-center relative group shadow-sm">
             <CardContent className="p-8 flex justify-between items-center w-full z-10">
-              <div className="max-w-full space-y-2">
+              <div className="max-w-[65%] space-y-2">
+                <h2 className="text-2xl md:text-3xl font-extrabold leading-tight tracking-tight text-foreground">
+                  Where precision meets performance
+                </h2>
                 <div className="flex items-center gap-2 text-primary font-bold">
                   <Activity className="h-4 w-4" />
                   <span className="text-lg font-mono tracking-tighter">
                     ${liveBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </span>
                 </div>
+              </div>
+              <div className="relative w-32 h-32 md:w-40 md:h-40 transition-transform group-hover:scale-105 duration-700">
+                <Image 
+                  src="https://picsum.photos/seed/forexchart99/600/400" 
+                  alt="Market Data" 
+                  fill 
+                  className="object-cover rounded-2xl grayscale group-hover:grayscale-0 transition-all shadow-md"
+                  data-ai-hint="forex chart"
+                />
               </div>
             </CardContent>
           </Card>
@@ -151,19 +161,14 @@ export default function Dashboard() {
             </div>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
-              <Link href="/" className="w-full sm:w-[200px]">
-                <Button className="w-full h-[64px] rounded-full bg-secondary hover:bg-secondary/80 text-foreground border-none flex items-center justify-center gap-3 font-bold text-lg transition-all shadow-sm">
-                  <HomeIcon className="h-5 w-5" />
-                  Home
-                </Button>
-              </Link>
-              <Link href="/transfer" className="w-full sm:w-[200px]">
+              {/* Home button removed as requested */}
+              <Link href="/transfer" className="w-full sm:w-[280px]">
                 <Button className="w-full h-[64px] rounded-full bg-primary/10 hover:bg-primary/20 text-primary border-none flex items-center justify-center gap-3 font-bold text-lg transition-all shadow-sm">
                   <ArrowRightLeft className="h-5 w-5" />
                   Transfer
                 </Button>
               </Link>
-              <Link href="/withdraw" className="w-full sm:w-[200px]">
+              <Link href="/withdraw" className="w-full sm:w-[280px]">
                 <Button className="w-full h-[64px] rounded-full bg-accent hover:bg-accent/90 text-white flex items-center justify-center gap-3 font-bold text-lg border-none shadow-lg shadow-accent/20 transition-all">
                   <ArrowUpRight className="h-5 w-5" />
                   Withdraw
@@ -174,7 +179,7 @@ export default function Dashboard() {
         </Card>
 
         {/* Active Copy Traders Section */}
-        <section className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+        <section className="space-y-8">
           <div className="flex items-center justify-between">
             <h2 className="text-3xl font-black uppercase tracking-tight text-foreground flex items-center gap-3">
               <TrendingUp className="h-8 w-8 text-primary" />
@@ -190,53 +195,32 @@ export default function Dashboard() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {traderData.map((trader) => (
               <Card key={trader.id} className="group overflow-hidden border-none shadow-md hover:shadow-xl transition-all rounded-[2rem] bg-white">
-                <CardHeader className="pb-4">
+                <CardContent className="p-6 space-y-6">
                   <div className="flex items-center gap-4">
-                    <div className="relative w-14 h-14 rounded-full overflow-hidden bg-muted flex items-center justify-center text-primary font-black text-xl border-2 border-primary/10">
+                    <div className="w-14 h-14 rounded-full bg-muted flex items-center justify-center text-primary font-black text-xl border-2 border-primary/10">
                       {trader.name[0]}
                     </div>
                     <div>
-                      <h3 className="text-lg font-black leading-none group-hover:text-primary transition-colors uppercase tracking-tight">
-                        {trader.name}
-                      </h3>
-                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-1">Master Trader</p>
+                      <h3 className="text-lg font-black uppercase tracking-tight">{trader.name}</h3>
+                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Master Trader</p>
                     </div>
                   </div>
-                </CardHeader>
-                <CardContent className="space-y-6">
                   <div className="grid grid-cols-2 gap-3">
                     <div className="bg-[#F8FAFC] p-4 rounded-2xl">
                       <p className="text-[9px] text-muted-foreground uppercase font-black tracking-widest mb-1">Return</p>
-                      <p className="text-xl font-mono font-black text-primary">
-                        +{trader.return.toFixed(2)}%
-                      </p>
+                      <p className="text-xl font-mono font-black text-primary">+{trader.return.toFixed(2)}%</p>
                     </div>
                     <div className="bg-[#F8FAFC] p-4 rounded-2xl">
                       <p className="text-[9px] text-muted-foreground uppercase font-black tracking-widest mb-1">Success</p>
-                      <p className="text-xl font-mono font-black text-foreground">
-                        {trader.success.toFixed(1)}%
-                      </p>
+                      <p className="text-xl font-mono font-black text-foreground">{trader.success.toFixed(1)}%</p>
                     </div>
                   </div>
-                  
-                  <div className="flex justify-between items-center text-[10px] px-2">
-                    <div className="flex items-center gap-1.5 font-bold text-muted-foreground uppercase">
-                      <Users className="h-3 w-3" />
-                      {trader.followers.toLocaleString()} Followers
-                    </div>
-                    <div className="flex items-center gap-1 font-bold text-accent uppercase">
-                      <Star className="h-3 w-3 fill-accent" />
-                      4.9 Rating
-                    </div>
-                  </div>
-                </CardContent>
-                <div className="p-6 pt-0">
                   <Link href="/traders" className="w-full">
                     <Button className="w-full h-12 bg-primary/5 hover:bg-primary/10 text-primary font-black uppercase tracking-widest rounded-xl border-none">
                       Copy Strategy
                     </Button>
                   </Link>
-                </div>
+                </CardContent>
               </Card>
             ))}
           </div>
