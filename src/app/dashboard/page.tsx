@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect } from "react";
@@ -9,18 +8,26 @@ import {
   Bell, 
   ArrowRightLeft, 
   ArrowUpRight,
-  Activity
+  Activity,
+  CheckCircle2
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 export default function Dashboard() {
-  const [marketValue, setMarketValue] = useState(7240.50);
+  const [isMounted, setIsMounted] = useState(false);
+  const [hasNotification, setHasNotification] = useState(true);
 
   useEffect(() => {
-    const [randomVal, setRandomVal] = useState<number | null>(null);
-    setRandomVal(Math.random());
+    setIsMounted(true);
   }, []);
+
+  if (!isMounted) return null;
 
   return (
     <div className="flex flex-col min-h-screen bg-background font-body">
@@ -77,7 +84,7 @@ export default function Dashboard() {
           </Card>
         </div>
 
-        {/* Account Summary Card - Matches Reference Image */}
+        {/* Account Summary Card */}
         <Card className="bg-white text-foreground border-none shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden rounded-[2.5rem]">
           <CardContent className="p-8 md:p-12 space-y-8">
             <div className="flex justify-between items-center">
@@ -95,14 +102,44 @@ export default function Dashboard() {
                 <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-[0.2em] mt-3">Total Funds</p>
               </div>
 
-              {/* Right Side Notification */}
+              {/* Right Side Notification Bell with Popover */}
               <div className="relative">
-                <div className="w-12 h-12 bg-[#F1F3F9] rounded-full flex items-center justify-center cursor-pointer hover:bg-muted transition-colors">
-                  <Bell className="h-5 w-5 text-muted-foreground" />
-                  <div className="absolute top-0 right-0 h-4 w-4 bg-accent rounded-full border-2 border-white flex items-center justify-center text-[8px] font-bold text-white shadow-sm">
-                    1
-                  </div>
-                </div>
+                <Popover onOpenChange={(open) => { if(open) setHasNotification(false); }}>
+                  <PopoverTrigger asChild>
+                    <div className="w-12 h-12 bg-[#F1F3F9] rounded-full flex items-center justify-center cursor-pointer hover:bg-muted transition-colors relative">
+                      <Bell className="h-5 w-5 text-muted-foreground" />
+                      {hasNotification && (
+                        <div className="absolute top-0 right-0 h-4 w-4 bg-accent rounded-full border-2 border-white flex items-center justify-center text-[8px] font-bold text-white shadow-sm animate-pulse">
+                          1
+                        </div>
+                      )}
+                    </div>
+                  </PopoverTrigger>
+                  <PopoverContent align="end" className="w-80 p-0 rounded-2xl overflow-hidden shadow-2xl border-none">
+                    <div className="bg-primary p-4 text-primary-foreground">
+                      <h4 className="font-bold text-sm uppercase tracking-wider">Notifications</h4>
+                    </div>
+                    <div className="p-4 space-y-4 bg-white">
+                      <div className="flex gap-4 items-start">
+                        <div className="w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center shrink-0">
+                          <CheckCircle2 className="h-5 w-5 text-accent" />
+                        </div>
+                        <div className="space-y-1">
+                          <p className="text-sm font-bold text-foreground leading-tight">Welcome to JUST MARKETS!</p>
+                          <p className="text-xs text-muted-foreground leading-relaxed">
+                            We're thrilled to have you here. Start exploring our master traders or use our AI Matchmaker to find your perfect strategy.
+                          </p>
+                          <p className="text-[10px] text-accent font-bold uppercase pt-1">Just Now</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="p-3 bg-muted/30 text-center border-t border-border">
+                      <button className="text-[10px] font-black text-primary uppercase tracking-widest hover:underline">
+                        View all activity
+                      </button>
+                    </div>
+                  </PopoverContent>
+                </Popover>
               </div>
             </div>
 
@@ -110,19 +147,20 @@ export default function Dashboard() {
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
               <Link href="/transfer" className="w-full sm:w-[280px]">
                 <Button 
-                  variant="outline" 
-                  className="w-full h-[64px] rounded-full bg-primary/10 hover:bg-primary/20 text-primary border-primary/20 flex items-center justify-center gap-3 font-bold text-lg transition-all shadow-sm"
+                  className="w-full h-[64px] rounded-full bg-primary/10 hover:bg-primary/20 text-primary border-none flex items-center justify-center gap-3 font-bold text-lg transition-all shadow-sm"
                 >
                   <ArrowRightLeft className="h-5 w-5" />
                   Transfer
                 </Button>
               </Link>
-              <Button 
-                className="w-full sm:w-[280px] h-[64px] rounded-full bg-accent hover:bg-accent/90 text-white flex items-center justify-center gap-3 font-bold text-lg border-none shadow-lg shadow-accent/20 transition-all"
-              >
-                <ArrowUpRight className="h-5 w-5" />
-                Withdraw
-              </Button>
+              <Link href="/withdraw" className="w-full sm:w-[280px]">
+                <Button 
+                  className="w-full h-[64px] rounded-full bg-accent hover:bg-accent/90 text-white flex items-center justify-center gap-3 font-bold text-lg border-none shadow-lg shadow-accent/20 transition-all"
+                >
+                  <ArrowUpRight className="h-5 w-5" />
+                  Withdraw
+                </Button>
+              </Link>
             </div>
           </CardContent>
         </Card>
