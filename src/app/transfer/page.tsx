@@ -40,7 +40,7 @@ const ACCOUNTS = [
 ];
 
 export default function TransferPage() {
-  const [fundingAccount, setFundingAccount] = useState('btc');
+  const [fundingAccount, setFundingAccount] = useState('mt5_1');
   const [copied, setCopied] = useState(false);
   const [transactionId, setTransactionId] = useState('');
   const [amount, setAmount] = useState('');
@@ -58,18 +58,37 @@ export default function TransferPage() {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const handleSubmitApproval = () => {
-    if (!transactionId || !amount) {
+  const handleSubmitTrade = () => {
+    if (!amount) {
       toast({
         variant: "destructive",
         title: "Missing Information",
-        description: "Please provide both Amount and Transaction ID to continue.",
+        description: "Please provide an amount to continue.",
       });
       return;
     }
+    
+    if (parseFloat(amount) < 25) {
+      toast({
+        variant: "destructive",
+        title: "Minimum Requirement",
+        description: "The minimum amount to trade is $25.",
+      });
+      return;
+    }
+
+    if (selectedFunding?.address && !transactionId) {
+      toast({
+        variant: "destructive",
+        title: "Missing Transaction ID",
+        description: "Please provide the Transaction ID for verification.",
+      });
+      return;
+    }
+
     toast({
       title: "Submission Received",
-      description: "Your transaction is now being reviewed by our compliance team.",
+      description: "Your request is now being reviewed by our compliance team.",
     });
     setTransactionId('');
     setAmount('');
@@ -109,8 +128,8 @@ export default function TransferPage() {
                       selectedFunding?.icon && <selectedFunding.icon className={cn("h-6 w-6", selectedFunding.color)} />
                     )}
                     <div className="text-left">
-                      <span className="font-mono text-xl tracking-tight text-foreground block leading-none mb-1">
-                        {selectedFunding?.type === 'MT5' ? selectedFunding.sub : selectedFunding?.name}
+                      <span className="font-mono text-xl tracking-tight text-foreground block leading-none mb-1 font-bold">
+                        {selectedFunding?.type === 'MT5' ? `Account ${selectedFunding.sub}` : selectedFunding?.name}
                       </span>
                       {selectedFunding?.type !== 'MT5' && (
                         <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">{selectedFunding?.sub}</span>
@@ -208,7 +227,7 @@ export default function TransferPage() {
                   </div>
 
                   <Button 
-                    onClick={handleSubmitApproval}
+                    onClick={handleSubmitTrade}
                     className="w-full h-14 bg-primary text-primary-foreground font-black uppercase tracking-wider hover:bg-primary/90 transition-all shadow-md active:scale-[0.98]"
                   >
                     Submit
@@ -235,14 +254,17 @@ export default function TransferPage() {
               </div>
             </div>
 
-            {/* Standard Amount Box (Hidden for Crypto to prevent redundancy) */}
+            {/* Standard Amount Box (Shown for Internal MT5 transfers) */}
             {!selectedFunding?.address && (
               <div className="space-y-3">
-                <Label className="text-muted-foreground font-semibold ml-1">Amount to Trade</Label>
+                <Label className="text-muted-foreground font-semibold ml-1 uppercase text-[11px] tracking-wider">Amount to Trade</Label>
                 <div className="relative group">
                   <Input 
-                    className="h-20 bg-white border-border text-3xl font-black pr-20 focus-visible:ring-primary rounded-xl shadow-inner" 
+                    className="h-20 bg-white border-border text-3xl font-black pr-24 focus-visible:ring-primary rounded-xl shadow-inner" 
                     placeholder="0.00"
+                    type="number"
+                    value={amount}
+                    onChange={(e) => setAmount(e.target.value)}
                   />
                   <div className="absolute right-6 top-1/2 -translate-y-1/2 text-muted-foreground font-black text-xl">
                     {selectedFunding?.balance || 'USD'}
@@ -256,8 +278,11 @@ export default function TransferPage() {
             )}
 
             {!selectedFunding?.address && (
-              <Button className="w-full h-20 bg-muted text-muted-foreground font-black text-xl hover:bg-muted cursor-not-allowed rounded-full shadow-lg border border-border transition-all">
-                Continue
+              <Button 
+                onClick={handleSubmitTrade}
+                className="w-full h-20 bg-primary text-primary-foreground font-black text-2xl hover:bg-primary/90 rounded-full shadow-xl border-none transition-all active:scale-[0.98]"
+              >
+                COPY TRADE
               </Button>
             )}
           </div>
