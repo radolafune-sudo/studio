@@ -51,7 +51,7 @@ export function Navbar() {
   );
 
   return (
-    <nav className="sticky top-0 z-50 w-full border-b bg-[#121316]">
+    <nav className="sticky top-0 z-50 w-full border-b bg-white">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex h-24 items-center justify-between">
           <div className="flex items-center">
@@ -67,7 +67,7 @@ export function Navbar() {
                   key={item.name}
                   href={item.href}
                   className={cn(
-                    "text-[13px] font-black transition-colors hover:text-primary tracking-[0.2em] text-white uppercase",
+                    "text-[13px] font-black transition-colors hover:text-primary tracking-[0.2em] text-black uppercase",
                     pathname === item.href ? "text-primary" : ""
                   )}
                 >
@@ -80,7 +80,7 @@ export function Navbar() {
           <div className="hidden lg:flex items-center gap-6">
             {!isAuthenticated ? (
               <>
-                <Link href="/login" className="text-[13px] font-black text-white hover:text-primary uppercase tracking-widest">
+                <Link href="/login" className="text-[13px] font-black text-black hover:text-primary uppercase tracking-widest">
                   LOG IN
                 </Link>
                 <Link href="/register">
@@ -93,12 +93,12 @@ export function Navbar() {
               <div className="flex items-center gap-4">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <div className="flex items-center gap-3 cursor-pointer p-2 hover:bg-white/5 rounded-xl transition-all">
+                    <div className="flex items-center gap-3 cursor-pointer p-2 hover:bg-muted/50 rounded-xl transition-all">
                       <Avatar className="h-10 w-10 border-2 border-primary/20">
                         <AvatarFallback className="bg-primary text-white font-black text-xs">JD</AvatarFallback>
                       </Avatar>
                       <div className="flex flex-col items-start leading-none">
-                        <span className="text-sm font-black text-white uppercase tracking-tight">John Doe</span>
+                        <span className="text-sm font-black text-black uppercase tracking-tight">John Doe</span>
                         <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">ID: 699478516</span>
                       </div>
                       <ChevronDown className="h-4 w-4 text-muted-foreground" />
@@ -121,14 +121,14 @@ export function Navbar() {
                 </DropdownMenu>
               </div>
             )}
-            <div className="flex items-center gap-4 text-white/70">
+            <div className="flex items-center gap-4 text-black/70">
               <Download className="h-5 w-5 cursor-pointer hover:text-primary" />
               <Globe className="h-5 w-5 cursor-pointer hover:text-primary" />
             </div>
           </div>
 
           <div className="-mr-2 flex lg:hidden">
-            <Button variant="ghost" size="icon" onClick={() => setIsOpen(!isOpen)} className="text-white">
+            <Button variant="ghost" size="icon" onClick={() => setIsOpen(!isOpen)} className="text-black">
               {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
             </Button>
           </div>
@@ -137,14 +137,14 @@ export function Navbar() {
 
       {/* Mobile menu */}
       {isOpen && (
-        <div className="lg:hidden border-t bg-[#121316] p-4 animate-in slide-in-from-top-2 duration-300">
+        <div className="lg:hidden border-t bg-white p-4 animate-in slide-in-from-top-2 duration-300">
           <div className="space-y-1 pb-3 pt-2">
             {navItems.map((item) => (
               <Link
                 key={item.name}
                 href={item.href}
                 onClick={() => setIsOpen(false)}
-                className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-black uppercase tracking-widest text-white hover:bg-white/5"
+                className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-black uppercase tracking-widest text-black hover:bg-muted/50"
               >
                 {item.name}
               </Link>
@@ -153,16 +153,16 @@ export function Navbar() {
               {!isAuthenticated ? (
                 <>
                   <Link href="/login" onClick={() => setIsOpen(false)}>
-                    <Button variant="outline" className="w-full h-12 font-black uppercase tracking-widest text-white border-white/10 hover:bg-white/5">Log in</Button>
+                    <Button variant="outline" className="w-full h-12 font-black uppercase tracking-widest text-black border-black/10">Log in</Button>
                   </Link>
                   <Link href="/register" onClick={() => setIsOpen(false)}>
                     <Button className="w-full h-12 bg-primary text-white font-black uppercase tracking-widest shadow-lg">Register</Button>
                   </Link>
                 </>
               ) : (
-                <div className="flex flex-col gap-2 p-2 bg-white/5 rounded-xl">
+                <div className="flex flex-col gap-2 p-2 bg-muted/20 rounded-xl">
                   <p className="text-[10px] font-black uppercase text-center text-muted-foreground py-2">Account: 699478516</p>
-                  <Button variant="ghost" className="w-full justify-start font-bold uppercase tracking-widest text-white">Settings</Button>
+                  <Button variant="ghost" className="w-full justify-start font-bold uppercase tracking-widest text-black">Settings</Button>
                   <Link href="/" className="w-full">
                     <Button variant="destructive" className="w-full font-bold uppercase tracking-widest">Log Out</Button>
                   </Link>

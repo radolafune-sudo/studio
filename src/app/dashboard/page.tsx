@@ -11,11 +11,8 @@ import {
   ArrowUpRight,
   Activity,
   CheckCircle2,
-  TrendingUp,
-  Star,
-  Users
+  TrendingUp
 } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
 import {
   Popover,
@@ -73,19 +70,17 @@ export default function Dashboard() {
       
       <main className="container mx-auto px-4 py-8 space-y-12 max-w-7xl">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          {/* Banner 1: Blanked content as requested */}
+          {/* Banner 1: Blank as requested */}
           <Card className="bg-white border border-border overflow-hidden h-[200px] rounded-[1.5rem] flex items-center relative group shadow-sm">
-            <CardContent className="p-8 flex justify-between items-center w-full z-10">
-              <div className="max-w-full space-y-2">
-                {/* Blank top section as requested */}
-              </div>
+            <CardContent className="p-8 w-full z-10">
+              {/* Blank section */}
             </CardContent>
           </Card>
 
-          {/* Banner 2: Precision meets performance */}
+          {/* Banner 2: Precision meets performance - No images as requested */}
           <Card className="bg-white border border-border overflow-hidden h-[200px] rounded-[1.5rem] flex items-center relative group shadow-sm">
             <CardContent className="p-8 flex justify-between items-center w-full z-10">
-              <div className="max-w-[65%] space-y-2">
+              <div className="max-w-full space-y-2">
                 <h2 className="text-2xl md:text-3xl font-extrabold leading-tight tracking-tight text-foreground">
                   Where precision meets performance
                 </h2>
@@ -95,15 +90,6 @@ export default function Dashboard() {
                     ${liveBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </span>
                 </div>
-              </div>
-              <div className="relative w-32 h-32 md:w-40 md:h-40 transition-transform group-hover:scale-105 duration-700">
-                <Image 
-                  src="https://picsum.photos/seed/forexchart99/600/400" 
-                  alt="Market Data" 
-                  fill 
-                  className="object-cover rounded-2xl grayscale group-hover:grayscale-0 transition-all shadow-md"
-                  data-ai-hint="forex chart"
-                />
               </div>
             </CardContent>
           </Card>
@@ -161,7 +147,6 @@ export default function Dashboard() {
             </div>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
-              {/* Home button removed as requested */}
               <Link href="/transfer" className="w-full sm:w-[280px]">
                 <Button className="w-full h-[64px] rounded-full bg-primary/10 hover:bg-primary/20 text-primary border-none flex items-center justify-center gap-3 font-bold text-lg transition-all shadow-sm">
                   <ArrowRightLeft className="h-5 w-5" />
