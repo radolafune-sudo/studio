@@ -1,88 +1,60 @@
+
 import { Navbar } from "@/components/navbar";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { 
-  Zap, 
-  ShieldCheck, 
-  BarChart3, 
-  ArrowRight,
-  TrendingUp,
-  Globe,
-  Users,
-  MessageCircle
-} from "lucide-react";
+import { MessageCircle } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
 export default function Home() {
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen bg-[#F9FAFB]">
       <Navbar />
       
       {/* Hero Section */}
-      <section className="relative pt-20 pb-16 md:pt-32 md:pb-24 overflow-hidden bg-white">
-        <div className="container mx-auto px-4 relative z-10 max-w-7xl">
-          <div className="flex flex-col lg:flex-row items-center gap-16">
-            <div className="flex-1 space-y-8 text-center lg:text-left">
-              <div className="space-y-4">
-                <h1 className="text-5xl md:text-7xl font-black text-[#1a1a1a] leading-[1.05] tracking-tight">
-                  Better than <br />
-                  <span className="text-primary italic">copy trading</span>
+      <section className="relative flex-1 flex items-center justify-center pt-20 pb-32 lg:pt-0 lg:pb-0 overflow-hidden">
+        <div className="container mx-auto px-4 max-w-7xl">
+          <div className="flex flex-col lg:flex-row items-center gap-16 lg:gap-24">
+            <div className="flex-1 space-y-10 text-center lg:text-left z-10">
+              <div className="space-y-8">
+                <h1 className="text-6xl md:text-[84px] font-black text-[#1a1a1a] leading-[1.05] tracking-tight max-w-[600px]">
+                  Unlock the Full Power of Your Capital with Elite copy trading
                 </h1>
-                <p className="text-xl md:text-2xl text-accent font-extrabold uppercase tracking-tight">
-                  Join the platform used by millions
+                <p className="text-lg md:text-2xl text-[#22C55E] font-bold leading-relaxed max-w-[550px]">
+                  Expand your holdings and move across global markets with confidence, consistency, and proven security
                 </p>
               </div>
               
-              <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start pt-4">
+              <div className="pt-4">
                 <Link href="/register">
-                  <Button size="lg" className="bg-accent text-white hover:bg-accent/90 px-12 h-16 rounded-full font-black text-xl uppercase tracking-widest shadow-xl shadow-accent/20">
+                  <Button className="bg-[#121316] text-white hover:bg-black px-12 h-[72px] rounded-2xl font-black text-xl tracking-tight shadow-2xl transition-transform active:scale-95">
                     Open Account
                   </Button>
                 </Link>
-                <Link href="/traders">
-                  <Button size="lg" variant="outline" className="border-primary text-primary hover:bg-primary/5 px-12 h-16 rounded-full font-black text-xl uppercase tracking-widest">
-                    Try Demo
-                  </Button>
-                </Link>
-              </div>
-
-              <div className="flex items-center justify-center lg:justify-start gap-8 pt-8 opacity-60">
-                <div className="text-center">
-                  <p className="text-2xl font-black">2M+</p>
-                  <p className="text-[10px] uppercase font-bold tracking-widest">Users</p>
-                </div>
-                <div className="w-px h-8 bg-border" />
-                <div className="text-center">
-                  <p className="text-2xl font-black">150+</p>
-                  <p className="text-[10px] uppercase font-bold tracking-widest">Countries</p>
-                </div>
-                <div className="w-px h-8 bg-border" />
-                <div className="text-center">
-                  <p className="text-2xl font-black">0.0</p>
-                  <p className="text-[10px] uppercase font-bold tracking-widest">Pips</p>
-                </div>
               </div>
             </div>
 
-            <div className="flex-1 relative w-full max-w-2xl">
-              <div className="relative aspect-square w-full">
-                <Image 
-                  src="https://picsum.photos/seed/jmhero/800/800"
-                  alt="Trading App"
-                  fill
-                  className="object-contain"
-                  data-ai-hint="trading app"
-                  priority
-                />
-              </div>
-              {/* Floating badges */}
-              <div className="absolute top-1/4 -left-8 bg-white p-4 rounded-2xl shadow-2xl animate-bounce duration-1000">
-                <TrendingUp className="text-primary h-8 w-8" />
-              </div>
-              <div className="absolute bottom-1/4 -right-8 bg-white p-4 rounded-2xl shadow-2xl animate-pulse">
-                <ShieldCheck className="text-accent h-8 w-8" />
+            <div className="flex-1 relative w-full flex justify-center lg:justify-end">
+              <div className="relative w-full max-w-[600px] aspect-[4/5]">
+                {/* Back Phone */}
+                <div className="absolute top-[10%] right-[10%] w-[65%] aspect-[9/18.5] border-[12px] border-black rounded-[50px] overflow-hidden shadow-2xl rotate-[5deg] z-0">
+                  <Image 
+                    src="https://picsum.photos/seed/lake99/400/800"
+                    alt="Scenic Background"
+                    fill
+                    className="object-cover"
+                    data-ai-hint="lake mountain"
+                  />
+                </div>
+                {/* Front Phone */}
+                <div className="absolute top-[0%] left-[5%] w-[65%] aspect-[9/18.5] border-[12px] border-black rounded-[50px] overflow-hidden shadow-2xl -rotate-[5deg] z-10">
+                  <Image 
+                    src="https://picsum.photos/seed/coffee99/400/800"
+                    alt="Trading Insight"
+                    fill
+                    className="object-cover"
+                    data-ai-hint="coffee beans"
+                  />
+                </div>
               </div>
             </div>
           </div>
@@ -90,26 +62,19 @@ export default function Home() {
       </section>
 
       {/* Floating Chat Bubble */}
-      <div className="fixed bottom-8 right-8 z-50">
-        <div className="relative group">
-          <Button className="w-16 h-16 rounded-full bg-primary shadow-2xl hover:scale-110 transition-transform">
-            <MessageCircle className="h-8 w-8 text-white" />
-          </Button>
-          <div className="absolute -top-1 -right-1 bg-accent text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold border-2 border-white shadow-lg">
+      <div className="fixed bottom-10 right-10 z-50">
+        <button className="w-20 h-20 rounded-full bg-[#22C55E] shadow-2xl flex items-center justify-center hover:scale-110 transition-transform active:scale-95">
+          <MessageCircle className="h-10 w-10 text-white fill-current" />
+          <div className="absolute -top-1 -right-1 bg-[#EF4444] text-white w-7 h-7 rounded-full flex items-center justify-center text-sm font-black border-[3px] border-white shadow-lg">
             1
           </div>
-        </div>
+        </button>
       </div>
 
-      <footer className="bg-[#1a1a1a] text-white py-20 mt-auto">
-        <div className="container mx-auto px-4 text-center space-y-8">
-          <div className="flex items-center justify-center gap-2">
-            <div className="bg-primary text-white w-8 h-8 flex items-center justify-center rounded-lg font-black">JM</div>
-            <span className="text-xl font-black uppercase tracking-tighter">Just Markets</span>
-          </div>
-          <p className="text-sm text-gray-500 max-w-4xl mx-auto leading-relaxed">
+      <footer className="bg-white border-t border-gray-100 py-16">
+        <div className="container mx-auto px-4 text-center space-y-6">
+          <p className="text-[11px] text-gray-400 max-w-4xl mx-auto leading-relaxed uppercase tracking-widest font-black">
             Risk Warning: Trading financial instruments involves significant risk of loss and is not suitable for all investors. 
-            Ensure you fully understand the risks involved and take appropriate care to manage your risk.
             &copy; {new Date().getFullYear()} JUST MARKETS. ALL RIGHTS RESERVED.
           </p>
         </div>
