@@ -111,7 +111,6 @@ export default function TransferPage() {
               <ArrowRightLeft className="h-6 w-6 text-primary" />
               <span className="font-bold text-lg">Between your accounts</span>
             </div>
-            <ChevronDown className="h-5 w-5 text-muted-foreground" />
           </div>
 
           <div className="space-y-8">
@@ -119,7 +118,7 @@ export default function TransferPage() {
             <div className="space-y-3">
               <Label className="text-muted-foreground font-black ml-1 uppercase text-[11px] tracking-[0.2em]">FROM YOUR FUNDING ACCOUNT</Label>
               <Select value={fundingAccount} onValueChange={setFundingAccount}>
-                <SelectTrigger className="h-auto p-5 bg-white border border-border rounded-xl flex items-center justify-between hover:bg-muted/50 transition-all shadow-sm">
+                <SelectTrigger className="h-auto p-5 bg-white border border-border rounded-xl flex items-center justify-between hover:bg-muted/50 transition-all shadow-sm ring-1 ring-primary/5 shadow-[0_0_15px_rgba(37,99,235,0.08)] animate-pulse hover:animate-none">
                   <div className="flex items-center gap-4">
                     {selectedFunding?.type === 'MT5' ? (
                       <div className="px-3 py-1 rounded bg-primary/10 border border-primary/20 text-primary text-xs font-black uppercase tracking-wider">

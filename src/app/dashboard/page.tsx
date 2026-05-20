@@ -23,9 +23,23 @@ import {
 export default function Dashboard() {
   const [isMounted, setIsMounted] = useState(false);
   const [hasNotification, setHasNotification] = useState(true);
+  const [liveBalance, setLiveBalance] = useState(7240.50);
 
   useEffect(() => {
     setIsMounted(true);
+    
+    // Simulate MT5 live trading digit movement
+    const interval = setInterval(() => {
+      setLiveBalance((prev) => {
+        const change = (Math.random() - 0.48) * 1.5; // Slight upward bias
+        let newVal = prev + change;
+        if (newVal < 5000) newVal = 5000;
+        if (newVal > 50000) newVal = 50000;
+        return newVal;
+      });
+    }, 150); // Fast updates for that live feel
+
+    return () => clearInterval(interval);
   }, []);
 
   if (!isMounted) return null;
@@ -58,7 +72,7 @@ export default function Dashboard() {
                 <div className="flex items-center gap-2 text-primary font-bold">
                   <Activity className="h-4 w-4" />
                   <span className="text-lg font-mono tracking-tighter">
-                    $7,240.50
+                    ${liveBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </span>
                 </div>
               </div>
