@@ -38,21 +38,21 @@ export default function Home() {
                 {/* Back Phone */}
                 <div className="absolute top-[10%] right-[10%] w-[65%] aspect-[9/18.5] border-[12px] border-black rounded-[50px] overflow-hidden shadow-2xl rotate-[5deg] z-0">
                   <Image 
-                    src="https://picsum.photos/seed/lake99/400/800"
-                    alt="Scenic Background"
+                    src="https://picsum.photos/seed/forexchart99/600/400"
+                    alt="Market Graph"
                     fill
                     className="object-cover"
-                    data-ai-hint="lake mountain"
+                    data-ai-hint="forex graph"
                   />
                 </div>
                 {/* Front Phone */}
                 <div className="absolute top-[0%] left-[5%] w-[65%] aspect-[9/18.5] border-[12px] border-black rounded-[50px] overflow-hidden shadow-2xl -rotate-[5deg] z-10">
                   <Image 
-                    src="https://picsum.photos/seed/coffee99/400/800"
-                    alt="Trading Insight"
+                    src="https://picsum.photos/seed/candlesticks99/400/800"
+                    alt="Trading Candlesticks"
                     fill
                     className="object-cover"
-                    data-ai-hint="coffee beans"
+                    data-ai-hint="trading candlesticks"
                   />
                 </div>
               </div>

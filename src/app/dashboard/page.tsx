@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -36,31 +37,21 @@ export default function Dashboard() {
       <main className="container mx-auto px-4 py-8 space-y-6 max-w-7xl">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           {/* Banner 1: Proven Strategy */}
-          <Card className="bg-primary border-none overflow-hidden h-[200px] rounded-[1.5rem] flex items-center relative group shadow-lg">
-            <CardContent className="p-8 flex justify-between items-center w-full z-10 text-primary-foreground">
-              <div className="max-w-[65%] space-y-2">
-                <h2 className="text-2xl md:text-3xl font-extrabold leading-tight tracking-tight">
+          <Card className="bg-white border border-border overflow-hidden h-[200px] rounded-[1.5rem] flex items-center relative group shadow-sm">
+            <CardContent className="p-8 flex justify-between items-center w-full z-10">
+              <div className="max-w-full space-y-2">
+                <h2 className="text-2xl md:text-3xl font-extrabold leading-tight tracking-tight text-foreground">
                   Ready to start today with a proven strategy?
                 </h2>
                 <p className="text-sm font-semibold text-accent tracking-wide uppercase">CopyTrade Now!</p>
               </div>
-              <div className="relative w-32 h-32 md:w-40 md:h-40 transition-transform group-hover:scale-105 duration-700 opacity-90">
-                <Image 
-                  src="https://picsum.photos/seed/btc99/400/400" 
-                  alt="BTC Illustration" 
-                  fill 
-                  className="object-contain"
-                  data-ai-hint="bitcoin crypto"
-                />
-              </div>
             </CardContent>
-            <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent pointer-events-none" />
           </Card>
 
           {/* Banner 2: Precision meets performance */}
           <Card className="bg-white border border-border overflow-hidden h-[200px] rounded-[1.5rem] flex items-center relative group shadow-sm">
             <CardContent className="p-8 flex justify-between items-center w-full z-10">
-              <div className="max-w-[65%] space-y-2">
+              <div className="max-w-full space-y-2">
                 <h2 className="text-2xl md:text-3xl font-extrabold leading-tight tracking-tight text-foreground">
                   Where precision meets performance
                 </h2>
@@ -70,15 +61,6 @@ export default function Dashboard() {
                     $7,240.50
                   </span>
                 </div>
-              </div>
-              <div className="relative w-32 h-32 md:w-40 md:h-40 transition-transform group-hover:scale-105 duration-700">
-                <Image 
-                  src="https://picsum.photos/seed/forexchart99/600/400" 
-                  alt="Market Data" 
-                  fill 
-                  className="object-cover rounded-2xl grayscale group-hover:grayscale-0 transition-all shadow-md"
-                  data-ai-hint="forex chart"
-                />
               </div>
             </CardContent>
           </Card>

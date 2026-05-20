@@ -8,20 +8,34 @@ import {
   Menu,
   X,
   Download,
-  Globe
+  Globe,
+  User,
+  LogOut,
+  Settings,
+  ChevronDown
 } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 export function Navbar() {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
 
+  // Check if we are on an authenticated page (dashboard or transfer)
+  const isAuthenticated = pathname?.startsWith('/dashboard') || pathname?.startsWith('/transfer');
+
   const navItems = [
     { name: "TRADING", href: "#" },
     { name: "MARKETS", href: "/traders" },
-    { name: "PLATFORMS", href: "#" },
-    { name: "EDUCATION", href: "#" },
     { name: "COMPANY", href: "#" },
   ];
 
@@ -65,14 +79,49 @@ export function Navbar() {
           </div>
 
           <div className="hidden lg:flex items-center gap-6">
-            <Link href="/login" className="text-[13px] font-black text-[#555] hover:text-primary uppercase tracking-widest">
-              LOG IN
-            </Link>
-            <Link href="/register">
-              <Button className="bg-primary text-white hover:bg-primary/90 px-10 h-12 rounded-full font-black text-[13px] uppercase tracking-widest shadow-xl shadow-primary/30">
-                REGISTER
-              </Button>
-            </Link>
+            {!isAuthenticated ? (
+              <>
+                <Link href="/login" className="text-[13px] font-black text-[#555] hover:text-primary uppercase tracking-widest">
+                  LOG IN
+                </Link>
+                <Link href="/register">
+                  <Button className="bg-primary text-white hover:bg-primary/90 px-10 h-12 rounded-full font-black text-[13px] uppercase tracking-widest shadow-xl shadow-primary/30">
+                    REGISTER
+                  </Button>
+                </Link>
+              </>
+            ) : (
+              <div className="flex items-center gap-4">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <div className="flex items-center gap-3 cursor-pointer p-2 hover:bg-muted/50 rounded-xl transition-all">
+                      <Avatar className="h-10 w-10 border-2 border-primary/20">
+                        <AvatarFallback className="bg-primary text-white font-black text-xs">JD</AvatarFallback>
+                      </Avatar>
+                      <div className="flex flex-col items-start leading-none">
+                        <span className="text-sm font-black text-foreground uppercase tracking-tight">John Doe</span>
+                        <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">ID: 699478516</span>
+                      </div>
+                      <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                    </div>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-56 p-2 rounded-xl">
+                    <DropdownMenuLabel className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Account Details</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem className="py-3 rounded-lg font-bold text-sm cursor-pointer">
+                      <Settings className="mr-2 h-4 w-4" />
+                      Settings
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/" className="py-3 rounded-lg font-bold text-sm cursor-pointer text-destructive focus:text-destructive">
+                        <LogOut className="mr-2 h-4 w-4" />
+                        Log Out
+                      </Link>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            )}
             <div className="flex items-center gap-4 text-[#555]">
               <Download className="h-5 w-5 cursor-pointer hover:text-primary" />
               <Globe className="h-5 w-5 cursor-pointer hover:text-primary" />
@@ -102,12 +151,24 @@ export function Navbar() {
               </Link>
             ))}
             <div className="mt-6 flex flex-col gap-3">
-              <Link href="/login" onClick={() => setIsOpen(false)}>
-                <Button variant="outline" className="w-full h-12 font-black uppercase tracking-widest">Log in</Button>
-              </Link>
-              <Link href="/register" onClick={() => setIsOpen(false)}>
-                <Button className="w-full h-12 bg-primary text-white font-black uppercase tracking-widest shadow-lg">Register</Button>
-              </Link>
+              {!isAuthenticated ? (
+                <>
+                  <Link href="/login" onClick={() => setIsOpen(false)}>
+                    <Button variant="outline" className="w-full h-12 font-black uppercase tracking-widest">Log in</Button>
+                  </Link>
+                  <Link href="/register" onClick={() => setIsOpen(false)}>
+                    <Button className="w-full h-12 bg-primary text-white font-black uppercase tracking-widest shadow-lg">Register</Button>
+                  </Link>
+                </>
+              ) : (
+                <div className="flex flex-col gap-2 p-2 bg-muted/30 rounded-xl">
+                  <p className="text-[10px] font-black uppercase text-center text-muted-foreground py-2">Account: 699478516</p>
+                  <Button variant="ghost" className="w-full justify-start font-bold uppercase tracking-widest">Settings</Button>
+                  <Link href="/" className="w-full">
+                    <Button variant="destructive" className="w-full font-bold uppercase tracking-widest">Log Out</Button>
+                  </Link>
+                </div>
+              )}
             </div>
           </div>
         </div>
