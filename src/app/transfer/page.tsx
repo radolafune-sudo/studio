@@ -9,14 +9,13 @@ import {
   ArrowRightLeft, 
   ChevronDown, 
   Bitcoin,
-  Smartphone,
   Copy,
   Check,
   Coins,
   Globe,
   Wallet
 } from "lucide-react";
-import { useState, useRef, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
   Select,
@@ -104,7 +103,7 @@ export default function TransferPage() {
       toast({
         variant: "destructive",
         title: "Insufficient Balance",
-        description: "Your deposit has not yet reflected. Please wait for the 3-minute verification period.",
+        description: "Minimum copy trade amount is $25. Your deposit may still be pending verification.",
       });
       return;
     }
@@ -138,7 +137,6 @@ export default function TransferPage() {
                     {selectedFunding?.icon && <selectedFunding.icon className="h-5 w-5" style={{ color: selectedFunding.color }} />}
                     <span className="font-bold text-gray-800">{selectedFunding?.name}</span>
                   </div>
-                  <ChevronDown className="h-4 w-4 text-gray-400" />
                 </SelectTrigger>
                 <SelectContent className="max-h-[300px]">
                   {CRYPTO_ACCOUNTS.map((acc) => (
@@ -170,9 +168,9 @@ export default function TransferPage() {
               <p className="text-[10px] font-black uppercase text-blue-600 tracking-widest">Deposit Crypto to Fund</p>
               <div className="flex items-center gap-3 bg-gray-50 p-3 rounded-lg border border-gray-100">
                 <span className="flex-1 font-mono text-[10px] break-all text-gray-500">{selectedFunding?.address}</span>
-                <Button variant="ghost" size="icon" onClick={() => handleCopy(selectedFunding?.address!)}>
+                <button title="copy address" onClick={() => handleCopy(selectedFunding?.address!)} className="p-2 hover:bg-gray-100 rounded-md transition-colors">
                   {copied ? <Check className="h-4 w-4 text-green-600" /> : <Copy className="h-4 w-4" />}
-                </Button>
+                </button>
               </div>
               <div className="space-y-3">
                 <div className="space-y-1">
@@ -194,32 +192,20 @@ export default function TransferPage() {
                     onChange={(e) => setTransactionId(e.target.value)}
                   />
                 </div>
-                <Button onClick={handleSubmitTransfer} className="w-full bg-blue-600 text-white font-bold h-11 rounded-xl">
+                <Button onClick={handleSubmitTransfer} className="w-full bg-blue-600 text-white font-bold h-11 rounded-xl shadow-md">
                   Submit Verification
                 </Button>
               </div>
             </div>
 
-            <div className="pt-8 space-y-6">
-              <section className="space-y-2">
-                <h3 className="font-black text-lg">Terms</h3>
-                <div className="text-sm space-y-1">
-                  <p className="text-gray-500 font-medium">Average payment time <span className="text-black font-bold">Instant</span></p>
-                  <p className="text-gray-500 font-medium">Fee <span className="text-black font-bold">0%</span></p>
+            <div className="pt-8 space-y-8">
+              <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex items-center justify-between">
+                <div>
+                  <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Available Funds</p>
+                  <p className="text-3xl font-black">${balance.toFixed(2)}</p>
                 </div>
-              </section>
-
-              <section className="space-y-2">
-                <h3 className="font-black text-lg uppercase tracking-tight">FAQ</h3>
-                <div className="space-y-4">
-                  <div className="space-y-1">
-                    <p className="text-sm font-bold text-gray-800">General transfer rules</p>
-                    <p className="text-xs text-gray-500 leading-relaxed">
-                      Funds are debited from the source account and credited to the destination account after a successful transfer. Minimum copy trade amount is $25.
-                    </p>
-                  </div>
-                </div>
-              </section>
+                <Wallet className="h-8 w-8 text-primary/20" />
+              </div>
 
               <Button 
                 onClick={handleCopyTradeRedirect}
@@ -227,6 +213,28 @@ export default function TransferPage() {
               >
                 COPY TRADE
               </Button>
+
+              <div className="space-y-8 border-t pt-8">
+                <section className="space-y-2">
+                  <h3 className="font-black text-lg uppercase">Terms</h3>
+                  <div className="text-sm space-y-1">
+                    <p className="text-gray-500 font-medium">Average payment time <span className="text-black font-bold">Instant</span></p>
+                    <p className="text-gray-500 font-medium">Fee <span className="text-black font-bold">0%</span></p>
+                  </div>
+                </section>
+
+                <section className="space-y-2">
+                  <h3 className="font-black text-lg uppercase tracking-tight">FAQ</h3>
+                  <div className="space-y-4">
+                    <div className="space-y-1">
+                      <p className="text-sm font-bold text-gray-800">General transfer rules</p>
+                      <p className="text-xs text-gray-500 leading-relaxed">
+                        Funds are debited from the source account and credited to the destination account after a successful transfer. Minimum copy trade amount is $25.
+                      </p>
+                    </div>
+                  </div>
+                </section>
+              </div>
             </div>
           </div>
         </div>

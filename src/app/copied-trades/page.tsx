@@ -6,7 +6,7 @@ import { Navbar } from "@/components/navbar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Zap, Play, Square, Loader2, Info } from "lucide-react";
+import { Zap, Play, Square, Loader2, Info, Wallet } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export default function CopiedTrades() {
@@ -93,6 +93,8 @@ export default function CopiedTrades() {
     localStorage.setItem('user_balance', finalBalance.toString());
   };
 
+  const availableCapital = Math.max(0, balance + todayPnL);
+
   return (
     <div className="flex flex-col min-h-screen bg-[#0A0E0A] text-white font-body">
       <Navbar />
@@ -110,13 +112,25 @@ export default function CopiedTrades() {
           </p>
         </div>
 
-        <div className="space-y-6 bg-white/5 p-8 rounded-[2.5rem] border border-white/5 text-center shadow-2xl">
-          <p className="text-muted-foreground font-black text-xs uppercase tracking-[0.2em]">Today's PnL</p>
-          <div className={cn(
-            "text-7xl md:text-9xl font-black font-mono tracking-tighter transition-colors duration-75",
-            todayPnL >= 0 ? "text-[#22C55E]" : "text-red-500"
-          )}>
-            {todayPnL >= 0 ? "+" : ""}{todayPnL.toFixed(2)} USD
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-6 bg-white/5 p-8 rounded-[2rem] border border-white/5 text-center shadow-2xl">
+            <p className="text-muted-foreground font-black text-xs uppercase tracking-[0.2em]">Today's PnL</p>
+            <div className={cn(
+              "text-5xl font-black font-mono tracking-tighter transition-colors duration-75",
+              todayPnL >= 0 ? "text-[#22C55E]" : "text-red-500"
+            )}>
+              {todayPnL >= 0 ? "+" : ""}{todayPnL.toFixed(2)} USD
+            </div>
+          </div>
+
+          <div className="space-y-6 bg-white/5 p-8 rounded-[2rem] border border-white/5 text-center shadow-2xl flex flex-col justify-center">
+            <div className="flex items-center justify-center gap-2 mb-1">
+              <Wallet className="h-3 w-3 text-primary" />
+              <p className="text-muted-foreground font-black text-xs uppercase tracking-[0.2em]">Available Capital</p>
+            </div>
+            <div className="text-4xl font-black font-mono tracking-tighter text-white">
+              {availableCapital.toFixed(2)} USD
+            </div>
           </div>
         </div>
 
