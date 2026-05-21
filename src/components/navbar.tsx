@@ -1,4 +1,3 @@
-
 "use client";
 
 import Link from "next/link";
@@ -33,8 +32,8 @@ export function Navbar() {
   const { user } = useUser();
   const [isOpen, setIsOpen] = useState(false);
 
-  const userRef = useMemo(() => user?.uid || null, [user]);
-  const { data: userProfile } = useDoc(userRef as any);
+  const userRef = useMemo(() => user?.uid ? `users/${user.uid}` : null, [user]);
+  const { data: userProfile } = useDoc(userRef);
 
   const isAuthenticated = !!user;
 
@@ -109,19 +108,19 @@ export function Navbar() {
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <div className="flex items-center gap-3 cursor-pointer p-2 hover:bg-muted/50 rounded-xl transition-all">
-                      <Avatar className="h-10 w-10 border-2 border-primary/20">
+                      <Avatar className="h-10 w-10 border-2 border-primary/20 shadow-sm">
                         <AvatarFallback className="bg-primary text-white font-black text-xs uppercase">
                           {userProfile?.name?.slice(0, 2) || "JD"}
                         </AvatarFallback>
                       </Avatar>
                       <div className="flex flex-col items-start leading-none">
                         <span className="text-sm font-black text-black uppercase tracking-tight">{userProfile?.name || "User"}</span>
-                        <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">ID: {user?.uid?.slice(0, 8).toUpperCase() || "..."}</span>
+                        <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">ID: {user?.uid || "..."}</span>
                       </div>
                       <ChevronDown className="h-4 w-4 text-muted-foreground" />
                     </div>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-56 p-2 rounded-xl">
+                  <DropdownMenuContent align="end" className="w-56 p-2 rounded-xl border-none shadow-2xl">
                     <DropdownMenuLabel className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Account Details</DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     {userProfile?.role === 'admin' && (
@@ -185,7 +184,15 @@ export function Navbar() {
                 </>
               ) : (
                 <div className="flex flex-col gap-2 p-2 bg-muted/20 rounded-xl">
-                  <p className="text-[10px] font-black uppercase text-center text-muted-foreground py-2">ID: {user?.uid?.slice(0, 8).toUpperCase()}</p>
+                  <p className="text-[10px] font-black uppercase text-center text-muted-foreground py-2">ID: {user?.uid}</p>
+                  <div className="flex items-center gap-3 p-3 border-b border-muted/30">
+                     <Avatar className="h-10 w-10">
+                        <AvatarFallback className="bg-primary text-white font-black text-xs uppercase">
+                          {userProfile?.name?.slice(0, 2) || "JD"}
+                        </AvatarFallback>
+                      </Avatar>
+                      <p className="font-black uppercase text-sm text-black">{userProfile?.name}</p>
+                  </div>
                   {userProfile?.role === 'admin' && (
                     <Link href="/admin" className="w-full" onClick={() => setIsOpen(false)}>
                       <Button variant="ghost" className="w-full justify-start font-bold uppercase tracking-widest text-primary">

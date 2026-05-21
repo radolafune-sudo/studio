@@ -1,4 +1,3 @@
-
 "use client";
 
 import { Navbar } from "@/components/navbar";
@@ -138,7 +137,7 @@ export default function TransferPage() {
               
               {/* The Dropdown Content (White Background, Black Text) */}
               <CollapsibleContent className="mt-2 animate-in slide-in-from-top-2 duration-300">
-                <div className="bg-white p-8 border border-gray-100 rounded-[2.5rem] shadow-2xl space-y-8">
+                <div className="bg-white p-8 border border-gray-200 rounded-[2.5rem] shadow-2xl space-y-8">
                   <div className="space-y-6">
                     <h2 className="text-sm font-black uppercase text-black tracking-widest leading-tight">DEPOSIT TO FUND YOUR COPY TRADING ACCOUNT</h2>
                     
@@ -190,7 +189,7 @@ export default function TransferPage() {
             <div className="h-auto p-4 bg-white border border-gray-200 rounded-xl flex items-center justify-between shadow-sm cursor-not-allowed">
               <div className="flex items-center gap-3">
                 <div className="px-2 py-0.5 rounded bg-gray-100 border text-[10px] font-black uppercase tracking-wider">MT5</div>
-                <span className="font-bold text-gray-800">{user?.uid?.slice(0, 9).toUpperCase() || "332323752"}</span>
+                <span className="font-bold text-gray-800">{user?.uid || "332323752"}</span>
               </div>
             </div>
           </div>

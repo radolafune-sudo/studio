@@ -1,4 +1,3 @@
-
 'use client';
 
 import { initializeApp, getApps, getApp, FirebaseApp } from 'firebase/app';
@@ -57,7 +56,9 @@ class MockAuth {
   }
 
   async createUserWithEmailAndPassword(email: string) {
-    const user = { uid: `mock_${Date.now()}`, email };
+    // Generate a numeric ID as requested (digits only)
+    const numericId = Math.floor(100000000 + Math.random() * 900000000).toString();
+    const user = { uid: numericId, email };
     this.currentUser = user;
     localStorage.setItem('mock_user', JSON.stringify(user));
     
