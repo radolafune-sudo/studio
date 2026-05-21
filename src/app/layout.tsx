@@ -3,6 +3,7 @@ import type {Metadata} from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 import { FirebaseProvider } from "@/firebase/provider";
+import { SupportChat } from "@/components/support-chat";
 
 export const metadata: Metadata = {
   title: 'JUST MARKETS | Expert Copy Trading Platform',
@@ -24,6 +25,7 @@ export default function RootLayout({
       <body className="font-body antialiased min-h-screen bg-background">
         <FirebaseProvider>
           {children}
+          <SupportChat />
           <Toaster />
         </FirebaseProvider>
       </body>

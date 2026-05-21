@@ -6,14 +6,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { 
-  ArrowRightLeft, 
-  Bitcoin,
   Copy,
   Check,
-  Coins,
-  Globe,
   Wallet,
-  ChevronDown
+  ChevronDown,
+  Bitcoin,
+  CircleDollarSign,
+  TrendingUp,
+  Activity
 } from "lucide-react";
 import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
@@ -21,6 +21,15 @@ import { useToast } from "@/hooks/use-toast";
 import { useUser, useDoc, createDeposit } from "@/firebase";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { cn } from "@/lib/utils";
+import Image from "next/image";
+
+const CRYPTO_WALLETS = [
+  { name: "Crypto wallet (BTC)", icon: <Bitcoin className="h-5 w-5 text-[#F7931A]" />, symbol: "BTC" },
+  { name: "Crypto wallet (USDT TRC20)", icon: <CircleDollarSign className="h-5 w-5 text-[#26A17B]" />, symbol: "USDT" },
+  { name: "TRON (TRX)", icon: <TrendingUp className="h-5 w-5 text-[#FF0013]" />, symbol: "TRX" },
+  { name: "Ethereum (ETH)", icon: <Activity className="h-5 w-5 text-[#627EEA]" />, symbol: "ETH" },
+  { name: "USD Coin (USDC ERC20)", icon: <CircleDollarSign className="h-5 w-5 text-[#2775CA]" />, symbol: "USDC" }
+];
 
 export default function TransferPage() {
   const router = useRouter();
@@ -28,14 +37,13 @@ export default function TransferPage() {
   const [fundingOpen, setFundingOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const [transactionId, setTransactionId] = useState('');
-  const [depositAmount, setDepositAmount] = useState('');
+  const [depositAmount, setDepositAmount] = useState('25');
   const [copyTradeAmount, setCopyTradeAmount] = useState('');
   const { toast } = useToast();
   
   const userRef = useMemo(() => user?.uid ? `users/${user.uid}` : null, [user]);
   const { data: userProfile } = useDoc(userRef);
   
-  // Real-time wallet address from admin settings
   const { data: globalSettings } = useDoc('settings/global');
   const walletAddress = globalSettings?.walletAddress || '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa';
 
@@ -123,7 +131,6 @@ export default function TransferPage() {
       
       <main className="flex-1 container mx-auto px-4 py-8 max-w-xl">
         <div className="space-y-6">
-          {/* Available Capital - MOVED TO TOP */}
           <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex items-center justify-between">
             <div>
               <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Available Capital</p>
@@ -138,52 +145,58 @@ export default function TransferPage() {
             <Collapsible open={fundingOpen} onOpenChange={setFundingOpen} className="w-full">
               <CollapsibleTrigger asChild>
                 <button className={cn(
-                  "w-full h-auto p-5 bg-[#0A0A0A] border rounded-2xl flex items-center justify-between transition-all",
+                  "w-full h-auto p-5 bg-[#0A0A0A] border rounded-2xl flex items-center justify-between transition-all group",
                   fundingOpen ? "border-accent ring-1 ring-accent/30" : "border-gray-800"
                 )}>
-                  <div className="flex items-center gap-3">
-                    <div className="px-3 py-1 rounded bg-[#22C55E]/10 border border-[#22C55E]/20 text-[#22C55E] text-[11px] font-black tracking-tight uppercase">
-                      MT5
-                    </div>
-                    <span className="font-bold text-white text-lg">332323752</span>
+                  <div className="flex flex-col gap-2 w-full">
+                    {CRYPTO_WALLETS.map((wallet, idx) => (
+                      <div key={idx} className="flex items-center justify-between py-1 opacity-80 group-hover:opacity-100 transition-opacity">
+                        <div className="flex items-center gap-3">
+                          {wallet.icon}
+                          <span className="text-xs font-bold text-white uppercase tracking-tight">{wallet.name}</span>
+                        </div>
+                        <span className="text-[10px] font-mono text-gray-500">0.00 {wallet.symbol}</span>
+                      </div>
+                    ))}
                   </div>
-                  <ChevronDown className={cn("h-5 w-5 text-gray-500 transition-transform", fundingOpen && "rotate-180")} />
+                  <ChevronDown className={cn("h-5 w-5 text-gray-500 transition-transform ml-4 shrink-0", fundingOpen && "rotate-180")} />
                 </button>
               </CollapsibleTrigger>
               
               <CollapsibleContent className="mt-2 animate-in slide-in-from-top-2 duration-300">
-                <div className="bg-white p-6 border border-gray-100 rounded-2xl shadow-lg space-y-6">
-                  <div className="space-y-4">
-                    <p className="text-[12px] font-black uppercase text-blue-600 tracking-widest">DEPOSIT TO FUND YOUR COPY TRADING ACCOUNT</p>
-                    <p className="text-[10px] font-bold text-muted-foreground uppercase">copy the address below</p>
-                    <div className="flex items-center gap-3 bg-gray-50 p-3 rounded-lg border border-gray-100">
-                      <span className="flex-1 font-mono text-[10px] break-all text-gray-500">{walletAddress}</span>
-                      <button title="copy address" onClick={() => handleCopy(walletAddress)} className="p-2 hover:bg-gray-100 rounded-md transition-colors">
-                        {copied ? <Check className="h-4 w-4 text-green-600" /> : <Copy className="h-4 w-4" />}
+                <div className="bg-white p-8 border border-gray-100 rounded-[2rem] shadow-2xl space-y-8">
+                  <div className="space-y-4 text-center md:text-left">
+                    <h2 className="text-sm font-black uppercase text-black tracking-widest leading-tight">DEPOSIT TO FUND YOUR COPY TRADING ACCOUNT</h2>
+                    <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">copy the address below</p>
+                    
+                    <div className="flex items-center gap-3 bg-muted/20 p-4 rounded-xl border border-dashed border-muted">
+                      <span className="flex-1 font-mono text-[11px] break-all text-black font-bold">{walletAddress}</span>
+                      <button title="copy address" onClick={() => handleCopy(walletAddress)} className="p-3 bg-white hover:bg-muted/50 rounded-lg transition-colors shadow-sm">
+                        {copied ? <Check className="h-4 w-4 text-accent" /> : <Copy className="h-4 w-4 text-primary" />}
                       </button>
                     </div>
                     
-                    <div className="space-y-3 pt-4 border-t border-dashed">
-                      <div className="space-y-1">
-                         <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Amount</Label>
+                    <div className="grid grid-cols-1 gap-6 pt-6 border-t border-muted/30">
+                      <div className="space-y-2">
+                         <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Deposit Amount (USD)</Label>
                          <Input 
                           placeholder="25"
                           type="number"
-                          className="h-12 bg-white border-gray-200 text-lg font-bold"
+                          className="h-14 bg-muted/10 border-none text-xl font-black rounded-xl text-black"
                           value={depositAmount}
                           onChange={(e) => setDepositAmount(e.target.value)}
                         />
                       </div>
-                      <div className="space-y-1">
-                        <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Transaction ID</Label>
+                      <div className="space-y-2">
+                        <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Transaction ID / Hash</Label>
                         <Input 
                           placeholder="tyfugfigop"
-                          className="h-12 bg-white border-gray-200 font-mono"
+                          className="h-14 bg-muted/10 border-none font-mono text-black rounded-xl font-bold"
                           value={transactionId}
                           onChange={(e) => setTransactionId(e.target.value)}
                         />
                       </div>
-                      <Button onClick={handleSubmitVerification} className="w-full bg-blue-600 text-white font-black uppercase tracking-widest h-14 rounded-xl shadow-md mt-2">
+                      <Button onClick={handleSubmitVerification} className="w-full bg-primary text-white font-black uppercase tracking-widest h-16 rounded-2xl shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all">
                         Submit Verification
                       </Button>
                     </div>
@@ -203,7 +216,6 @@ export default function TransferPage() {
             </div>
           </div>
 
-          {/* New Custom Copy Trade Amount Section */}
           <div className="pt-8 space-y-4">
             <div className="space-y-2">
               <Label className="text-[11px] font-black uppercase tracking-widest text-primary ml-1">Enter amount to copy trade</Label>
@@ -227,7 +239,6 @@ export default function TransferPage() {
             </Button>
           </div>
 
-          {/* Footer Terms & FAQ - AT THE VERY BOTTOM */}
           <div className="space-y-8 border-t pt-8">
             <section className="space-y-2">
               <h3 className="font-black text-lg uppercase">Terms</h3>

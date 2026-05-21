@@ -23,7 +23,6 @@ import { firebaseConfig } from './config';
 
 export const isPlaceholder = !firebaseConfig.apiKey || firebaseConfig.apiKey === "AIzaSy..." || firebaseConfig.apiKey.includes("your-app");
 
-// Simple Event Emitter for Mock Reactivity
 class MockEmitter {
   private listeners: Record<string, ((data: any) => void)[]> = {};
   on(event: string, cb: any) {
@@ -40,7 +39,6 @@ class MockEmitter {
 
 export const mockEvents = new MockEmitter();
 
-// Simulated Security Layer (Local Persistence)
 class MockAuth {
   private listeners: ((user: any) => void)[] = [];
   currentUser: any = null;
@@ -63,7 +61,6 @@ class MockAuth {
     this.currentUser = user;
     localStorage.setItem('mock_user', JSON.stringify(user));
     
-    // Initialize user in mock DB
     const db = JSON.parse(localStorage.getItem('mock_db_users') || '{}');
     db[user.uid] = { 
       uid: user.uid, 
@@ -100,15 +97,13 @@ class MockAuth {
 
 class MockFirestore {
   async updateDoc(docPath: string, data: any) {
-    // Expects path like "users/uid" or "settings/global"
     const parts = docPath.split('/');
     const collectionName = parts[0];
     const docId = parts[1];
     
-    const db = JSON.parse(localStorage.getItem(`mock_db_${collectionName}`) || (collectionName === 'users' ? '{}' : (collectionName === 'settings' ? '{}' : '[]')));
+    const db = JSON.parse(localStorage.getItem(`mock_db_${collectionName}`) || (collectionName === 'users' || collectionName === 'settings' ? '{}' : '[]'));
     
     if (collectionName === 'users' || collectionName === 'settings') {
-      // Handle increment mock
       const updateData = { ...data };
       if (updateData.balance && typeof updateData.balance === 'object' && updateData.balance._methodName === 'increment') {
         const currentBalance = db[docId]?.balance || 0;
@@ -154,7 +149,6 @@ export function initializeFirebase() {
   return { app, auth: getAuth(app), firestore: getFirestore(app) };
 }
 
-// Unified Functional API
 export async function loginUser(email: string, pass: string) {
   if (isPlaceholder) return mockAuth.signInWithEmailAndPassword(email);
   const { auth } = initializeFirebase();
@@ -183,6 +177,13 @@ export async function createDeposit(data: any) {
   if (isPlaceholder) return mockFirestore.addDoc("deposits", data);
   const { firestore } = initializeFirebase();
   return firebaseAddDoc(collection(firestore, "deposits"), { ...data, timestamp: serverTimestamp() });
+}
+
+export async function sendSupportMessage(userId: string, text: string, isAdmin = false) {
+  const data = { userId, text, isAdmin, timestamp: new Date().toISOString() };
+  if (isPlaceholder) return mockFirestore.addDoc("support_messages", data);
+  const { firestore } = initializeFirebase();
+  return firebaseAddDoc(collection(firestore, "support_messages"), { ...data, timestamp: serverTimestamp() });
 }
 
 export { serverTimestamp, firebaseIncrement as increment };
