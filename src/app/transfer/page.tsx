@@ -10,7 +10,6 @@ import {
   Bitcoin,
   Coins,
   CircleDollarSign,
-  Zap,
   Copy,
   Check,
   SendHorizontal
@@ -22,7 +21,7 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
-} from "@/ui/select";
+} from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 
@@ -115,7 +114,7 @@ export default function TransferPage() {
             <div className="space-y-3">
               <Label className="text-muted-foreground font-black ml-1 uppercase text-[11px] tracking-[0.2em]">FROM YOUR FUNDING ACCOUNT</Label>
               <Select value={fundingAccount} onValueChange={setFundingAccount}>
-                <SelectTrigger className="h-auto p-5 bg-white border border-border rounded-xl flex items-center justify-between hover:bg-muted/50 transition-all shadow-sm ring-1 ring-primary/20 animate-pulse hover:animate-none">
+                <SelectTrigger className="h-auto p-5 bg-white border border-border rounded-xl flex items-center justify-between hover:bg-muted/50 transition-all shadow-sm ring-1 ring-primary/10 animate-pulse hover:animate-none">
                   <div className="flex items-center gap-4">
                     {selectedFunding?.type === 'MT5' ? (
                       <div className="px-3 py-1 rounded bg-primary/10 border border-primary/20 text-primary text-xs font-black uppercase tracking-wider">MT5</div>
@@ -128,7 +127,7 @@ export default function TransferPage() {
                       </span>
                     </div>
                   </div>
-                  <ChevronDown className="h-5 w-5 text-muted-foreground" />
+                  <ChevronDown className="h-5 w-5 text-muted-foreground hidden" />
                 </SelectTrigger>
                 <SelectContent>
                   {ACCOUNTS.map((acc) => (
