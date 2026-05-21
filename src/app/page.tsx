@@ -1,7 +1,7 @@
 
 import { Navbar } from "@/components/navbar";
 import { Button } from "@/components/ui/button";
-import { MessageCircle } from "lucide-react";
+import { MessageCircle, Activity, ShieldCheck, TrendingUp } from "lucide-react";
 import Link from "next/link";
 import { LiveChart } from "@/components/live-chart";
 
@@ -31,11 +31,31 @@ export default function Home() {
                   </Button>
                 </Link>
               </div>
+
+              <div className="flex flex-wrap justify-center lg:justify-start gap-8 pt-8 opacity-60">
+                <div className="flex items-center gap-2">
+                  <Activity className="h-5 w-5 text-primary" />
+                  <span className="text-[10px] font-black uppercase tracking-widest">Real-time execution</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <ShieldCheck className="h-5 w-5 text-accent" />
+                  <span className="text-[10px] font-black uppercase tracking-widest">Secured by JM Protocol</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <TrendingUp className="h-5 w-5 text-primary" />
+                  <span className="text-[10px] font-black uppercase tracking-widest">99.9% Success Metrics</span>
+                </div>
+              </div>
             </div>
 
-            <div className="flex-1 relative w-full flex justify-center lg:justify-end mt-12 lg:mt-0 min-h-[500px]">
+            <div className="flex-1 relative w-full flex flex-col items-center lg:items-end mt-12 lg:mt-0 min-h-[500px]">
               <div className="relative w-full max-w-[600px] h-[500px]">
                 <LiveChart />
+              </div>
+              <div className="mt-6 text-center lg:text-right max-w-[400px]">
+                <p className="text-[11px] font-black text-gray-400 uppercase tracking-[0.2em] leading-relaxed">
+                  Advanced wave analysis powered by JM algorithmic core. Green candles indicate positive market sentiment and bullish breakouts.
+                </p>
               </div>
             </div>
           </div>

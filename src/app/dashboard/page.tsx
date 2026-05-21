@@ -13,7 +13,8 @@ import {
   CheckCircle2,
   TrendingUp,
 } from "lucide-react";
-import Link from "next/link";
+import Link from "next/navigation";
+import NextLink from "next/link";
 import {
   Popover,
   PopoverContent,
@@ -31,15 +32,14 @@ export default function Dashboard() {
   const [hasNotification, setHasNotification] = useState(true);
   const [balance, setBalance] = useState(0);
   const [activeTraders, setActiveTraders] = useState([
-    { id: 1, name: "Alex Sterling", return: 42.5, success: 68 },
-    { id: 2, name: "Elena Vance", return: 112.8, success: 54 },
-    { id: 3, name: "Marcus Chen", return: 28.1, success: 72 },
+    { id: 1, name: "Alex Sterling", return: 42.5, success: 88.4 },
+    { id: 2, name: "Elena Vance", return: 112.8, success: 91.2 },
+    { id: 3, name: "Marcus Chen", return: 28.1, success: 85.7 },
   ]);
 
   useEffect(() => {
     setIsMounted(true);
     
-    // Check for 3-minute deposit updates
     const checkDeposit = () => {
       const pending = localStorage.getItem('pending_deposit');
       if (pending) {
@@ -60,24 +60,22 @@ export default function Dashboard() {
     };
 
     checkDeposit();
-    const depositInterval = setInterval(checkDeposit, 10000);
+    const depositInterval = setInterval(checkDeposit, 5000);
 
-    // Rotate trader names every minute
     const nameInterval = setInterval(() => {
-      setActiveTraders(prev => prev.map(t => ({
+      setActiveTraders(prev => prev.map((t, idx) => ({
         ...t,
-        name: TRADER_NAMES[Math.floor(Math.random() * TRADER_NAMES.length)]
+        name: idx < 3 ? t.name : TRADER_NAMES[Math.floor(Math.random() * TRADER_NAMES.length)]
       })));
     }, 60000);
 
-    // Live trader data movement
     const statsInterval = setInterval(() => {
       setActiveTraders(prev => prev.map(t => ({
         ...t,
-        return: t.return + (Math.random() > 0.5 ? 0.05 : -0.05),
-        success: Math.min(100, Math.max(40, t.success + (Math.random() > 0.5 ? 0.1 : -0.1)))
+        return: t.return + (Math.random() > 0.5 ? 0.02 : -0.01),
+        success: Math.min(99.9, Math.max(80, t.success + (Math.random() > 0.5 ? 0.05 : -0.05)))
       })));
-    }, 800);
+    }, 1000);
 
     return () => {
       clearInterval(depositInterval);
@@ -100,7 +98,7 @@ export default function Dashboard() {
                 <h3 className="text-black font-black text-2xl md:text-3xl tracking-tight leading-tight">
                   Ready to start today with <br /> a proven strategy?
                 </h3>
-                <p className="text-primary font-black uppercase text-xs tracking-[0.2em] mt-2">
+                <p className="text-black font-black uppercase text-xs tracking-[0.2em] mt-2">
                   CopyTrade Now!
                 </p>
               </div>
@@ -126,7 +124,7 @@ export default function Dashboard() {
           <CardContent className="p-8 md:p-12 space-y-8">
             <div className="flex justify-between items-center">
               <div className="w-12 h-12 bg-[#F1F3F9] rounded-full flex items-center justify-center font-bold text-[#4B5563] text-sm">
-                MT
+                JD
               </div>
               
               <div className="text-center">
@@ -170,18 +168,18 @@ export default function Dashboard() {
             </div>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
-              <Link href="/transfer" className="w-full sm:w-[220px]">
+              <NextLink href="/transfer" className="w-full sm:w-[220px]">
                 <Button className="w-full h-[64px] rounded-full bg-primary/10 hover:bg-primary/20 text-primary border-none flex items-center justify-center gap-3 font-bold text-lg shadow-sm">
                   <ArrowRightLeft className="h-5 w-5" />
                   Transfer
                 </Button>
-              </Link>
-              <Link href="/withdraw" className="w-full sm:w-[220px]">
+              </NextLink>
+              <NextLink href="/withdraw" className="w-full sm:w-[220px]">
                 <Button className="w-full h-[64px] rounded-full bg-accent hover:bg-accent/90 text-white flex items-center justify-center gap-3 font-bold text-lg border-none shadow-lg shadow-accent/20">
                   <ArrowUpRight className="h-5 w-5" />
                   Withdraw
                 </Button>
-              </Link>
+              </NextLink>
             </div>
           </CardContent>
         </Card>
@@ -192,11 +190,11 @@ export default function Dashboard() {
               <TrendingUp className="h-8 w-8 text-primary" />
               Active Copy Traders
             </h2>
-            <Link href="/traders">
+            <NextLink href="/traders">
               <Button variant="link" className="font-bold text-primary uppercase tracking-widest text-xs">
-                View All Markets
+                View Active Traders
               </Button>
-            </Link>
+            </NextLink>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

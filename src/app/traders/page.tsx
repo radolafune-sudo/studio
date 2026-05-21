@@ -18,31 +18,48 @@ import {
   Users
 } from "lucide-react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { useToast } from "@/hooks/use-toast";
 
 const INITIAL_TRADERS = [
-  { id: 1, name: "Alex Sterling", strategy: "Price Action Alpha", assets: ["Forex", "Stocks"], risk: 3, return: 42.5, successRate: 68, followers: 842, avatar: "https://picsum.photos/seed/t1/100/100" },
-  { id: 2, name: "Elena Vance", strategy: "Crypto Momentum", assets: ["Crypto", "Defi"], risk: 8, return: 112.8, successRate: 54, followers: 1250, avatar: "https://picsum.photos/seed/t2/100/100" },
-  { id: 3, name: "Marcus Chen", strategy: "Macro Swing", assets: ["Indices", "Commodities"], risk: 4, return: 28.1, successRate: 72, followers: 615, avatar: "https://picsum.photos/seed/t3/100/100" },
-  { id: 4, name: "Sarah Jenkins", strategy: "Dividend Dividend", assets: ["Blue Chip Stocks"], risk: 2, return: 14.2, successRate: 81, followers: 2100, avatar: "https://picsum.photos/seed/t4/100/100" },
-  { id: 5, name: "Julian Rosso", strategy: "Volatility Arbitrage", assets: ["Options", "Futures"], risk: 7, return: 65.4, successRate: 59, followers: 432, avatar: "https://picsum.photos/seed/t5/100/100" },
-  { id: 6, name: "The Quant Fund", strategy: "Algorithmic Scaling", assets: ["All Markets"], risk: 5, return: 38.9, successRate: 64, followers: 1560, avatar: "https://picsum.photos/seed/t6/100/100" }
+  { id: 1, name: "Alex Sterling", strategy: "Elite Scalp Master", assets: ["Forex", "XAUUSD"], risk: 2, return: 84.5, successRate: 92.4, followers: 12402, avatar: "https://picsum.photos/seed/t1/100/100" },
+  { id: 2, name: "Elena Vance", strategy: "Precision Alpha", assets: ["Indices", "BTC"], risk: 3, return: 112.8, successRate: 94.1, followers: 8560, avatar: "https://picsum.photos/seed/t2/100/100" },
+  { id: 3, name: "Marcus Chen", strategy: "Global Macro Growth", assets: ["Forex", "Oil"], risk: 2, return: 62.1, successRate: 89.7, followers: 4320, avatar: "https://picsum.photos/seed/t3/100/100" },
+  { id: 4, name: "Sarah Jenkins", strategy: "Dividend Safe Haven", assets: ["Stocks"], risk: 2, return: 14.2, successRate: 81.2, followers: 2100, avatar: "https://picsum.photos/seed/t4/100/100" },
+  { id: 5, name: "Julian Rosso", strategy: "Volatility Arb", assets: ["Options"], risk: 7, return: 65.4, successRate: 59.8, followers: 432, avatar: "https://picsum.photos/seed/t5/100/100" },
+  { id: 6, name: "The Quant Fund", strategy: "Algo Scaling", assets: ["All Markets"], risk: 5, return: 38.9, successRate: 64.2, followers: 1560, avatar: "https://picsum.photos/seed/t6/100/100" }
 ];
 
 export default function TraderDiscovery() {
   const [traders, setTraders] = useState(INITIAL_TRADERS);
+  const router = useRouter();
+  const { toast } = useToast();
 
   useEffect(() => {
     const statsInterval = setInterval(() => {
       setTraders(prev => prev.map(t => ({
         ...t,
-        return: t.return + (Math.random() > 0.5 ? 0.01 : -0.01),
-        successRate: Math.min(100, Math.max(0, t.successRate + (Math.random() > 0.5 ? 0.1 : -0.1))),
-        followers: t.followers + (Math.random() > 0.95 ? 1 : Math.random() < 0.05 ? -1 : 0)
+        return: t.return + (Math.random() > 0.5 ? 0.01 : -0.005),
+        successRate: Math.min(99.9, Math.max(50, t.successRate + (Math.random() > 0.5 ? 0.02 : -0.02))),
+        followers: t.followers + (Math.random() > 0.95 ? 1 : 0)
       })));
-    }, 400);
+    }, 1000);
 
     return () => clearInterval(statsInterval);
   }, []);
+
+  const handleCopyAction = () => {
+    const balance = Number(localStorage.getItem('user_balance') || '0');
+    if (balance <= 0) {
+      toast({
+        title: "Account Empty",
+        description: "Please fund your account to start copying professional traders.",
+      });
+      router.push('/transfer');
+    } else {
+      router.push('/copied-trades');
+    }
+  };
 
   return (
     <div className="flex flex-col min-h-screen bg-background font-body">
@@ -50,7 +67,7 @@ export default function TraderDiscovery() {
       
       <main className="container mx-auto px-4 py-8 md:py-12">
         <header className="mb-10 text-center md:text-left">
-          <h1 className="text-4xl font-black uppercase tracking-tight mb-2">Discover Master Traders</h1>
+          <h1 className="text-4xl font-black uppercase tracking-tight mb-2 text-foreground">Discover Master Traders</h1>
           <p className="text-muted-foreground font-medium">Browse top performers and start copying their successful strategies.</p>
         </header>
 
@@ -128,10 +145,10 @@ export default function TraderDiscovery() {
                 </div>
               </CardContent>
               <CardFooter className="pt-0 pb-8 px-6 flex gap-3">
-                <Button className="flex-1 h-14 bg-accent hover:bg-accent/90 text-white font-black uppercase tracking-widest rounded-2xl shadow-lg shadow-accent/20 border-none">
+                <Button onClick={handleCopyAction} className="flex-1 h-14 bg-accent hover:bg-accent/90 text-white font-black uppercase tracking-widest rounded-2xl shadow-lg shadow-accent/20 border-none">
                   Copy Trader
                 </Button>
-                <Button variant="outline" size="icon" className="h-14 w-14 shrink-0 rounded-2xl border-none bg-[#F8FAFC] hover:bg-muted text-muted-foreground shadow-sm">
+                <Button variant="outline" size="icon" onClick={handleCopyAction} className="h-14 w-14 shrink-0 rounded-2xl border-none bg-[#F8FAFC] hover:bg-muted text-muted-foreground shadow-sm">
                   <ArrowUpRight className="h-5 w-5" />
                 </Button>
               </CardFooter>
