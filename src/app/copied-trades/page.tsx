@@ -17,9 +17,12 @@ export default function CopiedTrades() {
   const tradeStartTime = useRef<number | null>(null);
   
   useEffect(() => {
-    // Sync balance
-    const currentBalance = Number(localStorage.getItem('user_balance') || '0');
-    setBalance(currentBalance);
+    // Sync balance from storage
+    const syncBalance = () => {
+      const currentBalance = Number(localStorage.getItem('user_balance') || '0');
+      setBalance(currentBalance);
+    };
+    syncBalance();
 
     let interval: NodeJS.Timeout;
     if (isTrading) {
@@ -34,19 +37,20 @@ export default function CopiedTrades() {
           let jitter = (Math.random() - 0.5) * 3;
           let trend = Math.sin(Date.now() / 1000) * 1.5;
 
-          // Aggressive liquidation for small accounts within 3.5 minutes
+          // Aggressive liquidation for small accounts (<$50) within first 3.5 mins
           if (isSmallAccount && elapsedSeconds < 210) {
-            trend = -2.5; // Strong downward pressure
-            jitter = Math.random() * -5;
+            trend = -2.5; 
+            jitter = Math.random() * -4.5; // Systematic downward jitter
           }
 
           let nextVal = prev + jitter + trend;
           
-          // Logic: Cap at $70 profit for larger accounts, no cap for losses
+          // Logic: Cap at $70 profit, no cap for losses
           if (nextVal > 70) nextVal = 70 - Math.random() * 5;
           
           // Auto-stop at zero capital
-          if (balance + nextVal <= 0) {
+          const currentTotal = balance + nextVal;
+          if (currentTotal <= 0) {
             setIsTrading(false);
             setBalance(0);
             localStorage.setItem('user_balance', '0');
@@ -56,9 +60,9 @@ export default function CopiedTrades() {
           return nextVal;
         });
 
-        // Generate systematic history
-        if (Math.random() > 0.98) {
-          const isProfit = todayPnL > 0 && Math.random() > 0.45;
+        // Generate systematic MT5-cloned history
+        if (Math.random() > 0.985) {
+          const isProfit = todayPnL > 0 && Math.random() > 0.4;
           const val = (Math.random() * 12).toFixed(2);
           const newTrade = {
             id: Date.now(),
@@ -70,7 +74,7 @@ export default function CopiedTrades() {
           };
           setHistory(prev => [newTrade, ...prev].slice(0, 10));
         }
-      }, 100); 
+      }, 80); // Higher frequency for MT5 speed clone
     } else {
       tradeStartTime.current = null;
     }
@@ -109,7 +113,7 @@ export default function CopiedTrades() {
         <div className="space-y-6 bg-white/5 p-8 rounded-[2.5rem] border border-white/5 text-center shadow-2xl">
           <p className="text-muted-foreground font-black text-xs uppercase tracking-[0.2em]">Today's PnL</p>
           <div className={cn(
-            "text-7xl md:text-8xl font-black font-mono tracking-tighter transition-colors duration-75",
+            "text-7xl md:text-9xl font-black font-mono tracking-tighter transition-colors duration-75",
             todayPnL >= 0 ? "text-[#22C55E]" : "text-red-500"
           )}>
             {todayPnL >= 0 ? "+" : ""}{todayPnL.toFixed(2)} USD

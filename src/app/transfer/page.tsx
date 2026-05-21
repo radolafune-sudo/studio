@@ -28,11 +28,11 @@ import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 
 const CRYPTO_ACCOUNTS = [
-  { id: 'btc', name: 'Crypto wallet (BTC)', sub: '0.00 BTC', icon: Bitcoin, address: '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa' },
-  { id: 'usdt_trc20', name: 'Crypto wallet (USDT TRC20)', sub: '0.00 USDT', icon: Coins, address: 'TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t' },
-  { id: 'trx', name: 'TRON (TRX)', sub: '0.00 TRX', icon: Globe, address: 'T9yD63u1pYj9S9WfS7tG8S1S1S1S1S1S1S' },
-  { id: 'eth', name: 'Ethereum (ETH)', sub: '0.00 ETH', icon: Wallet, address: '0x742d35Cc6634C0532925a3b844Bc454e4438f44e' },
-  { id: 'usdc_erc20', name: 'USD Coin (USDC ERC20)', sub: '0.00 USDC', icon: Coins, address: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48' },
+  { id: 'btc', name: 'Crypto wallet (BTC)', sub: 'BTC', icon: Bitcoin, color: '#F7931A', address: '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa' },
+  { id: 'usdt_trc20', name: 'Crypto wallet (USDT TRC20)', sub: 'USDT', icon: Coins, color: '#26A17B', address: 'TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t' },
+  { id: 'trx', name: 'TRON (TRX)', sub: 'TRX', icon: Globe, color: '#FF0013', address: 'T9yD63u1pYj9S9WfS7tG8S1S1S1S1S1S1S' },
+  { id: 'eth', name: 'Ethereum (ETH)', sub: 'ETH', icon: Wallet, color: '#627EEA', address: '0x742d35Cc6634C0532925a3b844Bc454e4438f44e' },
+  { id: 'usdc_erc20', name: 'USD Coin (USDC ERC20)', sub: 'USDC', icon: Coins, color: '#2775CA', address: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48' },
 ];
 
 export default function TransferPage() {
@@ -41,11 +41,9 @@ export default function TransferPage() {
   const [copied, setCopied] = useState(false);
   const [transactionId, setTransactionId] = useState('');
   const [amount, setAmount] = useState('');
-  const [isVerifying, setIsVerifying] = useState(false);
   const [balance, setBalance] = useState(0);
   const { toast } = useToast();
   
-  const amountRef = useRef<HTMLDivElement>(null);
   const selectedFunding = CRYPTO_ACCOUNTS.find(a => a.id === fundingAccount);
 
   useEffect(() => {
@@ -67,24 +65,6 @@ export default function TransferPage() {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const handleInitialSubmit = () => {
-    if (!transactionId) {
-      toast({
-        variant: "destructive",
-        title: "Missing Transaction ID",
-        description: "Please provide the Transaction ID for verification.",
-      });
-      return;
-    }
-    
-    amountRef.current?.scrollIntoView({ behavior: 'smooth' });
-    setIsVerifying(true);
-    toast({
-      title: "ID Submitted",
-      description: "Please specify the amount to be credited to your account.",
-    });
-  };
-
   const handleSubmitTransfer = () => {
     const numAmount = Number(amount);
     if (!numAmount || numAmount <= 0) {
@@ -96,15 +76,15 @@ export default function TransferPage() {
       return;
     }
 
-    if (numAmount < 25) {
+    if (!transactionId) {
       toast({
         variant: "destructive",
-        title: "Minimum Copy Trade",
-        description: "The minimum amount to start copy trading is $25.",
+        title: "Missing Transaction ID",
+        description: "Please provide the Transaction ID for verification.",
       });
       return;
     }
-    
+
     localStorage.setItem('pending_deposit', JSON.stringify({
       amount: numAmount,
       timestamp: Date.now()
@@ -115,7 +95,6 @@ export default function TransferPage() {
       description: "Your deposit will reflect in your dashboard in 3 minutes.",
     });
     
-    setIsVerifying(false);
     setTransactionId('');
     setAmount('');
   };
@@ -141,7 +120,7 @@ export default function TransferPage() {
           <div className="space-y-6">
             <div className="space-y-1.5">
               <Label className="text-sm font-bold text-gray-600">Payment method</Label>
-              <div className="flex items-center justify-between p-4 bg-white border border-green-500/30 rounded-xl shadow-sm">
+              <div className="flex items-center justify-between p-4 bg-white border border-gray-100 rounded-xl shadow-sm">
                 <div className="flex items-center gap-3">
                   <div className="bg-black text-white p-1 rounded-full">
                     <ArrowRightLeft className="h-4 w-4 rotate-90" />
@@ -154,9 +133,9 @@ export default function TransferPage() {
             <div className="space-y-1.5">
               <Label className="text-sm font-bold text-gray-600">From account</Label>
               <Select value={fundingAccount} onValueChange={setFundingAccount}>
-                <SelectTrigger className="h-auto p-4 bg-white border border-green-500/30 rounded-xl flex items-center justify-between hover:bg-muted/10 transition-all shadow-sm">
+                <SelectTrigger className="h-auto p-4 bg-white border border-green-500/30 rounded-xl flex items-center justify-between hover:bg-muted/10 transition-all shadow-sm animate-pulse shadow-[0_0_15px_rgba(34,197,94,0.1)]">
                   <div className="flex items-center gap-3">
-                    {selectedFunding?.icon && <selectedFunding.icon className="h-5 w-5 text-primary" />}
+                    {selectedFunding?.icon && <selectedFunding.icon className="h-5 w-5" style={{ color: selectedFunding.color }} />}
                     <span className="font-bold text-gray-800">{selectedFunding?.name}</span>
                   </div>
                   <ChevronDown className="h-4 w-4 text-gray-400" />
@@ -166,7 +145,7 @@ export default function TransferPage() {
                     <SelectItem key={acc.id} value={acc.id} className="cursor-pointer py-3">
                       <div className="flex items-center justify-between w-full gap-8">
                         <div className="flex items-center gap-3">
-                          {acc.icon && <acc.icon className="h-4 w-4 text-primary" />}
+                          {acc.icon && <acc.icon className="h-4 w-4" style={{ color: acc.color }} />}
                           <span className="font-bold text-sm">{acc.name}</span>
                         </div>
                         <span className="text-[10px] font-mono text-gray-400">{acc.sub}</span>
@@ -184,13 +163,10 @@ export default function TransferPage() {
                   <div className="px-2 py-0.5 rounded bg-gray-100 border text-[10px] font-black uppercase tracking-wider">MT5</div>
                   <span className="font-bold text-gray-800">332323752</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-bold text-gray-500">0.00 USD</span>
-                </div>
               </div>
             </div>
 
-            <div className="mt-4 p-5 bg-white border border-blue-500/20 rounded-xl shadow-sm space-y-4 animate-in fade-in slide-in-from-top-2">
+            <div className="mt-4 p-5 bg-white border border-blue-500/20 rounded-xl shadow-sm space-y-4">
               <p className="text-[10px] font-black uppercase text-blue-600 tracking-widest">Deposit Crypto to Fund</p>
               <div className="flex items-center gap-3 bg-gray-50 p-3 rounded-lg border border-gray-100">
                 <span className="flex-1 font-mono text-[10px] break-all text-gray-500">{selectedFunding?.address}</span>
@@ -198,41 +174,31 @@ export default function TransferPage() {
                   {copied ? <Check className="h-4 w-4 text-green-600" /> : <Copy className="h-4 w-4" />}
                 </Button>
               </div>
-              <div className="space-y-2">
-                <Input 
-                  placeholder="Transaction ID"
-                  className="h-11 bg-white border-gray-200"
-                  value={transactionId}
-                  onChange={(e) => setTransactionId(e.target.value)}
-                />
-                <Button onClick={handleInitialSubmit} className="w-full bg-blue-600 text-white font-bold h-11">
-                  Verify Deposit
+              <div className="space-y-3">
+                <div className="space-y-1">
+                   <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Amount to deposit</Label>
+                   <Input 
+                    placeholder="0.00"
+                    type="number"
+                    className="h-11 bg-white border-gray-200"
+                    value={amount}
+                    onChange={(e) => setAmount(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Transaction ID</Label>
+                  <Input 
+                    placeholder="Transaction ID"
+                    className="h-11 bg-white border-gray-200"
+                    value={transactionId}
+                    onChange={(e) => setTransactionId(e.target.value)}
+                  />
+                </div>
+                <Button onClick={handleSubmitTransfer} className="w-full bg-blue-600 text-white font-bold h-11 rounded-xl">
+                  Submit Verification
                 </Button>
               </div>
             </div>
-
-            <div className="space-y-1.5" ref={amountRef}>
-              <Label className="text-sm font-bold text-gray-600">Amount</Label>
-              <div className="relative">
-                <Input 
-                  className="h-14 bg-white border-green-500/30 text-xl font-bold pr-14" 
-                  placeholder="0.00"
-                  type="number"
-                  value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
-                />
-                <div className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold text-sm">USD</div>
-              </div>
-              <p className="text-[10px] font-bold text-blue-600">0.01 USD - 0.00 USD (Reflecting Limit)</p>
-            </div>
-
-            <Button 
-              disabled={!amount || Number(amount) < 25}
-              onClick={handleSubmitTransfer}
-              className="w-full h-14 bg-gray-100 text-gray-400 font-bold text-lg rounded-xl hover:bg-blue-600 hover:text-white transition-all disabled:opacity-50"
-            >
-              Continue
-            </Button>
 
             <div className="pt-8 space-y-6">
               <section className="space-y-2">
@@ -249,7 +215,7 @@ export default function TransferPage() {
                   <div className="space-y-1">
                     <p className="text-sm font-bold text-gray-800">General transfer rules</p>
                     <p className="text-xs text-gray-500 leading-relaxed">
-                      Funds are debited from the source account and credited to the destination account after a successful transfer.
+                      Funds are debited from the source account and credited to the destination account after a successful transfer. Minimum copy trade amount is $25.
                     </p>
                   </div>
                 </div>
