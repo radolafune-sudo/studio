@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from "react";
@@ -6,28 +7,61 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
-} from "@/components/ui/select";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Globe, Phone, Lock, Mail, UserPlus, Eye, EyeOff } from "lucide-react";
+import { Lock, Mail, UserPlus, Eye, EyeOff, Globe, Phone } from "lucide-react";
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { doc, setDoc } from "firebase/firestore";
+import { useAuth, useFirestore } from "@/firebase/provider";
+import { useToast } from "@/hooks/use-toast";
 
 export default function Register() {
   const router = useRouter();
+  const auth = useAuth();
+  const db = useFirestore();
+  const { toast } = useToast();
+  
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+    name: "",
+    countryCode: "",
+    phone: ""
+  });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!auth || !db) return;
+    
     setLoading(true);
-    setTimeout(() => {
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
+      const user = userCredential.user;
+      
+      // Create user profile in Firestore
+      await setDoc(doc(db, "users", user.uid), {
+        email: formData.email,
+        name: formData.name || formData.email.split('@')[0],
+        balance: 0,
+        role: "user",
+        countryCode: formData.countryCode,
+        phone: formData.phone,
+        createdAt: new Date().toISOString()
+      });
+      
       router.push('/dashboard');
-    }, 1500);
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Registration Failed",
+        description: error.message || "Could not create account.",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -42,7 +76,10 @@ export default function Register() {
             </div>
             <CardTitle className="text-3xl font-black uppercase tracking-tight">Create Account</CardTitle>
             <div className="flex flex-col leading-none opacity-80">
-              <span className="text-lg font-bold uppercase">Just Markets</span>
+              <div className="flex items-center justify-center gap-1">
+                <div className="bg-white w-4 h-4 rounded-sm flex items-center justify-center text-primary font-black text-[8px]">JM</div>
+                <span className="text-lg font-bold uppercase">Just Markets</span>
+              </div>
               <span className="text-[8px] font-black uppercase tracking-[0.2em] mt-1">Copy Trading Platform</span>
             </div>
           </CardHeader>
@@ -52,7 +89,14 @@ export default function Register() {
               <div className="space-y-2">
                 <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Email Address</Label>
                 <div className="relative">
-                  <Input required type="email" placeholder="name@example.com" className="h-12 pl-10 bg-secondary/30 border-none focus-visible:ring-primary font-medium" />
+                  <Input 
+                    required 
+                    type="email" 
+                    value={formData.email}
+                    onChange={(e) => setFormData({...formData, email: e.target.value})}
+                    placeholder="name@example.com" 
+                    className="h-12 pl-10 bg-secondary/30 border-none focus-visible:ring-primary font-medium" 
+                  />
                   <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 </div>
               </div>
@@ -61,30 +105,31 @@ export default function Register() {
                 <div className="space-y-2">
                   <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Country Code</Label>
                   <div className="relative">
-                    <Input required type="text" placeholder="+1" className="h-12 pl-10 bg-secondary/30 border-none focus-visible:ring-primary font-medium" />
+                    <Input 
+                      required 
+                      type="text" 
+                      value={formData.countryCode}
+                      onChange={(e) => setFormData({...formData, countryCode: e.target.value})}
+                      placeholder="+1" 
+                      className="h-12 pl-10 bg-secondary/30 border-none focus-visible:ring-primary font-medium" 
+                    />
                     <Globe className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground z-10" />
                   </div>
                 </div>
                 <div className="space-y-2">
                   <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Phone Number</Label>
                   <div className="relative">
-                    <Input required type="tel" placeholder="000 000 000" className="h-12 pl-10 bg-secondary/30 border-none focus-visible:ring-primary font-medium" />
+                    <Input 
+                      required 
+                      type="tel" 
+                      value={formData.phone}
+                      onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                      placeholder="000 000 000" 
+                      className="h-12 pl-10 bg-secondary/30 border-none focus-visible:ring-primary font-medium" 
+                    />
                     <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   </div>
                 </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Trading Mode</Label>
-                <Select defaultValue="copy">
-                  <SelectTrigger className="h-12 bg-secondary/30 border-none focus-visible:ring-primary font-bold">
-                    <SelectValue placeholder="Select Trading Mode" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="copy" className="font-bold">Copy Trading</SelectItem>
-                    <SelectItem value="manual" className="font-bold">Manual Trading</SelectItem>
-                  </SelectContent>
-                </Select>
               </div>
 
               <div className="space-y-2">
@@ -93,6 +138,8 @@ export default function Register() {
                   <Input 
                     required 
                     type={showPassword ? "text" : "password"} 
+                    value={formData.password}
+                    onChange={(e) => setFormData({...formData, password: e.target.value})}
                     placeholder="••••••••" 
                     className="h-12 pl-10 pr-10 bg-secondary/30 border-none focus-visible:ring-primary font-medium" 
                   />

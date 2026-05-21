@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Navbar } from "@/components/navbar";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -13,13 +13,15 @@ import {
   CheckCircle2,
   TrendingUp,
 } from "lucide-react";
-import Link from "next/navigation";
 import NextLink from "next/link";
+import { useRouter } from "next/navigation";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { useUser, useFirestore, useDoc } from "@/firebase";
+import { doc, updateDoc, increment } from "firebase/firestore";
 
 const TRADER_NAMES = [
   "Alex Sterling", "Elena Vance", "Marcus Chen", "Sarah Jenkins", 
@@ -28,9 +30,18 @@ const TRADER_NAMES = [
 ];
 
 export default function Dashboard() {
-  const [isMounted, setIsMounted] = useState(false);
+  const router = useRouter();
+  const { user, loading: authLoading } = useUser();
+  const db = useFirestore();
+  
+  const userRef = useMemo(() => {
+    if (!db || !user) return null;
+    return doc(db, "users", user.uid);
+  }, [db, user]);
+  
+  const { data: userProfile, loading: profileLoading } = useDoc(userRef);
+  
   const [hasNotification, setHasNotification] = useState(true);
-  const [balance, setBalance] = useState(0);
   const [activeTraders, setActiveTraders] = useState([
     { id: 1, name: "Alex Sterling", return: 42.5, success: 88.4 },
     { id: 2, name: "Elena Vance", return: 112.8, success: 91.2 },
@@ -38,30 +49,33 @@ export default function Dashboard() {
   ]);
 
   useEffect(() => {
-    setIsMounted(true);
-    
-    const checkDeposit = () => {
-      const pending = localStorage.getItem('pending_deposit');
-      if (pending) {
-        const { amount, timestamp } = JSON.parse(pending);
+    if (!authLoading && !user) {
+      router.push('/login');
+    }
+  }, [user, authLoading, router]);
+
+  useEffect(() => {
+    if (!user || !db) return;
+
+    const checkDeposit = async () => {
+      const pendingStr = localStorage.getItem(`pending_deposit_${user.uid}`);
+      if (pendingStr) {
+        const { amount, timestamp } = JSON.parse(pendingStr);
         const now = Date.now();
         const threeMinutes = 3 * 60 * 1000;
         
         if (now - timestamp >= threeMinutes) {
-          const currentBalance = Number(localStorage.getItem('user_balance') || '0');
-          const newBalance = currentBalance + Number(amount);
-          localStorage.setItem('user_balance', newBalance.toString());
-          localStorage.removeItem('pending_deposit');
-          setBalance(newBalance);
+          // Update balance in Firestore
+          await updateDoc(doc(db, "users", user.uid), {
+            balance: increment(Number(amount))
+          });
+          localStorage.removeItem(`pending_deposit_${user.uid}`);
         }
-      } else {
-        setBalance(Number(localStorage.getItem('user_balance') || '0'));
       }
     };
 
-    checkDeposit();
     const depositInterval = setInterval(checkDeposit, 5000);
-
+    
     const nameInterval = setInterval(() => {
       setActiveTraders(prev => prev.map((t, idx) => ({
         ...t,
@@ -82,9 +96,17 @@ export default function Dashboard() {
       clearInterval(nameInterval);
       clearInterval(statsInterval);
     };
-  }, []);
+  }, [user, db]);
 
-  if (!isMounted) return null;
+  if (authLoading || profileLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-background">
+        <Activity className="h-8 w-8 text-primary animate-spin" />
+      </div>
+    );
+  }
+
+  if (!user) return null;
 
   return (
     <div className="flex flex-col min-h-screen bg-background font-body">
@@ -123,14 +145,14 @@ export default function Dashboard() {
         <Card className="bg-white text-foreground border-none shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden rounded-[2.5rem]">
           <CardContent className="p-8 md:p-12 space-y-8">
             <div className="flex justify-between items-center">
-              <div className="w-12 h-12 bg-[#F1F3F9] rounded-full flex items-center justify-center font-bold text-[#4B5563] text-sm">
-                JD
+              <div className="w-12 h-12 bg-[#F1F3F9] rounded-full flex items-center justify-center font-bold text-[#4B5563] text-sm uppercase">
+                {userProfile?.name?.slice(0, 2) || "JD"}
               </div>
               
               <div className="text-center">
                 <div className="flex items-start justify-center text-[#1F2937]">
                   <span className="text-2xl font-medium mt-2 mr-1 opacity-50">$</span>
-                  <span className="text-7xl font-bold tracking-tight">{balance.toFixed(2)}</span>
+                  <span className="text-7xl font-bold tracking-tight">{(userProfile?.balance || 0).toFixed(2)}</span>
                 </div>
                 <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-[0.2em] mt-3">Total Funds</p>
               </div>

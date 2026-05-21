@@ -2,7 +2,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { 
   Menu,
@@ -14,7 +14,7 @@ import {
   ChevronDown,
   ShieldAlert
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { cn } from "@/lib/utils";
 import {
   DropdownMenu,
@@ -25,13 +25,33 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { useUser, useAuth, useFirestore, useDoc } from "@/firebase";
+import { signOut } from "firebase/auth";
+import { doc } from "firebase/firestore";
 
 export function Navbar() {
   const pathname = usePathname();
+  const router = useRouter();
+  const { user } = useUser();
+  const auth = useAuth();
+  const db = useFirestore();
   const [isOpen, setIsOpen] = useState(false);
 
-  // Check if we are on an authenticated page
-  const isAuthenticated = pathname?.startsWith('/dashboard') || pathname?.startsWith('/transfer') || pathname?.startsWith('/copied-trades') || pathname?.startsWith('/admin');
+  const userRef = useMemo(() => {
+    if (!db || !user) return null;
+    return doc(db, "users", user.uid);
+  }, [db, user]);
+  
+  const { data: userProfile } = useDoc(userRef);
+
+  const isAuthenticated = !!user;
+
+  const handleLogout = async () => {
+    if (auth) {
+      await signOut(auth);
+      router.push('/');
+    }
+  };
 
   const navItems = [
     { name: "TRADING", href: isAuthenticated ? "/dashboard" : "/login" },
@@ -100,11 +120,13 @@ export function Navbar() {
                   <DropdownMenuTrigger asChild>
                     <div className="flex items-center gap-3 cursor-pointer p-2 hover:bg-muted/50 rounded-xl transition-all">
                       <Avatar className="h-10 w-10 border-2 border-primary/20">
-                        <AvatarFallback className="bg-primary text-white font-black text-xs">JD</AvatarFallback>
+                        <AvatarFallback className="bg-primary text-white font-black text-xs uppercase">
+                          {userProfile?.name?.slice(0, 2) || "JD"}
+                        </AvatarFallback>
                       </Avatar>
                       <div className="flex flex-col items-start leading-none">
-                        <span className="text-sm font-black text-black uppercase tracking-tight">John Doe</span>
-                        <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">ID: 699478516</span>
+                        <span className="text-sm font-black text-black uppercase tracking-tight">{userProfile?.name || "User"}</span>
+                        <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">ID: {user?.uid?.slice(0, 8).toUpperCase() || "..."}</span>
                       </div>
                       <ChevronDown className="h-4 w-4 text-muted-foreground" />
                     </div>
@@ -112,22 +134,22 @@ export function Navbar() {
                   <DropdownMenuContent align="end" className="w-56 p-2 rounded-xl">
                     <DropdownMenuLabel className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Account Details</DropdownMenuLabel>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem asChild>
-                      <Link href="/admin" className="py-3 rounded-lg font-bold text-sm cursor-pointer text-primary">
-                        <ShieldAlert className="mr-2 h-4 w-4" />
-                        Admin Panel
-                      </Link>
-                    </DropdownMenuItem>
+                    {userProfile?.role === 'admin' && (
+                      <DropdownMenuItem asChild>
+                        <Link href="/admin" className="py-3 rounded-lg font-bold text-sm cursor-pointer text-primary">
+                          <ShieldAlert className="mr-2 h-4 w-4" />
+                          Admin Panel
+                        </Link>
+                      </DropdownMenuItem>
+                    )}
                     <DropdownMenuItem className="py-3 rounded-lg font-bold text-sm cursor-pointer">
                       <Settings className="mr-2 h-4 w-4" />
                       Settings
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem asChild>
-                      <Link href="/" className="py-3 rounded-lg font-bold text-sm cursor-pointer text-destructive focus:text-destructive">
-                        <LogOut className="mr-2 h-4 w-4" />
-                        Log Out
-                      </Link>
+                    <DropdownMenuItem onClick={handleLogout} className="py-3 rounded-lg font-bold text-sm cursor-pointer text-destructive focus:text-destructive">
+                      <LogOut className="mr-2 h-4 w-4" />
+                      Log Out
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -173,17 +195,17 @@ export function Navbar() {
                 </>
               ) : (
                 <div className="flex flex-col gap-2 p-2 bg-muted/20 rounded-xl">
-                  <p className="text-[10px] font-black uppercase text-center text-muted-foreground py-2">Account: 699478516</p>
-                  <Link href="/admin" className="w-full" onClick={() => setIsOpen(false)}>
-                    <Button variant="ghost" className="w-full justify-start font-bold uppercase tracking-widest text-primary">
-                      <ShieldAlert className="h-4 w-4 mr-2" />
-                      Admin Panel
-                    </Button>
-                  </Link>
+                  <p className="text-[10px] font-black uppercase text-center text-muted-foreground py-2">ID: {user?.uid?.slice(0, 8).toUpperCase()}</p>
+                  {userProfile?.role === 'admin' && (
+                    <Link href="/admin" className="w-full" onClick={() => setIsOpen(false)}>
+                      <Button variant="ghost" className="w-full justify-start font-bold uppercase tracking-widest text-primary">
+                        <ShieldAlert className="h-4 w-4 mr-2" />
+                        Admin Panel
+                      </Button>
+                    </Link>
+                  )}
                   <Button variant="ghost" className="w-full justify-start font-bold uppercase tracking-widest text-black">Settings</Button>
-                  <Link href="/" className="w-full" onClick={() => setIsOpen(false)}>
-                    <Button variant="destructive" className="w-full font-bold uppercase tracking-widest">Log Out</Button>
-                  </Link>
+                  <Button onClick={handleLogout} variant="destructive" className="w-full font-bold uppercase tracking-widest">Log Out</Button>
                 </div>
               )}
             </div>
