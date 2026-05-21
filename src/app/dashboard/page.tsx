@@ -20,7 +20,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { useUser, useDoc, updateUserProfile, increment } from "@/firebase";
+import { useUser, useDoc, useCollection } from "@/firebase";
 
 const TRADER_NAMES = [
   "Alex Sterling", "Elena Vance", "Marcus Chen", "Sarah Jenkins", 
@@ -34,7 +34,11 @@ export default function Dashboard() {
   const userPath = user ? `users/${user.uid}` : null;
   const { data: userProfile, loading: profileLoading } = useDoc(userPath);
   
-  const [hasNotification, setHasNotification] = useState(true);
+  // REAL-TIME CHECK FOR MESSAGES
+  const { data: messages } = useCollection<any>(user ? 'support_messages' : null);
+  const userMessages = messages.filter(m => m.userId === user?.uid);
+  const hasUnread = userMessages.length > 0 && userMessages[userMessages.length - 1].isAdmin;
+
   const [activeTraders, setActiveTraders] = useState([
     { id: 1, name: "Alex Sterling", return: 42.5, success: 92.4 },
     { id: 2, name: "Elena Vance", return: 112.8, success: 94.1 },
@@ -42,41 +46,10 @@ export default function Dashboard() {
   ]);
 
   useEffect(() => {
-    if (!authLoading && !user) {
-      router.push('/login');
-    }
+    if (!authLoading && !user) router.push('/login');
   }, [user, authLoading, router]);
 
   useEffect(() => {
-    if (!user) return;
-
-    const checkDeposit = async () => {
-      const pendingStr = localStorage.getItem(`pending_deposit_${user.uid}`);
-      if (pendingStr) {
-        const { amount, timestamp } = JSON.parse(pendingStr);
-        const now = Date.now();
-        const threeMinutes = 3 * 60 * 1000;
-        
-        if (now - timestamp >= threeMinutes) {
-          await updateUserProfile(user.uid, {
-            balance: increment(Number(amount))
-          });
-          localStorage.removeItem(`pending_deposit_${user.uid}`);
-        }
-      }
-    };
-
-    const depositInterval = setInterval(checkDeposit, 5000);
-    
-    // Rotate names every minute
-    const nameInterval = setInterval(() => {
-      setActiveTraders(prev => prev.map((t, idx) => ({
-        ...t,
-        name: TRADER_NAMES[Math.floor(Math.random() * TRADER_NAMES.length)]
-      })));
-    }, 60000);
-
-    // Live stats updates
     const statsInterval = setInterval(() => {
       setActiveTraders(prev => prev.map(t => ({
         ...t,
@@ -84,13 +57,8 @@ export default function Dashboard() {
         success: Math.min(99.9, Math.max(80, t.success + (Math.random() > 0.5 ? 0.05 : -0.05)))
       })));
     }, 1000);
-
-    return () => {
-      clearInterval(depositInterval);
-      clearInterval(nameInterval);
-      clearInterval(statsInterval);
-    };
-  }, [user]);
+    return () => clearInterval(statsInterval);
+  }, []);
 
   if (authLoading || profileLoading) {
     return (
@@ -152,12 +120,12 @@ export default function Dashboard() {
               </div>
 
               <div className="relative">
-                <Popover onOpenChange={(open) => { if(open) setHasNotification(false); }}>
+                <Popover>
                   <PopoverTrigger asChild>
                     <div className="w-12 h-12 bg-[#F1F3F9] rounded-full flex items-center justify-center cursor-pointer hover:bg-muted transition-colors relative">
                       <Bell className="h-5 w-5 text-muted-foreground" />
-                      {hasNotification && (
-                        <div className="absolute top-0 right-0 h-4 w-4 bg-accent rounded-full border-2 border-white flex items-center justify-center text-[8px] font-bold text-white shadow-sm animate-pulse">
+                      {hasUnread && (
+                        <div className="absolute top-0 right-0 h-4 w-4 bg-[#EF4444] rounded-full border-2 border-white flex items-center justify-center text-[8px] font-bold text-white shadow-sm animate-pulse">
                           1
                         </div>
                       )}
@@ -173,8 +141,10 @@ export default function Dashboard() {
                           <CheckCircle2 className="h-5 w-5 text-accent" />
                         </div>
                         <div className="space-y-1">
-                          <p className="text-sm font-bold text-foreground leading-tight">Welcome to JUST MARKETS!</p>
-                          <p className="text-xs text-muted-foreground leading-relaxed">We're thrilled to have you here.</p>
+                          <p className="text-sm font-bold text-foreground leading-tight">System Notification</p>
+                          <p className="text-xs text-muted-foreground leading-relaxed">
+                            {hasUnread ? "You have a new support message." : "Welcome to JUST MARKETS platform."}
+                          </p>
                         </div>
                       </div>
                     </div>
@@ -186,14 +156,12 @@ export default function Dashboard() {
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
               <NextLink href="/transfer" className="w-full sm:w-[220px]">
                 <Button className="w-full h-[64px] rounded-full bg-primary/10 hover:bg-primary/20 text-primary border-none flex items-center justify-center gap-3 font-bold text-lg shadow-sm">
-                  <ArrowRightLeft className="h-5 w-5" />
-                  Transfer
+                  <ArrowRightLeft className="h-5 w-5" /> Transfer
                 </Button>
               </NextLink>
               <NextLink href="/withdraw" className="w-full sm:w-[220px]">
                 <Button className="w-full h-[64px] rounded-full bg-accent hover:bg-accent/90 text-white flex items-center justify-center gap-3 font-bold text-lg border-none shadow-lg shadow-accent/20">
-                  <ArrowUpRight className="h-5 w-5" />
-                  Withdraw
+                  <ArrowUpRight className="h-5 w-5" /> Withdraw
                 </Button>
               </NextLink>
             </div>
@@ -201,26 +169,15 @@ export default function Dashboard() {
         </Card>
 
         <section className="space-y-8">
-          <div className="flex items-center justify-between">
-            <h2 className="text-3xl font-black uppercase tracking-tight text-foreground flex items-center gap-3">
-              <TrendingUp className="h-8 w-8 text-primary" />
-              Active Copy Traders
-            </h2>
-            <NextLink href="/traders">
-              <Button variant="link" className="font-bold text-primary uppercase tracking-widest text-xs">
-                View Active Traders
-              </Button>
-            </NextLink>
-          </div>
-
+          <h2 className="text-3xl font-black uppercase tracking-tight text-foreground flex items-center gap-3">
+            <TrendingUp className="h-8 w-8 text-primary" /> Active Traders
+          </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {activeTraders.map((trader) => (
               <Card key={trader.id} className="overflow-hidden border-none shadow-md hover:shadow-xl transition-all rounded-[2rem] bg-white">
                 <CardContent className="p-8 space-y-6">
                   <div className="flex items-center gap-4">
-                    <div className="w-14 h-14 rounded-full bg-primary/5 flex items-center justify-center text-primary font-black text-xl">
-                      {trader.name[0]}
-                    </div>
+                    <div className="w-14 h-14 rounded-full bg-primary/5 flex items-center justify-center text-primary font-black text-xl">{trader.name[0]}</div>
                     <div>
                       <h3 className="text-lg font-black uppercase tracking-tight">{trader.name}</h3>
                       <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Master Trader</p>

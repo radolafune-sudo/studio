@@ -10,12 +10,15 @@ import {
   ArrowDownCircle, 
   CheckCircle2, 
   ShieldCheck,
-  Search,
   Wallet,
   Settings,
   Save,
   MessageSquare,
-  Send
+  Send,
+  Bitcoin,
+  CircleDollarSign,
+  TrendingUp,
+  Activity
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -26,6 +29,14 @@ import { useCollection, useDoc, updateUserProfile, initializeFirebase, increment
 import { doc, setDoc } from "firebase/firestore";
 import { cn } from "@/lib/utils";
 
+const WALLET_TYPES = [
+  { id: 'btc', name: "Bitcoin (BTC)", icon: <Bitcoin className="h-4 w-4" /> },
+  { id: 'usdt', name: "USDT TRC20", icon: <CircleDollarSign className="h-4 w-4" /> },
+  { id: 'trx', name: "TRON (TRX)", icon: <TrendingUp className="h-4 w-4" /> },
+  { id: 'eth', name: "Ethereum (ETH)", icon: <Activity className="h-4 w-4" /> },
+  { id: 'usdc', name: "USDC ERC20", icon: <CircleDollarSign className="h-4 w-4" /> }
+];
+
 export default function AdminPanel() {
   const { data: users } = useCollection<any>('users');
   const { data: deposits } = useCollection<any>('deposits');
@@ -33,53 +44,48 @@ export default function AdminPanel() {
   const { data: allMessages } = useCollection<any>('support_messages');
   
   const { toast } = useToast();
-  const [newWallet, setNewWallet] = useState("");
+  const [walletEdits, setWalletEdits] = useState<Record<string, string>>({});
   const [editingBalance, setEditingBalance] = useState<Record<string, string>>({});
   const [replyText, setReplyText] = useState("");
   const [activeChatId, setActiveChatId] = useState<string | null>(null);
 
-  const handleUpdateWallet = async () => {
-    if (!newWallet) return;
-    
+  const handleUpdateWallets = async () => {
     const { firestore } = initializeFirebase();
+    const updatedWallets = { ...globalSettings?.wallets, ...walletEdits };
+    
     if (firestore) {
       await setDoc(doc(firestore, "settings", "global"), {
-        walletAddress: newWallet
+        wallets: updatedWallets
       }, { merge: true });
     } else {
-      await updateUserProfile('global', { walletAddress: newWallet }, 'settings');
+      await updateUserProfile('global', { wallets: updatedWallets }, 'settings');
     }
 
-    toast({
-      title: "Settings Updated",
-      description: "Global wallet address has been updated for all clients.",
-    });
-    setNewWallet("");
+    toast({ title: "System Updated", description: "All wallet addresses refreshed." });
+    setWalletEdits({});
   };
 
   const handleApproveDeposit = async (id: string, userId: string, amount: number) => {
-    await updateUserProfile(userId, {
-      balance: increment(amount)
-    });
+    // 1. Credit User Balance
+    await updateUserProfile(userId, { balance: increment(amount) });
     
-    toast({
-      title: "Deposit Approved",
-      description: `The amount of $${amount} has been added to the user's account.`,
-    });
+    // 2. Mark Deposit as Approved
+    const { firestore } = initializeFirebase();
+    if (firestore) {
+      await setDoc(doc(firestore, "deposits", id), { status: "approved" }, { merge: true });
+    } else {
+      await updateUserProfile(id, { status: "approved" }, 'deposits');
+    }
+
+    toast({ title: "Deposit Approved", description: `$${amount} credited instantly.` });
   };
 
   const handleUpdateBalance = async (userId: string) => {
     const val = editingBalance[userId];
     if (val === undefined || isNaN(Number(val))) return;
 
-    await updateUserProfile(userId, {
-      balance: Number(val)
-    });
-
-    toast({
-      title: "Balance Updated",
-      description: `User balance set to $${Number(val).toFixed(2)}.`,
-    });
+    await updateUserProfile(userId, { balance: Number(val) });
+    toast({ title: "Balance Updated", description: `Set to $${Number(val).toFixed(2)}.` });
   };
 
   const handleSendReply = async () => {
@@ -103,171 +109,124 @@ export default function AdminPanel() {
           <div className="space-y-1">
             <div className="flex items-center gap-2">
               <ShieldCheck className="h-6 w-6 text-primary" />
-              <h1 className="text-3xl font-black uppercase tracking-tight text-[#1A1A1A]">System Control</h1>
+              <h1 className="text-3xl font-black uppercase tracking-tight text-[#1A1A1A]">Admin Control</h1>
             </div>
-            <p className="text-muted-foreground font-medium">Global platform administration and oversight.</p>
+            <p className="text-muted-foreground font-medium">Real-time oversight and system management.</p>
           </div>
           
-          <div className="flex gap-4">
-            <div className="flex items-center gap-2 bg-white p-2 rounded-2xl shadow-sm border border-gray-100">
-              <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
-                <Users className="h-5 w-5 text-primary" />
-              </div>
-              <div className="pr-4">
-                <p className="text-[10px] font-black uppercase text-muted-foreground leading-none mb-1">Total Users</p>
-                <p className="font-black text-lg text-black">{users?.length || 0}</p>
-              </div>
+          <div className="flex items-center gap-2 bg-white p-3 rounded-2xl shadow-sm border border-gray-100">
+            <Users className="h-5 w-5 text-primary" />
+            <div>
+              <p className="text-[9px] font-black uppercase text-muted-foreground leading-none">Registered Clients</p>
+              <p className="font-black text-lg text-black">{users?.length || 0}</p>
             </div>
           </div>
         </header>
 
-        <Tabs defaultValue="settings" className="space-y-8">
-          <TabsList className="bg-white border p-1 rounded-2xl h-14 w-full md:w-auto overflow-x-auto overflow-y-hidden">
-            <TabsTrigger value="settings" className="rounded-xl px-8 font-black uppercase tracking-widest text-[11px] whitespace-nowrap">
-              <Settings className="h-4 w-4 mr-2" />
-              System Settings
+        <Tabs defaultValue="deposits" className="space-y-8">
+          <TabsList className="bg-white border p-1 rounded-2xl h-14 w-full md:w-auto">
+            <TabsTrigger value="deposits" className="rounded-xl px-6 font-black uppercase tracking-widest text-[10px]">
+              <ArrowDownCircle className="h-4 w-4 mr-2" /> Deposits
             </TabsTrigger>
-            <TabsTrigger value="deposits" className="rounded-xl px-8 font-black uppercase tracking-widest text-[11px] whitespace-nowrap">
-              <ArrowDownCircle className="h-4 w-4 mr-2" />
-              Deposits
+            <TabsTrigger value="users" className="rounded-xl px-6 font-black uppercase tracking-widest text-[10px]">
+              <Users className="h-4 w-4 mr-2" /> Users
             </TabsTrigger>
-            <TabsTrigger value="users" className="rounded-xl px-8 font-black uppercase tracking-widest text-[11px] whitespace-nowrap">
-              <Users className="h-4 w-4 mr-2" />
-              Users
+            <TabsTrigger value="wallets" className="rounded-xl px-6 font-black uppercase tracking-widest text-[10px]">
+              <Wallet className="h-4 w-4 mr-2" /> Wallets
             </TabsTrigger>
-            <TabsTrigger value="support" className="rounded-xl px-8 font-black uppercase tracking-widest text-[11px] whitespace-nowrap">
-              <MessageSquare className="h-4 w-4 mr-2" />
-              Support
+            <TabsTrigger value="support" className="rounded-xl px-6 font-black uppercase tracking-widest text-[10px]">
+              <MessageSquare className="h-4 w-4 mr-2" /> Support
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="settings" className="animate-in fade-in duration-500">
-            <Card className="rounded-[2.5rem] border-none shadow-sm bg-white overflow-hidden">
-              <CardHeader className="bg-primary/5 p-8 border-b border-primary/10">
-                <CardTitle className="text-xl font-black uppercase flex items-center gap-2">
-                  <Wallet className="h-5 w-5 text-primary" />
-                  Wallet Configuration
-                </CardTitle>
+          <TabsContent value="wallets">
+            <Card className="rounded-[2rem] border-none shadow-sm bg-white">
+              <CardHeader className="p-8 border-b">
+                <CardTitle className="text-sm font-black uppercase text-primary">Global Wallet Configuration</CardTitle>
               </CardHeader>
               <CardContent className="p-8 space-y-6">
-                <div className="space-y-4 max-w-2xl">
-                  <div className="space-y-2">
-                    <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Current Client Wallet Address</Label>
-                    <div className="p-4 bg-muted/30 rounded-xl font-mono text-sm break-all border border-muted">
-                      {globalSettings?.walletAddress || '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa'}
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Update Wallet Address</Label>
-                    <div className="flex gap-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {WALLET_TYPES.map(type => (
+                    <div key={type.id} className="space-y-2">
+                      <Label className="text-[10px] font-black uppercase text-muted-foreground flex items-center gap-2">
+                        {type.icon} {type.name}
+                      </Label>
                       <Input 
-                        placeholder="Enter new wallet address" 
-                        className="h-12 bg-white" 
-                        value={newWallet}
-                        onChange={(e) => setNewWallet(e.target.value)}
+                        placeholder={globalSettings?.wallets?.[type.id] || "Enter address..."}
+                        className="h-12 bg-muted/20 border-none font-mono text-xs"
+                        value={walletEdits[type.id] || ""}
+                        onChange={(e) => setWalletEdits({...walletEdits, [type.id]: e.target.value})}
                       />
-                      <Button onClick={handleUpdateWallet} className="bg-accent hover:bg-accent/90 px-8 h-12 rounded-xl font-black uppercase text-xs tracking-widest text-white">
-                        Apply
-                      </Button>
                     </div>
-                  </div>
+                  ))}
                 </div>
+                <Button onClick={handleUpdateWallets} className="h-14 px-12 bg-accent font-black uppercase tracking-widest rounded-xl">
+                  Update All Addresses
+                </Button>
               </CardContent>
             </Card>
           </TabsContent>
 
-          <TabsContent value="deposits" className="space-y-6">
-            <div className="grid grid-cols-1 gap-4">
-              {deposits.length === 0 ? (
-                <div className="p-20 text-center bg-white rounded-[2.5rem] border border-dashed border-gray-200">
-                  <CheckCircle2 className="h-12 w-12 text-muted-foreground/30 mx-auto mb-4" />
-                  <p className="font-bold text-muted-foreground">No pending verifications</p>
-                </div>
-              ) : (
-                deposits.map(deposit => (
-                  <Card key={deposit.id} className="border-none shadow-sm rounded-[2rem] overflow-hidden bg-white">
-                    <CardContent className="p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-6">
-                      <div className="flex items-center gap-6">
-                        <div className="w-14 h-14 bg-primary/5 rounded-2xl flex items-center justify-center">
-                          <Wallet className="h-6 w-6 text-primary" />
-                        </div>
-                        <div className="space-y-1">
-                          <h3 className="font-black text-xl">{deposit.userEmail}</h3>
-                          <div className="flex items-center gap-3">
-                            <Badge variant="outline" className="text-[10px] font-mono bg-muted/50 border-none">
-                              TX: {deposit.transactionId}
-                            </Badge>
-                          </div>
-                        </div>
+          <TabsContent value="deposits" className="space-y-4">
+            {deposits?.filter((d: any) => d.status === 'pending').length === 0 ? (
+              <div className="p-20 text-center bg-white rounded-[2rem] border border-dashed">
+                <CheckCircle2 className="h-12 w-12 text-muted-foreground/20 mx-auto mb-4" />
+                <p className="font-bold text-muted-foreground uppercase text-xs">No pending requests</p>
+              </div>
+            ) : (
+              deposits?.filter((d: any) => d.status === 'pending').map((deposit: any) => (
+                <Card key={deposit.id} className="border-none shadow-sm rounded-[2rem] bg-white">
+                  <CardContent className="p-6 flex flex-col md:flex-row items-center justify-between gap-6">
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center text-primary">
+                        <Wallet className="h-5 w-5" />
                       </div>
-
-                      <div className="flex flex-col items-center md:items-end gap-1">
-                        <p className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Deposit Amount</p>
-                        <p className="text-3xl font-black text-accent">${deposit.amount.toFixed(2)}</p>
+                      <div>
+                        <h3 className="font-black text-lg">{deposit.userEmail}</h3>
+                        <p className="text-[10px] font-mono text-muted-foreground">{deposit.transactionId}</p>
                       </div>
-
-                      <Button 
-                        onClick={() => handleApproveDeposit(deposit.id, deposit.userId, deposit.amount)}
-                        className="w-full md:w-auto bg-accent hover:bg-accent/90 text-white font-black uppercase tracking-widest h-12 rounded-xl px-12"
-                      >
-                        Approve
-                      </Button>
-                    </CardContent>
-                  </Card>
-                ))
-              )}
-            </div>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-[9px] font-black uppercase text-muted-foreground">Amount</p>
+                      <p className="text-2xl font-black text-accent">${deposit.amount.toFixed(2)}</p>
+                    </div>
+                    <Button onClick={() => handleApproveDeposit(deposit.id, deposit.userId, deposit.amount)} className="bg-accent h-12 px-10 font-black uppercase rounded-xl">
+                      Approve Fast
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))
+            )}
           </TabsContent>
 
-          <TabsContent value="users" className="space-y-6">
-            <div className="bg-white rounded-[2.5rem] border border-gray-100 shadow-sm overflow-x-auto">
-              <table className="w-full text-left border-collapse min-w-[800px]">
-                <thead>
-                  <tr className="border-b bg-muted/30">
-                    <th className="p-6 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">Client</th>
-                    <th className="p-6 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">Edit Balance</th>
-                    <th className="p-6 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">Portfolio Value</th>
-                    <th className="p-6 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">Status</th>
+          <TabsContent value="users">
+            <div className="bg-white rounded-[2rem] border overflow-hidden">
+              <table className="w-full text-left">
+                <thead className="bg-muted/30 border-b">
+                  <tr>
+                    <th className="p-6 text-[10px] font-black uppercase tracking-widest">Client</th>
+                    <th className="p-6 text-[10px] font-black uppercase tracking-widest">Balance Edit</th>
+                    <th className="p-6 text-[10px] font-black uppercase tracking-widest">Current Balance</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {users.map(user => (
-                    <tr key={user.uid} className="border-b hover:bg-muted/10 transition-colors">
+                  {users?.map((user: any) => (
+                    <tr key={user.uid} className="border-b">
+                      <td className="p-6 font-bold">{user.name || user.email}</td>
                       <td className="p-6">
-                        <div className="flex items-center gap-4">
-                          <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-black text-xs">
-                            {user.name?.[0] || 'U'}
-                          </div>
-                          <div>
-                            <p className="font-black text-sm uppercase">{user.name}</p>
-                            <p className="text-[10px] font-medium text-muted-foreground">{user.email}</p>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="p-6">
-                        <div className="flex items-center gap-2">
+                        <div className="flex gap-2">
                           <Input 
                             type="number"
-                            placeholder="Set Balance"
-                            className="h-10 w-32 rounded-lg text-sm font-bold"
+                            className="h-10 w-32 font-bold"
                             value={editingBalance[user.uid] || ""}
                             onChange={(e) => setEditingBalance({...editingBalance, [user.uid]: e.target.value})}
                           />
-                          <Button 
-                            size="icon" 
-                            className="bg-accent hover:bg-accent/90 h-10 w-10 text-white"
-                            onClick={() => handleUpdateBalance(user.uid)}
-                          >
+                          <Button onClick={() => handleUpdateBalance(user.uid)} size="icon" className="bg-primary h-10 w-10">
                             <Save className="h-4 w-4" />
                           </Button>
                         </div>
                       </td>
-                      <td className="p-6">
-                        <p className="font-black font-mono text-lg text-primary">${(user.balance || 0).toFixed(2)}</p>
-                      </td>
-                      <td className="p-6">
-                        <Badge className="bg-accent/10 text-accent font-bold text-[9px] border-none px-3">ACTIVE</Badge>
-                      </td>
+                      <td className="p-6 font-black font-mono text-primary text-xl">${(user.balance || 0).toFixed(2)}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -275,72 +234,37 @@ export default function AdminPanel() {
             </div>
           </TabsContent>
 
-          <TabsContent value="support" className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-in slide-in-from-bottom-4">
-            <Card className="md:col-span-1 rounded-[2rem] border-none shadow-sm overflow-hidden h-[600px] flex flex-col">
-              <CardHeader className="bg-primary/5 p-6 border-b">
-                <CardTitle className="text-sm font-black uppercase tracking-widest text-primary">Active Conversations</CardTitle>
-              </CardHeader>
-              <CardContent className="p-0 overflow-y-auto flex-1">
-                {Object.keys(chatGroups).length === 0 ? (
-                  <div className="p-8 text-center text-muted-foreground text-xs font-bold uppercase">No active chats</div>
-                ) : (
-                  Object.entries(chatGroups).map(([userId, messages]: any) => (
-                    <div 
-                      key={userId}
-                      onClick={() => setActiveChatId(userId)}
-                      className={cn(
-                        "p-4 border-b cursor-pointer transition-colors hover:bg-muted/50",
-                        activeChatId === userId && "bg-primary/5 border-l-4 border-l-primary"
-                      )}
-                    >
-                      <p className="font-black text-xs uppercase text-foreground truncate">{userId}</p>
-                      <p className="text-[10px] text-muted-foreground truncate">{messages[messages.length-1].text}</p>
-                    </div>
-                  ))
-                )}
+          <TabsContent value="support" className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <Card className="md:col-span-1 rounded-[2rem] border-none shadow-sm h-[500px] flex flex-col">
+              <CardHeader className="bg-muted/20 p-6 border-b"><CardTitle className="text-xs font-black uppercase">Chats</CardTitle></CardHeader>
+              <CardContent className="p-0 flex-1 overflow-y-auto">
+                {Object.entries(chatGroups).map(([userId, msgs]: any) => (
+                  <div key={userId} onClick={() => setActiveChatId(userId)} className={cn("p-4 border-b cursor-pointer", activeChatId === userId && "bg-primary/5")}>
+                    <p className="font-black text-xs uppercase truncate">{userId.slice(0, 10)}...</p>
+                    <p className="text-[10px] text-muted-foreground truncate">{msgs[msgs.length-1].text}</p>
+                  </div>
+                ))}
               </CardContent>
             </Card>
-
-            <Card className="md:col-span-2 rounded-[2rem] border-none shadow-sm overflow-hidden h-[600px] flex flex-col">
+            <Card className="md:col-span-2 rounded-[2rem] border-none shadow-sm h-[500px] flex flex-col">
               {activeChatId ? (
                 <>
-                  <CardHeader className="bg-primary p-6 flex flex-row items-center justify-between">
-                    <CardTitle className="text-sm font-black uppercase tracking-widest text-white">Chat with {activeChatId.slice(0, 8)}</CardTitle>
-                    <Badge variant="outline" className="bg-white/10 text-white border-white/20">LIVE</Badge>
-                  </CardHeader>
-                  <CardContent className="flex-1 overflow-y-auto p-6 space-y-4 bg-muted/10">
-                    {(chatGroups[activeChatId] || []).sort((a: any, b: any) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()).map((msg: any, i: number) => (
+                  <CardContent className="flex-1 overflow-y-auto p-6 space-y-3 bg-muted/5">
+                    {(chatGroups[activeChatId] || []).map((msg: any, i: number) => (
                       <div key={i} className={cn("flex flex-col", msg.isAdmin ? "items-end" : "items-start")}>
-                        <div className={cn(
-                          "max-w-[80%] p-4 rounded-2xl text-sm font-medium",
-                          msg.isAdmin ? "bg-primary text-white rounded-tr-none" : "bg-white text-foreground rounded-tl-none shadow-sm"
-                        )}>
+                        <div className={cn("p-3 rounded-xl text-sm max-w-[80%]", msg.isAdmin ? "bg-primary text-white" : "bg-white border shadow-sm")}>
                           {msg.text}
                         </div>
-                        <span className="text-[8px] font-bold text-muted-foreground mt-1 uppercase">
-                          {new Date(msg.timestamp).toLocaleTimeString()}
-                        </span>
                       </div>
                     ))}
                   </CardContent>
-                  <div className="p-4 border-t bg-white flex gap-2">
-                    <Input 
-                      placeholder="Type your response..."
-                      className="flex-1 h-12 bg-muted/30 border-none rounded-xl font-medium"
-                      value={replyText}
-                      onChange={(e) => setReplyText(e.target.value)}
-                      onKeyDown={(e) => e.key === 'Enter' && handleSendReply()}
-                    />
-                    <Button onClick={handleSendReply} className="h-12 w-12 rounded-xl bg-primary text-white" size="icon">
-                      <Send className="h-5 w-5" />
-                    </Button>
+                  <div className="p-4 bg-white border-t flex gap-2">
+                    <Input value={replyText} onChange={(e) => setReplyText(e.target.value)} placeholder="Type reply..." className="h-12 rounded-xl" />
+                    <Button onClick={handleSendReply} className="h-12 w-12 rounded-xl bg-primary"><Send className="h-5 w-5" /></Button>
                   </div>
                 </>
               ) : (
-                <div className="flex-1 flex flex-col items-center justify-center text-muted-foreground p-12 text-center">
-                  <MessageSquare className="h-12 w-12 mb-4 opacity-20" />
-                  <p className="font-black uppercase text-xs tracking-widest">Select a conversation to start chatting</p>
-                </div>
+                <div className="flex-1 flex items-center justify-center text-muted-foreground uppercase font-black text-xs">Select a chat</div>
               )}
             </Card>
           </TabsContent>
