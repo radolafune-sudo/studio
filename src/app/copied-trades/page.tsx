@@ -32,24 +32,24 @@ export default function CopiedTrades() {
         const elapsedSeconds = (Date.now() - (tradeStartTime.current || 0)) / 1000;
 
         setTodayPnL((prev) => {
-          // MT5 high-frequency movement
+          // MT5 high-frequency movement jitter
           let jitter = (Math.random() - 0.5) * 3;
           let trend = Math.sin(Date.now() / 1000) * 1.5;
 
           let nextVal = prev + jitter + trend;
 
-          // For the first 3.5 minutes, losses should not go beyond $24
+          // RULE: For the first 3.5 minutes, losses MUST NOT go beyond $24
           if (elapsedSeconds < 210) {
             if (nextVal < -24) {
               nextVal = -24 + Math.random() * 0.5;
             }
           }
           
-          // Logic: Cap at $70 profit, no cap for losses except the 3.5m rule
+          // RULE: Cap at $70 profit, and $70 loss
           if (nextVal > 70) nextVal = 70 - Math.random() * 5;
           if (nextVal < -70) nextVal = -70 + Math.random() * 5;
           
-          // Auto-stop at zero capital
+          // Auto-stop at zero capital (liquidation)
           const currentTotal = balance + nextVal;
           if (currentTotal <= 0) {
             setIsTrading(false);
@@ -61,8 +61,8 @@ export default function CopiedTrades() {
           return nextVal;
         });
 
-        // Generate systematic MT5-cloned history
-        if (Math.random() > 0.985) {
+        // Generate systematic MT5-cloned history records
+        if (Math.random() > 0.98) {
           const isProfit = todayPnL > 0 && Math.random() > 0.4;
           const val = (Math.random() * 12).toFixed(2);
           const newTrade = {
@@ -75,7 +75,7 @@ export default function CopiedTrades() {
           };
           setHistory(prev => [newTrade, ...prev].slice(0, 10));
         }
-      }, 80); // Higher frequency for MT5 speed clone
+      }, 80); // High frequency speed clone
     } else {
       tradeStartTime.current = null;
     }

@@ -101,7 +101,7 @@ export default function TransferPage() {
       toast({
         variant: "destructive",
         title: "Insufficient Balance",
-        description: "Minimum copy trade amount is required. Your deposit may still be pending verification.",
+        description: "The minimum copy trade amount is required. Your deposit may still be pending verification.",
       });
       return;
     }
@@ -154,7 +154,7 @@ export default function TransferPage() {
               </div>
 
               <div className="space-y-4">
-                <p className="text-[12px] font-black uppercase text-blue-600 tracking-widest">Deposit crypto to fund your copy trading account</p>
+                <p className="text-[12px] font-black uppercase text-blue-600 tracking-widest">DEPOSIT TO FUND YOUR COPY TRADING ACCOUNT</p>
                 <p className="text-[10px] font-bold text-muted-foreground uppercase">copy the address below</p>
                 <div className="flex items-center gap-3 bg-gray-50 p-3 rounded-lg border border-gray-100">
                   <span className="flex-1 font-mono text-[10px] break-all text-gray-500">{selectedFunding?.address}</span>
