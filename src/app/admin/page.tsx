@@ -17,7 +17,8 @@ import {
   Bitcoin,
   CircleDollarSign,
   TrendingUp,
-  Activity
+  Activity,
+  History
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -46,6 +47,8 @@ export default function AdminPanel() {
   const [editingBalance, setEditingBalance] = useState<Record<string, string>>({});
   const [replyText, setReplyText] = useState("");
   const [activeChatId, setActiveChatId] = useState<string | null>(null);
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState("deposits");
 
   const handleUpdateWallet = async (walletId: string) => {
     const newVal = walletEdits[walletId];
@@ -94,11 +97,18 @@ export default function AdminPanel() {
     setReplyText("");
   };
 
+  const handleStartChat = (userId: string) => {
+    setActiveChatId(userId);
+    setActiveTab("support");
+  };
+
   const chatGroups = (allMessages || []).reduce((acc: any, msg: any) => {
     if (!acc[msg.userId]) acc[msg.userId] = [];
     acc[msg.userId].push(msg);
     return acc;
   }, {});
+
+  const selectedUserHistory = deposits?.filter((d: any) => d.userId === selectedUserId) || [];
 
   return (
     <div className="flex flex-col min-h-screen bg-[#F8F9FC] font-body">
@@ -121,7 +131,7 @@ export default function AdminPanel() {
           </div>
         </header>
 
-        <Tabs defaultValue="deposits" className="space-y-8">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
           <TabsList className="bg-white border p-1 rounded-2xl h-14 w-full md:w-auto">
             <TabsTrigger value="deposits" className="rounded-xl px-6 font-black uppercase tracking-widest text-[10px]">
               <ArrowDownCircle className="h-4 w-4 mr-2" /> Deposits
@@ -199,20 +209,34 @@ export default function AdminPanel() {
             )}
           </TabsContent>
 
-          <TabsContent value="users">
+          <TabsContent value="users" className="space-y-6">
             <div className="bg-white rounded-[2rem] border overflow-hidden">
               <table className="w-full text-left">
                 <thead className="bg-muted/30 border-b">
                   <tr>
                     <th className="p-6 text-[10px] font-black uppercase tracking-widest">Client</th>
+                    <th className="p-6 text-[10px] font-black uppercase tracking-widest">Actions</th>
                     <th className="p-6 text-[10px] font-black uppercase tracking-widest">Balance Edit</th>
-                    <th className="p-6 text-[10px] font-black uppercase tracking-widest">Current Balance</th>
+                    <th className="p-6 text-[10px] font-black uppercase tracking-widest text-right">Current Balance</th>
                   </tr>
                 </thead>
                 <tbody>
                   {users?.map((user: any) => (
-                    <tr key={user.uid} className="border-b">
-                      <td className="p-6 font-bold">{user.name || user.email}</td>
+                    <tr key={user.uid} className={cn("border-b transition-colors cursor-pointer hover:bg-muted/5", selectedUserId === user.uid && "bg-primary/5")}>
+                      <td className="p-6" onClick={() => setSelectedUserId(user.uid)}>
+                        <p className="font-bold">{user.name || user.email}</p>
+                        <p className="text-[10px] font-mono text-muted-foreground">{user.uid}</p>
+                      </td>
+                      <td className="p-6">
+                        <Button 
+                          onClick={() => handleStartChat(user.uid)} 
+                          size="sm" 
+                          variant="outline" 
+                          className="rounded-full h-8 px-4 text-[10px] font-black uppercase border-primary/20 text-primary"
+                        >
+                          <MessageSquare className="h-3 w-3 mr-2" /> Message
+                        </Button>
+                      </td>
                       <td className="p-6">
                         <div className="flex gap-2">
                           <Input 
@@ -221,50 +245,121 @@ export default function AdminPanel() {
                             value={editingBalance[user.uid] || ""}
                             onChange={(e) => setEditingBalance({...editingBalance, [user.uid]: e.target.value})}
                           />
-                          <Button onClick={() => handleUpdateBalance(user.uid)} size="icon" className="bg-primary h-10 w-10">
+                          <Button onClick={() => handleUpdateBalance(user.uid)} size="icon" className="bg-primary h-10 w-10 rounded-xl">
                             <Save className="h-4 w-4" />
                           </Button>
                         </div>
                       </td>
-                      <td className="p-6 font-black font-mono text-primary text-xl">${(user.balance || 0).toFixed(2)}</td>
+                      <td className="p-6 font-black font-mono text-primary text-xl text-right">${(user.balance || 0).toFixed(2)}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
+
+            {selectedUserId && (
+              <Card className="rounded-[2rem] border-none shadow-lg bg-white overflow-hidden animate-in slide-in-from-bottom-4">
+                <CardHeader className="p-8 bg-muted/20 border-b flex flex-row items-center justify-between">
+                  <div>
+                    <CardTitle className="text-sm font-black uppercase">Transaction History</CardTitle>
+                    <p className="text-[10px] text-muted-foreground uppercase font-bold mt-1">Client: {selectedUserId}</p>
+                  </div>
+                  <History className="h-5 w-5 text-muted-foreground" />
+                </CardHeader>
+                <CardContent className="p-0">
+                  <table className="w-full">
+                    <thead className="bg-muted/10 border-b">
+                      <tr>
+                        <th className="p-4 text-[9px] font-black uppercase">Date</th>
+                        <th className="p-4 text-[9px] font-black uppercase">Type</th>
+                        <th className="p-4 text-[9px] font-black uppercase">Status</th>
+                        <th className="p-4 text-[9px] font-black uppercase text-right">Amount</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {selectedUserHistory.length === 0 ? (
+                        <tr><td colSpan={4} className="p-12 text-center text-xs font-bold text-muted-foreground uppercase">No transactions found</td></tr>
+                      ) : (
+                        selectedUserHistory.map((h: any) => (
+                          <tr key={h.id} className="border-b last:border-0">
+                            <td className="p-4 text-[10px] font-mono">{new Date(h.timestamp).toLocaleDateString()}</td>
+                            <td className="p-4 text-[10px] font-bold uppercase">{h.walletType || 'Deposit'}</td>
+                            <td className="p-4">
+                              <Badge className={cn(
+                                "text-[8px] font-black uppercase",
+                                h.status === 'approved' ? "bg-accent" : "bg-yellow-500"
+                              )}>
+                                {h.status}
+                              </Badge>
+                            </td>
+                            <td className="p-4 text-right font-black text-sm">${h.amount.toFixed(2)}</td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </CardContent>
+              </Card>
+            )}
           </TabsContent>
 
           <TabsContent value="support" className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Card className="md:col-span-1 rounded-[2rem] border-none shadow-sm h-[500px] flex flex-col">
-              <CardHeader className="bg-muted/20 p-6 border-b"><CardTitle className="text-xs font-black uppercase">Chats</CardTitle></CardHeader>
+            <Card className="md:col-span-1 rounded-[2rem] border-none shadow-sm h-[600px] flex flex-col">
+              <CardHeader className="bg-muted/20 p-6 border-b"><CardTitle className="text-xs font-black uppercase">Active Chats</CardTitle></CardHeader>
               <CardContent className="p-0 flex-1 overflow-y-auto">
-                {Object.entries(chatGroups).map(([userId, msgs]: any) => (
-                  <div key={userId} onClick={() => setActiveChatId(userId)} className={cn("p-4 border-b cursor-pointer", activeChatId === userId && "bg-primary/5")}>
-                    <p className="font-black text-xs uppercase truncate">{userId.slice(0, 10)}...</p>
-                    <p className="text-[10px] text-muted-foreground truncate">{msgs[msgs.length-1].text}</p>
-                  </div>
-                ))}
+                {Object.entries(chatGroups).length === 0 ? (
+                  <div className="p-12 text-center text-[10px] font-black uppercase text-muted-foreground">No conversations</div>
+                ) : (
+                  Object.entries(chatGroups).map(([userId, msgs]: any) => (
+                    <div key={userId} onClick={() => setActiveChatId(userId)} className={cn("p-6 border-b cursor-pointer transition-all", activeChatId === userId ? "bg-primary/5 border-l-4 border-l-primary" : "hover:bg-muted/5")}>
+                      <div className="flex justify-between items-start mb-1">
+                        <p className="font-black text-xs uppercase truncate w-32">{userId.slice(0, 10)}...</p>
+                        <p className="text-[8px] font-bold text-muted-foreground">{new Date(msgs[msgs.length-1].timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</p>
+                      </div>
+                      <p className="text-[10px] text-muted-foreground truncate">{msgs[msgs.length-1].text}</p>
+                    </div>
+                  ))
+                )}
               </CardContent>
             </Card>
-            <Card className="md:col-span-2 rounded-[2rem] border-none shadow-sm h-[500px] flex flex-col">
+            <Card className="md:col-span-2 rounded-[2rem] border-none shadow-sm h-[600px] flex flex-col overflow-hidden">
               {activeChatId ? (
                 <>
-                  <CardContent className="flex-1 overflow-y-auto p-6 space-y-3 bg-muted/5">
+                  <div className="bg-primary/10 p-4 border-b flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white text-[10px] font-black">
+                      {activeChatId.slice(0, 2).toUpperCase()}
+                    </div>
+                    <p className="text-[10px] font-black uppercase">Client: {activeChatId}</p>
+                  </div>
+                  <CardContent className="flex-1 overflow-y-auto p-8 space-y-4 bg-muted/5">
                     {(chatGroups[activeChatId] || []).map((msg: any, i: number) => (
                       <div key={i} className={cn("flex flex-col", msg.isAdmin ? "items-end" : "items-start")}>
-                        <div className={cn("p-3 rounded-xl text-sm max-w-[80%]", msg.isAdmin ? "bg-primary text-white" : "bg-white border shadow-sm")}>
+                        <div className={cn(
+                          "p-4 rounded-2xl text-[13px] font-medium max-w-[80%] shadow-sm",
+                          msg.isAdmin ? "bg-primary text-white rounded-tr-none" : "bg-white border rounded-tl-none"
+                        )}>
                           {msg.text}
                         </div>
+                        <p className="text-[8px] mt-1 text-muted-foreground font-bold uppercase">{msg.isAdmin ? 'Admin' : 'Client'}</p>
                       </div>
                     ))}
                   </CardContent>
-                  <div className="p-4 bg-white border-t flex gap-2">
-                    <Input value={replyText} onChange={(e) => setReplyText(e.target.value)} placeholder="Type reply..." className="h-12 rounded-xl" />
-                    <Button onClick={handleSendReply} className="h-12 w-12 rounded-xl bg-primary"><Send className="h-5 w-5" /></Button>
+                  <div className="p-6 bg-white border-t flex gap-3">
+                    <Input 
+                      value={replyText} 
+                      onChange={(e) => setReplyText(e.target.value)} 
+                      onKeyDown={(e) => e.key === 'Enter' && handleSendReply()}
+                      placeholder="Type your reply here..." 
+                      className="h-14 rounded-xl border-none bg-muted/30 font-medium" 
+                    />
+                    <Button onClick={handleSendReply} className="h-14 w-14 rounded-xl bg-primary shadow-lg shadow-primary/20"><Send className="h-6 w-6" /></Button>
                   </div>
                 </>
               ) : (
-                <div className="flex-1 flex items-center justify-center text-muted-foreground uppercase font-black text-xs">Select a chat</div>
+                <div className="flex-1 flex flex-col items-center justify-center text-muted-foreground uppercase font-black text-xs gap-4">
+                  <MessageSquare className="h-12 w-12 opacity-20" />
+                  Select a chat to begin messaging
+                </div>
               )}
             </Card>
           </TabsContent>

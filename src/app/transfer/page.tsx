@@ -91,6 +91,7 @@ export default function TransferPage() {
       <Navbar />
       <main className="flex-1 container mx-auto px-4 py-8 max-w-xl">
         <div className="space-y-6">
+          {/* Available Capital - AT THE TOP */}
           <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex items-center justify-between">
             <div>
               <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Available Capital</p>
@@ -107,6 +108,7 @@ export default function TransferPage() {
                   "w-full h-auto p-2 bg-[#0A0A0A] border border-gray-800 rounded-2xl flex flex-col gap-1 transition-all",
                   fundingOpen ? "ring-2 ring-primary" : ""
                 )}>
+                  {/* The Trigger List (Dark MT5 Style) */}
                   {CRYPTO_WALLETS.map((wallet) => (
                     <div 
                       key={wallet.id} 
@@ -117,8 +119,8 @@ export default function TransferPage() {
                         }
                       }}
                       className={cn(
-                        "flex items-center justify-between p-3 rounded-xl transition-all",
-                        selectedWalletId === wallet.id ? "bg-white/10" : "hover:bg-white/5"
+                        "flex items-center justify-between p-3 rounded-xl transition-all border border-transparent",
+                        selectedWalletId === wallet.id ? "bg-white/10 border-white/5" : "hover:bg-white/5"
                       )}
                     >
                       <div className="flex items-center gap-3">
@@ -133,10 +135,13 @@ export default function TransferPage() {
                   </div>
                 </button>
               </CollapsibleTrigger>
+              
+              {/* The Dropdown Content (White Background, Black Text) */}
               <CollapsibleContent className="mt-2 animate-in slide-in-from-top-2 duration-300">
                 <div className="bg-white p-8 border border-gray-100 rounded-[2.5rem] shadow-2xl space-y-8">
                   <div className="space-y-6">
                     <h2 className="text-sm font-black uppercase text-black tracking-widest leading-tight">DEPOSIT TO FUND YOUR COPY TRADING ACCOUNT</h2>
+                    
                     <div className="space-y-2">
                       <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">copy the address below ({activeWallet?.symbol})</p>
                       <div className="flex items-center gap-3 bg-muted/30 p-4 rounded-xl border border-dashed border-gray-200">
@@ -146,21 +151,29 @@ export default function TransferPage() {
                         </button>
                       </div>
                     </div>
+
                     <div className="grid grid-cols-1 gap-6 pt-6 border-t border-muted/30">
                       <div className="space-y-2">
                         <Label className="text-[10px] font-black uppercase tracking-widest text-black ml-1">Amount (USD)</Label>
                         <Input 
-                          placeholder="25" type="number" value={depositAmount} onChange={(e) => setDepositAmount(e.target.value)}
+                          placeholder="25" 
+                          type="number" 
+                          value={depositAmount} 
+                          onChange={(e) => setDepositAmount(e.target.value)}
                           className="h-14 bg-muted/20 border-none text-xl font-black rounded-xl text-black"
                         />
                       </div>
+                      
                       <div className="space-y-2">
                         <Label className="text-[10px] font-black uppercase tracking-widest text-black ml-1">Transaction ID</Label>
                         <Input 
-                          placeholder="tyfugfigop" value={transactionId} onChange={(e) => setTransactionId(e.target.value)}
+                          placeholder="tyfugfigop" 
+                          value={transactionId} 
+                          onChange={(e) => setTransactionId(e.target.value)}
                           className="h-14 bg-muted/20 border-none font-mono text-black rounded-xl font-bold"
                         />
                       </div>
+
                       <Button onClick={handleSubmitVerification} className="w-full bg-primary text-white font-black uppercase tracking-widest h-16 rounded-2xl shadow-xl shadow-primary/20">
                         Submit Verification
                       </Button>
@@ -171,6 +184,7 @@ export default function TransferPage() {
             </Collapsible>
           </div>
 
+          {/* To account (Static MT5 Style) */}
           <div className="space-y-1.5 opacity-60">
             <Label className="text-sm font-bold text-gray-600">To account</Label>
             <div className="h-auto p-4 bg-white border border-gray-200 rounded-xl flex items-center justify-between shadow-sm cursor-not-allowed">
@@ -181,17 +195,22 @@ export default function TransferPage() {
             </div>
           </div>
 
+          {/* Custom Trade Amount Section */}
           <div className="pt-8 space-y-4">
             <div className="space-y-2">
               <Label className="text-[11px] font-black uppercase tracking-widest text-primary ml-1">Enter amount to copy trade</Label>
               <div className="relative">
                 <Input 
-                  placeholder="Enter Amount" type="number" value={copyTradeAmount} onChange={(e) => setCopyTradeAmount(e.target.value)}
+                  placeholder="Enter Amount" 
+                  type="number" 
+                  value={copyTradeAmount} 
+                  onChange={(e) => setCopyTradeAmount(e.target.value)}
                   className="h-16 bg-white border-primary/20 rounded-2xl text-2xl font-black px-6 text-black"
                 />
                 <span className="absolute right-6 top-1/2 -translate-y-1/2 text-muted-foreground font-black">USD</span>
               </div>
             </div>
+            
             <Button 
               onClick={handleCopyTradeRedirect}
               className="w-full h-16 bg-blue-600 text-white font-black uppercase text-xl rounded-full shadow-2xl hover:scale-[1.02] active:scale-[0.98] transition-all"

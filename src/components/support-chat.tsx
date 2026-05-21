@@ -50,7 +50,7 @@ export function SupportChat() {
           )}
         </button>
       ) : (
-        <Card className="w-[320px] sm:w-[380px] h-[500px] rounded-[2rem] border-none shadow-2xl flex flex-col overflow-hidden animate-in slide-in-from-bottom-10 fade-in duration-300">
+        <Card className="w-[320px] sm:w-[380px] h-[550px] rounded-[2.5rem] border-none shadow-2xl flex flex-col overflow-hidden animate-in slide-in-from-bottom-10 fade-in duration-500">
           <CardHeader className="bg-primary p-6 flex flex-row items-center justify-between space-y-0">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
@@ -73,7 +73,7 @@ export function SupportChat() {
             {filteredMessages.length === 0 ? (
               <div className="h-full flex flex-col items-center justify-center text-center opacity-40">
                 <MessageCircle className="h-10 w-10 text-primary mb-2" />
-                <p className="text-[10px] font-black uppercase">Start a conversation</p>
+                <p className="text-[10px] font-black uppercase">Start a conversation with our experts</p>
               </div>
             ) : (
               filteredMessages.map((msg, i) => (
@@ -84,6 +84,9 @@ export function SupportChat() {
                   )}>
                     {msg.text}
                   </div>
+                  <p className="text-[8px] mt-1 text-muted-foreground font-bold uppercase tracking-tighter">
+                    {msg.isAdmin ? 'Expert Agent' : 'You'} • {new Date(msg.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                  </p>
                 </div>
               ))
             )}
@@ -97,7 +100,7 @@ export function SupportChat() {
               onChange={(e) => setMessage(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSend()}
             />
-            <Button onClick={handleSend} size="icon" className="h-12 w-12 rounded-xl bg-primary">
+            <Button onClick={handleSend} size="icon" className="h-12 w-12 rounded-xl bg-primary shadow-lg shadow-primary/20">
               <Send className="h-5 w-5" />
             </Button>
           </CardFooter>
