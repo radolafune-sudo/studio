@@ -100,11 +100,14 @@ class MockAuth {
 
 class MockFirestore {
   async updateDoc(docPath: string, data: any) {
-    // Expects path like "users/uid"
-    const [collectionName, docId] = docPath.split('/');
-    const db = JSON.parse(localStorage.getItem(`mock_db_${collectionName}`) || (collectionName === 'users' ? '{}' : '[]'));
+    // Expects path like "users/uid" or "settings/global"
+    const parts = docPath.split('/');
+    const collectionName = parts[0];
+    const docId = parts[1];
     
-    if (collectionName === 'users') {
+    const db = JSON.parse(localStorage.getItem(`mock_db_${collectionName}`) || (collectionName === 'users' ? '{}' : (collectionName === 'settings' ? '{}' : '[]')));
+    
+    if (collectionName === 'users' || collectionName === 'settings') {
       // Handle increment mock
       const updateData = { ...data };
       if (updateData.balance && typeof updateData.balance === 'object' && updateData.balance._methodName === 'increment') {
@@ -115,7 +118,7 @@ class MockFirestore {
       db[docId] = { ...db[docId], ...updateData };
       localStorage.setItem(`mock_db_${collectionName}`, JSON.stringify(db));
       mockEvents.emit(`doc_${collectionName}_${docId}`, db[docId]);
-      mockEvents.emit(`collection_${collectionName}`, Object.values(db));
+      mockEvents.emit(`collection_${collectionName}`, collectionName === 'users' ? Object.values(db) : db);
     }
   }
 
@@ -170,10 +173,10 @@ export async function logoutUser() {
   return firebaseSignOut(auth);
 }
 
-export async function updateUserProfile(uid: string, data: any) {
-  if (isPlaceholder) return mockFirestore.updateDoc(`users/${uid}`, data);
+export async function updateUserProfile(uid: string, data: any, customColl = 'users') {
+  if (isPlaceholder) return mockFirestore.updateDoc(`${customColl}/${uid}`, data);
   const { firestore } = initializeFirebase();
-  return firebaseUpdateDoc(doc(firestore, "users", uid), data);
+  return firebaseUpdateDoc(doc(firestore, customColl, uid), data);
 }
 
 export async function createDeposit(data: any) {

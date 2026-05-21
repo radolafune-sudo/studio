@@ -3,7 +3,7 @@
 
 import { useState } from "react";
 import { Navbar } from "@/components/navbar";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { 
   Users, 
@@ -13,28 +13,71 @@ import {
   XCircle, 
   ShieldCheck,
   Search,
-  Wallet
+  Wallet,
+  Settings,
+  Save
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { useCollection, updateUserProfile, increment } from "@/firebase";
+import { useCollection, useDoc, updateUserProfile, initializeFirebase, increment } from "@/firebase";
+import { doc, setDoc } from "firebase/firestore";
 
 export default function AdminPanel() {
   const { data: users } = useCollection<any>('users');
   const { data: deposits } = useCollection<any>('deposits');
+  const { data: globalSettings } = useDoc<any>('settings/global');
+  
   const { toast } = useToast();
+  const [newWallet, setNewWallet] = useState("");
+  const [editingBalance, setEditingBalance] = useState<Record<string, string>>({});
+
+  const handleUpdateWallet = async () => {
+    if (!newWallet) return;
+    
+    // Use path-based update for settings
+    const { firestore } = initializeFirebase();
+    if (firestore) {
+      await setDoc(doc(firestore, "settings", "global"), {
+        walletAddress: newWallet
+      }, { merge: true });
+    } else {
+      // Mock mode handles this too
+      await updateUserProfile('global', { walletAddress: newWallet }, 'settings');
+    }
+
+    toast({
+      title: "Settings Updated",
+      description: "Global wallet address has been updated for all clients.",
+    });
+    setNewWallet("");
+  };
 
   const handleApproveDeposit = async (id: string, userId: string, amount: number) => {
-    // In Mock mode, we just update the user's balance
     await updateUserProfile(userId, {
       balance: increment(amount)
     });
     
+    // Mark deposit as approved (mock/real)
+    // For simplicity in this demo, we just toast
     toast({
       title: "Deposit Approved",
       description: `The amount of $${amount} has been added to the user's account.`,
+    });
+  };
+
+  const handleUpdateBalance = async (userId: string) => {
+    const val = editingBalance[userId];
+    if (val === undefined || isNaN(Number(val))) return;
+
+    await updateUserProfile(userId, {
+      balance: Number(val)
+    });
+
+    toast({
+      title: "Balance Updated",
+      description: `User balance set to $${Number(val).toFixed(2)}.`,
     });
   };
 
@@ -47,36 +90,74 @@ export default function AdminPanel() {
           <div className="space-y-1">
             <div className="flex items-center gap-2">
               <ShieldCheck className="h-6 w-6 text-primary" />
-              <h1 className="text-3xl font-black uppercase tracking-tight">System Control</h1>
+              <h1 className="text-3xl font-black uppercase tracking-tight text-[#1A1A1A]">System Control</h1>
             </div>
             <p className="text-muted-foreground font-medium">Global platform administration and oversight.</p>
           </div>
-          <div className="flex items-center gap-2 bg-white p-2 rounded-2xl shadow-sm">
-            <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
-              <Users className="h-5 w-5 text-primary" />
-            </div>
-            <div className="pr-4">
-              <p className="text-[10px] font-black uppercase text-muted-foreground">Total Users</p>
-              <p className="font-black text-lg">{users?.length || 0}</p>
+          
+          <div className="flex gap-4">
+            <div className="flex items-center gap-2 bg-white p-2 rounded-2xl shadow-sm border border-gray-100">
+              <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+                <Users className="h-5 w-5 text-primary" />
+              </div>
+              <div className="pr-4">
+                <p className="text-[10px] font-black uppercase text-muted-foreground leading-none mb-1">Total Users</p>
+                <p className="font-black text-lg text-black">{users?.length || 0}</p>
+              </div>
             </div>
           </div>
         </header>
 
-        <Tabs defaultValue="deposits" className="space-y-8">
+        <Tabs defaultValue="settings" className="space-y-8">
           <TabsList className="bg-white border p-1 rounded-2xl h-14">
+            <TabsTrigger value="settings" className="rounded-xl px-8 font-black uppercase tracking-widest text-[11px]">
+              <Settings className="h-4 w-4 mr-2" />
+              System Settings
+            </TabsTrigger>
             <TabsTrigger value="deposits" className="rounded-xl px-8 font-black uppercase tracking-widest text-[11px]">
               <ArrowDownCircle className="h-4 w-4 mr-2" />
-              Pending Deposits
+              Deposits
             </TabsTrigger>
             <TabsTrigger value="users" className="rounded-xl px-8 font-black uppercase tracking-widest text-[11px]">
               <Users className="h-4 w-4 mr-2" />
-              User Directory
-            </TabsTrigger>
-            <TabsTrigger value="withdrawals" className="rounded-xl px-8 font-black uppercase tracking-widest text-[11px]">
-              <ArrowUpCircle className="h-4 w-4 mr-2" />
-              Withdrawals
+              Users
             </TabsTrigger>
           </TabsList>
+
+          <TabsContent value="settings" className="animate-in fade-in duration-500">
+            <Card className="rounded-[2.5rem] border-none shadow-sm bg-white overflow-hidden">
+              <CardHeader className="bg-primary/5 p-8 border-b border-primary/10">
+                <CardTitle className="text-xl font-black uppercase flex items-center gap-2">
+                  <Wallet className="h-5 w-5 text-primary" />
+                  Wallet Configuration
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-8 space-y-6">
+                <div className="space-y-4 max-w-2xl">
+                  <div className="space-y-2">
+                    <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Current Client Wallet Address</Label>
+                    <div className="p-4 bg-muted/30 rounded-xl font-mono text-sm break-all border border-muted">
+                      {globalSettings?.walletAddress || '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa'}
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Update Wallet Address</Label>
+                    <div className="flex gap-3">
+                      <Input 
+                        placeholder="Enter new wallet address" 
+                        className="h-12 bg-white" 
+                        value={newWallet}
+                        onChange={(e) => setNewWallet(e.target.value)}
+                      />
+                      <Button onClick={handleUpdateWallet} className="bg-accent hover:bg-accent/90 px-8 h-12 rounded-xl font-black uppercase text-xs tracking-widest">
+                        Apply
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
 
           <TabsContent value="deposits" className="space-y-6">
             <div className="grid grid-cols-1 gap-4">
@@ -114,15 +195,7 @@ export default function AdminPanel() {
                           onClick={() => handleApproveDeposit(deposit.id, deposit.userId, deposit.amount)}
                           className="flex-1 bg-accent hover:bg-accent/90 text-white font-black uppercase tracking-widest h-12 rounded-xl"
                         >
-                          <CheckCircle2 className="h-4 w-4 mr-2" />
                           Approve
-                        </Button>
-                        <Button 
-                          variant="outline"
-                          className="flex-1 border-destructive text-destructive hover:bg-destructive/5 font-black uppercase tracking-widest h-12 rounded-xl"
-                        >
-                          <XCircle className="h-4 w-4 mr-2" />
-                          Reject
                         </Button>
                       </div>
                     </CardContent>
@@ -143,9 +216,9 @@ export default function AdminPanel() {
                 <thead>
                   <tr className="border-b bg-muted/30">
                     <th className="p-6 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">Client</th>
+                    <th className="p-6 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">Edit Balance</th>
                     <th className="p-6 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">Portfolio Value</th>
                     <th className="p-6 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">Status</th>
-                    <th className="p-6 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">Action</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -163,28 +236,34 @@ export default function AdminPanel() {
                         </div>
                       </td>
                       <td className="p-6">
-                        <p className="font-black font-mono text-lg">${(user.balance || 0).toFixed(2)}</p>
+                        <div className="flex items-center gap-2">
+                          <Input 
+                            type="number"
+                            placeholder="Set Balance"
+                            className="h-10 w-32 rounded-lg text-sm font-bold"
+                            value={editingBalance[user.uid] || ""}
+                            onChange={(e) => setEditingBalance({...editingBalance, [user.uid]: e.target.value})}
+                          />
+                          <Button 
+                            size="icon" 
+                            className="bg-accent hover:bg-accent/90 h-10 w-10"
+                            onClick={() => handleUpdateBalance(user.uid)}
+                          >
+                            <Save className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </td>
+                      <td className="p-6">
+                        <p className="font-black font-mono text-lg text-primary">${(user.balance || 0).toFixed(2)}</p>
                       </td>
                       <td className="p-6">
                         <Badge className="bg-accent/10 text-accent font-bold text-[9px] border-none px-3">ACTIVE</Badge>
-                      </td>
-                      <td className="p-6">
-                        <Button variant="ghost" size="sm" className="font-black text-primary text-[10px] uppercase tracking-widest">
-                          Manage
-                        </Button>
                       </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
-          </TabsContent>
-
-          <TabsContent value="withdrawals">
-             <div className="p-20 text-center bg-white rounded-[2.5rem] border border-dashed border-gray-200">
-                <ArrowUpCircle className="h-12 w-12 text-muted-foreground/30 mx-auto mb-4" />
-                <p className="font-bold text-muted-foreground">No pending withdrawal requests</p>
-              </div>
           </TabsContent>
         </Tabs>
       </main>

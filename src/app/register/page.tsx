@@ -23,6 +23,7 @@ export default function Register() {
   const [formData, setFormData] = useState({
     email: "",
     password: "",
+    confirmPassword: "",
     name: "",
     countryCode: "",
     phone: ""
@@ -30,11 +31,20 @@ export default function Register() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (formData.password !== formData.confirmPassword) {
+      toast({
+        variant: "destructive",
+        title: "Passwords Mismatch",
+        description: "Your passwords do not match. Please try again.",
+      });
+      return;
+    }
+
     setLoading(true);
     try {
       const { user } = await registerUser(formData.email, formData.password);
       
-      // Create user profile in local simulated layer or Firestore
       await updateUserProfile(user.uid, {
         email: formData.email,
         name: formData.name || formData.email.split('@')[0],
@@ -144,6 +154,21 @@ export default function Register() {
                   >
                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Confirm Password</Label>
+                <div className="relative">
+                  <Input 
+                    required 
+                    type={showPassword ? "text" : "password"} 
+                    value={formData.confirmPassword}
+                    onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})}
+                    placeholder="••••••••" 
+                    className="h-12 pl-10 pr-10 bg-secondary/30 border-none focus-visible:ring-primary font-medium" 
+                  />
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 </div>
               </div>
 
