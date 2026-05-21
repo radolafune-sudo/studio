@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from "react";
@@ -61,17 +62,7 @@ export default function Register() {
                 <div className="space-y-2">
                   <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Country Code</Label>
                   <div className="relative">
-                    <Select defaultValue="+1">
-                      <SelectTrigger className="h-12 pl-10 bg-secondary/30 border-none focus-visible:ring-primary font-medium">
-                        <SelectValue placeholder="Code" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="+1">+1 (USA)</SelectItem>
-                        <SelectItem value="+44">+44 (UK)</SelectItem>
-                        <SelectItem value="+234">+234 (NG)</SelectItem>
-                        <SelectItem value="+971">+971 (UAE)</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <Input required type="text" placeholder="+1" className="h-12 pl-10 bg-secondary/30 border-none focus-visible:ring-primary font-medium" />
                     <Globe className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground z-10" />
                   </div>
                 </div>

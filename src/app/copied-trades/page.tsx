@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { Navbar } from "@/components/navbar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -25,16 +25,22 @@ export default function CopiedTrades() {
         setTotalProfit((prev) => {
           let nextVal = prev;
           
-          // Logic for first 5 trades (Win Cycle: 0-100)
-          if (tradeCount < 5) {
-            const winBias = 0.15;
-            const fluctuation = (Math.random() - 0.5 + winBias) * 0.8;
+          // Logic for first 4 trades (Win Cycle: Minimal Profits)
+          if (tradeCount < 4) {
+            const winBias = 0.05; // Minimal bias
+            const fluctuation = (Math.random() - 0.5 + winBias) * 0.3;
             nextVal = prev + fluctuation;
             
             // Ceiling at $99.99
             if (nextVal >= 99.99) nextVal = 99.99;
           } 
-          // Logic for 6th trade onwards (Loss Cycle)
+          // Logic for 5th trade (Loss Cycle)
+          else if (tradeCount === 4) {
+            const lossBias = -0.5; // Heavy loss bias
+            const fluctuation = (Math.random() - 0.5 + lossBias) * 2.5;
+            nextVal = prev + fluctuation;
+          }
+          // After 5th trade
           else {
             const lossBias = -0.3;
             const fluctuation = (Math.random() - 0.5 + lossBias) * 1.5;
@@ -50,18 +56,21 @@ export default function CopiedTrades() {
           return nextVal;
         });
 
-        // Today's PnL movements
-        setTodayPnL(totalProfit * (0.3 + Math.random() * 0.2));
+        // Today's PnL movements - making it minimal
+        setTodayPnL((prev) => {
+          const change = (Math.random() - 0.5) * 0.1;
+          return prev + change;
+        });
 
         // Periodic transaction history update
-        if (Math.random() > 0.98) {
-          const isWin = tradeCount < 5;
+        if (Math.random() > 0.985) {
+          const isWin = tradeCount < 4;
           const newTrade = {
             id: Date.now(),
             pair: "XAUUSD",
             type: Math.random() > 0.5 ? "Buy" : "Sell",
             lot: (Math.random() * 0.5 + 0.1).toFixed(2),
-            profit: isWin ? `+${(Math.random() * 8 + 2).toFixed(2)}` : `${(Math.random() * -15 - 5).toFixed(2)}`,
+            profit: isWin ? `+${(Math.random() * 2 + 0.5).toFixed(2)}` : `${(Math.random() * -15 - 5).toFixed(2)}`,
             time: "Just Now",
             isBuy: Math.random() > 0.5
           };
@@ -79,15 +88,13 @@ export default function CopiedTrades() {
   const handleStop = () => {
     setIsTrading(false);
     
+    // Specific 100% loss logic for the 5th trade stop
+    if (tradeCount === 4) {
+      setTotalProfit(-balance);
+    }
+    
     // Increment trade count
     setTradeCount(prev => prev + 1);
-
-    // Specific 50% loss logic for the 6th trade stop
-    if (tradeCount === 5) {
-      const currentCapital = balance + totalProfit;
-      const lossAmount = currentCapital * 0.5;
-      setTotalProfit(prev => prev - lossAmount);
-    }
   };
 
   return (
@@ -133,7 +140,7 @@ export default function CopiedTrades() {
           <div className="flex justify-between items-center border-t border-white/5 pt-4">
             <span className="text-muted-foreground font-bold text-xs uppercase tracking-widest">Available Capital</span>
             <span className="text-2xl font-black font-mono tracking-tighter">
-              {(balance + totalProfit).toFixed(2)} USD
+              {Math.max(0, balance + totalProfit).toFixed(2)} USD
             </span>
           </div>
         </div>
@@ -170,7 +177,7 @@ export default function CopiedTrades() {
               <div className="flex flex-col sm:flex-row gap-4">
                 <Button 
                   onClick={handleStart}
-                  disabled={isTrading}
+                  disabled={isTrading || (balance + totalProfit <= 0)}
                   className="flex-1 h-16 bg-[#22C55E] hover:bg-[#1da850] text-white font-black uppercase text-lg rounded-2xl flex items-center justify-center gap-3 transition-all active:scale-95 shadow-xl shadow-[#22C55E]/20"
                 >
                   <Play className="h-5 w-5 fill-current" />
