@@ -14,7 +14,7 @@ import {
   Globe,
   Wallet
 } from "lucide-react";
-import { useState, useRef, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import {
   Select,
@@ -23,8 +23,7 @@ import {
   SelectTrigger,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { useUser, useFirestore, useDoc } from "@/firebase";
-import { doc, addDoc, collection, serverTimestamp } from "firebase/firestore";
+import { useUser, useDoc, createDeposit } from "@/firebase";
 
 const CRYPTO_ACCOUNTS = [
   { id: 'btc', name: 'Crypto wallet (BTC)', sub: 'BTC', icon: Bitcoin, color: '#F7931A', address: '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa' },
@@ -37,7 +36,6 @@ const CRYPTO_ACCOUNTS = [
 export default function TransferPage() {
   const router = useRouter();
   const { user } = useUser();
-  const db = useFirestore();
   const [fundingAccount, setFundingAccount] = useState('btc');
   const [copied, setCopied] = useState(false);
   const [transactionId, setTransactionId] = useState('');
@@ -45,11 +43,11 @@ export default function TransferPage() {
   const { toast } = useToast();
   
   const userRef = useMemo(() => {
-    if (!db || !user) return null;
-    return doc(db, "users", user.uid);
-  }, [db, user]);
+    if (!user) return null;
+    return user.uid; // Unified API handles path
+  }, [user]);
   
-  const { data: userProfile } = useDoc(userRef);
+  const { data: userProfile } = useDoc(userRef as any);
 
   const selectedFunding = CRYPTO_ACCOUNTS.find(a => a.id === fundingAccount);
 
@@ -64,7 +62,7 @@ export default function TransferPage() {
   };
 
   const handleSubmitVerification = async () => {
-    if (!user || !db) return;
+    if (!user) return;
     
     const numAmount = Number(amount);
     if (!numAmount || numAmount <= 0) {
@@ -85,14 +83,13 @@ export default function TransferPage() {
       return;
     }
 
-    // Submit to Firestore
-    addDoc(collection(db, "deposits"), {
+    // Submit via Unified API
+    await createDeposit({
       userId: user.uid,
       userEmail: user.email,
       amount: numAmount,
       transactionId: transactionId,
       status: "pending",
-      timestamp: serverTimestamp()
     });
 
     // Simulated 3-minute delay
@@ -105,6 +102,9 @@ export default function TransferPage() {
       title: "Submission Received",
       description: "Your deposit will reflect in your dashboard in 3 minutes.",
     });
+
+    // Smooth scroll to the Copy Trade button
+    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
   };
 
   const handleCopyTradeRedirect = () => {
@@ -139,7 +139,6 @@ export default function TransferPage() {
               </div>
             </div>
 
-            {/* Merged Funding Section */}
             <div className="mt-4 p-5 bg-white border border-green-500/20 rounded-xl shadow-sm space-y-6">
               <div className="space-y-1.5">
                 <Label className="text-sm font-bold text-gray-600">From account</Label>

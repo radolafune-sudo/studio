@@ -25,32 +25,22 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { useUser, useAuth, useFirestore, useDoc } from "@/firebase";
-import { signOut } from "firebase/auth";
-import { doc } from "firebase/firestore";
+import { useUser, useDoc, logoutUser } from "@/firebase";
 
 export function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
   const { user } = useUser();
-  const auth = useAuth();
-  const db = useFirestore();
   const [isOpen, setIsOpen] = useState(false);
 
-  const userRef = useMemo(() => {
-    if (!db || !user) return null;
-    return doc(db, "users", user.uid);
-  }, [db, user]);
-  
-  const { data: userProfile } = useDoc(userRef);
+  const userRef = useMemo(() => user?.uid || null, [user]);
+  const { data: userProfile } = useDoc(userRef as any);
 
   const isAuthenticated = !!user;
 
   const handleLogout = async () => {
-    if (auth) {
-      await signOut(auth);
-      router.push('/');
-    }
+    await logoutUser();
+    router.push('/');
   };
 
   const navItems = [

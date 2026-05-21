@@ -10,13 +10,11 @@ import { Label } from "@/components/ui/label";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Lock, Mail, LogIn, Eye, EyeOff } from "lucide-react";
-import { signInWithEmailAndPassword } from "firebase/auth";
-import { useAuth } from "@/firebase/provider";
+import { loginUser } from "@/firebase";
 import { useToast } from "@/hooks/use-toast";
 
 export default function Login() {
   const router = useRouter();
-  const auth = useAuth();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -25,11 +23,9 @@ export default function Login() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!auth) return;
-    
     setLoading(true);
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      await loginUser(email, password);
       router.push('/dashboard');
     } catch (error: any) {
       toast({

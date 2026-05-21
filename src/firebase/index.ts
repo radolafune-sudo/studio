@@ -2,9 +2,31 @@
 'use client';
 
 import { initializeApp, getApps, getApp, FirebaseApp } from 'firebase/app';
-import { getAuth, Auth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, User } from 'firebase/auth';
-import { getFirestore, Firestore, doc, setDoc, getDoc, collection, addDoc, updateDoc, onSnapshot, serverTimestamp, increment } from 'firebase/firestore';
+import { 
+  getAuth, 
+  Auth, 
+  signInWithEmailAndPassword as firebaseSignIn, 
+  createUserWithEmailAndPassword as firebaseCreateUser, 
+  onAuthStateChanged, 
+  signOut as firebaseSignOut, 
+  User 
+} from 'firebase/auth';
+import { 
+  getFirestore, 
+  Firestore, 
+  doc, 
+  setDoc as firebaseSetDoc, 
+  getDoc as firebaseGetDoc, 
+  collection, 
+  addDoc as firebaseAddDoc, 
+  updateDoc as firebaseUpdateDoc, 
+  onSnapshot, 
+  serverTimestamp, 
+  increment as firebaseIncrement 
+} from 'firebase/firestore';
 import { firebaseConfig } from './config';
+
+const isPlaceholder = firebaseConfig.apiKey === "AIzaSy..." || !firebaseConfig.apiKey;
 
 // Simulated Security Layer (Local Persistence)
 class MockAuth {
@@ -28,13 +50,17 @@ class MockAuth {
     const user = { uid: `mock_${Date.now()}`, email };
     this.currentUser = user;
     localStorage.setItem('mock_user', JSON.stringify(user));
+    // Initialize user in mock DB
+    const db = JSON.parse(localStorage.getItem('mock_db_users') || '{}');
+    db[user.uid] = { uid: user.uid, email, balance: 0, role: 'user', name: email.split('@')[0], createdAt: new Date().toISOString() };
+    localStorage.setItem('mock_db_users', JSON.stringify(db));
     this.notify();
     return { user };
   }
 
   async signInWithEmailAndPassword(email: string) {
     const users = JSON.parse(localStorage.getItem('mock_db_users') || '{}');
-    const user = Object.values(users).find((u: any) => u.email === email);
+    const user = Object.values(users).find((u: any) => (u as any).email === email);
     if (!user) throw new Error("User not found");
     this.currentUser = { uid: (user as any).uid, email: (user as any).email };
     localStorage.setItem('mock_user', JSON.stringify(this.currentUser));
@@ -52,43 +78,34 @@ class MockAuth {
 }
 
 class MockFirestore {
-  async setDoc(docRef: any, data: any) {
+  async setDoc(docId: string, data: any) {
     const db = JSON.parse(localStorage.getItem('mock_db_users') || '{}');
-    db[docRef.id] = { ...db[docRef.id], ...data };
+    db[docId] = { ...db[docId], ...data };
     localStorage.setItem('mock_db_users', JSON.stringify(db));
   }
-  async updateDoc(docRef: any, data: any) { return this.setDoc(docRef, data); }
-  async getDoc(docRef: any) {
+  async updateDoc(docId: string, data: any) { return this.setDoc(docId, data); }
+  async getDoc(docId: string) {
     const db = JSON.parse(localStorage.getItem('mock_db_users') || '{}');
-    return { exists: () => !!db[docRef.id], data: () => db[docRef.id] };
+    return { exists: () => !!db[docId], data: () => db[docId] };
   }
-  doc(_: any, coll: string, id: string) { return { id, coll }; }
-  collection(_: any, name: string) { return { name }; }
-  async addDoc(collRef: any, data: any) {
-    const db = JSON.parse(localStorage.getItem(`mock_db_${collRef.name}`) || '[]');
-    db.push({ ...data, id: Date.now() });
-    localStorage.setItem(`mock_db_${collRef.name}`, JSON.stringify(db));
-  }
-  onSnapshot(ref: any, cb: any) {
-    const update = () => {
-      const db = JSON.parse(localStorage.getItem('mock_db_users') || '{}');
-      cb({ data: () => db[ref.id], exists: () => !!db[ref.id] });
-    };
-    update();
-    const interval = setInterval(update, 2000);
-    return () => clearInterval(interval);
+  async addDoc(collName: string, data: any) {
+    const db = JSON.parse(localStorage.getItem(`mock_db_${collName}`) || '[]');
+    const newDoc = { ...data, id: Date.now().toString() };
+    db.push(newDoc);
+    localStorage.setItem(`mock_db_${collName}`, JSON.stringify(db));
+    return { id: newDoc.id };
   }
 }
 
+const mockAuth = new MockAuth();
+const mockFirestore = new MockFirestore();
+
 export function initializeFirebase() {
-  const isPlaceholder = firebaseConfig.apiKey === "AIzaSy..." || !firebaseConfig.apiKey;
-  
   if (isPlaceholder) {
-    console.warn("Using Simulated Security Layer (Local Simulation)");
     return {
       app: {} as FirebaseApp,
-      auth: new MockAuth() as unknown as Auth,
-      firestore: new MockFirestore() as unknown as Firestore
+      auth: mockAuth as unknown as Auth,
+      firestore: mockFirestore as unknown as Firestore
     };
   }
 
@@ -99,13 +116,42 @@ export function initializeFirebase() {
     app = getApp();
   }
 
-  const auth = getAuth(app);
-  const firestore = getFirestore(app);
+  return { app, auth: getAuth(app), firestore: getFirestore(app) };
+}
 
-  return { app, auth, firestore };
+// Unified Functional API
+export async function loginUser(email: string, pass: string) {
+  if (isPlaceholder) return mockAuth.signInWithEmailAndPassword(email);
+  const { auth } = initializeFirebase();
+  return firebaseSignIn(auth, email, pass);
+}
+
+export async function registerUser(email: string, pass: string) {
+  if (isPlaceholder) return mockAuth.createUserWithEmailAndPassword(email);
+  const { auth } = initializeFirebase();
+  return firebaseCreateUser(auth, email, pass);
+}
+
+export async function logoutUser() {
+  if (isPlaceholder) return mockAuth.signOut();
+  const { auth } = initializeFirebase();
+  return firebaseSignOut(auth);
+}
+
+export async function updateUserProfile(uid: string, data: any) {
+  if (isPlaceholder) return mockFirestore.updateDoc(uid, data);
+  const { firestore } = initializeFirebase();
+  return firebaseUpdateDoc(doc(firestore, "users", uid), data);
+}
+
+export async function createDeposit(data: any) {
+  if (isPlaceholder) return mockFirestore.addDoc("deposits", data);
+  const { firestore } = initializeFirebase();
+  return firebaseAddDoc(collection(firestore, "deposits"), { ...data, timestamp: serverTimestamp() });
 }
 
 export * from './provider';
 export * from './auth/use-user';
 export * from './firestore/use-doc';
 export * from './firestore/use-collection';
+export { serverTimestamp, firebaseIncrement as increment };

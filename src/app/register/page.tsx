@@ -10,15 +10,11 @@ import { Label } from "@/components/ui/label";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Lock, Mail, UserPlus, Eye, EyeOff, Globe, Phone } from "lucide-react";
-import { createUserWithEmailAndPassword } from "firebase/auth";
-import { doc, setDoc } from "firebase/firestore";
-import { useAuth, useFirestore } from "@/firebase/provider";
+import { registerUser, updateUserProfile } from "@/firebase";
 import { useToast } from "@/hooks/use-toast";
 
 export default function Register() {
   const router = useRouter();
-  const auth = useAuth();
-  const db = useFirestore();
   const { toast } = useToast();
   
   const [loading, setLoading] = useState(false);
@@ -34,15 +30,12 @@ export default function Register() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!auth || !db) return;
-    
     setLoading(true);
     try {
-      const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
-      const user = userCredential.user;
+      const { user } = await registerUser(formData.email, formData.password);
       
-      // Create user profile in Firestore
-      await setDoc(doc(db, "users", user.uid), {
+      // Create user profile in local simulated layer or Firestore
+      await updateUserProfile(user.uid, {
         email: formData.email,
         name: formData.name || formData.email.split('@')[0],
         balance: 0,

@@ -1,21 +1,19 @@
 
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { Navbar } from "@/components/navbar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Zap, Play, Square, Loader2, Info } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useUser, useFirestore, useDoc } from "@/firebase";
-import { doc, updateDoc } from "firebase/firestore";
+import { useUser, useDoc, updateUserProfile } from "@/firebase";
 
 export default function CopiedTrades() {
   const { user } = useUser();
-  const db = useFirestore();
-  const userRef = user && db ? doc(db, "users", user.uid) : null;
-  const { data: userProfile } = useDoc(userRef);
+  const userRef = useMemo(() => user?.uid || null, [user]);
+  const { data: userProfile } = useDoc(userRef as any);
 
   const [isTrading, setIsTrading] = useState(false);
   const [todayPnL, setTodayPnL] = useState(0);
@@ -59,7 +57,7 @@ export default function CopiedTrades() {
           const currentTotal = (userProfile.balance || 0) + nextVal;
           if (currentTotal <= 0) {
             setIsTrading(false);
-            if (userRef) updateDoc(userRef, { balance: 0 });
+            if (user?.uid) updateUserProfile(user.uid, { balance: 0 });
             return -(userProfile.balance || 0);
           }
 
@@ -85,7 +83,7 @@ export default function CopiedTrades() {
       tradeStartTime.current = null;
     }
     return () => clearInterval(interval);
-  }, [isTrading, userProfile, todayPnL, userRef]);
+  }, [isTrading, userProfile, todayPnL, user]);
 
   const handleStart = () => {
     if (!userProfile || userProfile.balance <= 0) return;
@@ -94,9 +92,9 @@ export default function CopiedTrades() {
 
   const handleStop = () => {
     setIsTrading(false);
-    if (userRef && userProfile) {
+    if (user?.uid && userProfile) {
       const finalBalance = Math.max(0, userProfile.balance + todayPnL);
-      updateDoc(userRef, { balance: finalBalance });
+      updateUserProfile(user.uid, { balance: finalBalance });
     }
   };
 
