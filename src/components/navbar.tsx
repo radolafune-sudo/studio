@@ -11,7 +11,8 @@ import {
   Globe,
   LogOut,
   Settings,
-  ChevronDown
+  ChevronDown,
+  ShieldAlert
 } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
@@ -30,7 +31,7 @@ export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
 
   // Check if we are on an authenticated page
-  const isAuthenticated = pathname?.startsWith('/dashboard') || pathname?.startsWith('/transfer') || pathname?.startsWith('/copied-trades');
+  const isAuthenticated = pathname?.startsWith('/dashboard') || pathname?.startsWith('/transfer') || pathname?.startsWith('/copied-trades') || pathname?.startsWith('/admin');
 
   const navItems = [
     { name: "TRADING", href: isAuthenticated ? "/dashboard" : "/login" },
@@ -45,8 +46,8 @@ export function Navbar() {
           JM
         </div>
         <div className="flex flex-col">
-          <span className="text-[20px] font-black text-black tracking-tighter uppercase">JUST MARKETS</span>
-          <span className="text-[7px] font-bold text-muted-foreground tracking-[0.3em] uppercase w-full text-center">
+          <span className="text-[20px] font-black text-black tracking-tighter uppercase leading-[0.9]">JUST MARKETS</span>
+          <span className="text-[7px] font-bold text-muted-foreground tracking-[0.3em] uppercase w-full text-center mt-0.5">
             COPY TRADING PLATFORM
           </span>
         </div>
@@ -111,10 +112,17 @@ export function Navbar() {
                   <DropdownMenuContent align="end" className="w-56 p-2 rounded-xl">
                     <DropdownMenuLabel className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Account Details</DropdownMenuLabel>
                     <DropdownMenuSeparator />
+                    <DropdownMenuItem asChild>
+                      <Link href="/admin" className="py-3 rounded-lg font-bold text-sm cursor-pointer text-primary">
+                        <ShieldAlert className="mr-2 h-4 w-4" />
+                        Admin Panel
+                      </Link>
+                    </DropdownMenuItem>
                     <DropdownMenuItem className="py-3 rounded-lg font-bold text-sm cursor-pointer">
                       <Settings className="mr-2 h-4 w-4" />
                       Settings
                     </DropdownMenuItem>
+                    <DropdownMenuSeparator />
                     <DropdownMenuItem asChild>
                       <Link href="/" className="py-3 rounded-lg font-bold text-sm cursor-pointer text-destructive focus:text-destructive">
                         <LogOut className="mr-2 h-4 w-4" />
@@ -166,8 +174,14 @@ export function Navbar() {
               ) : (
                 <div className="flex flex-col gap-2 p-2 bg-muted/20 rounded-xl">
                   <p className="text-[10px] font-black uppercase text-center text-muted-foreground py-2">Account: 699478516</p>
+                  <Link href="/admin" className="w-full" onClick={() => setIsOpen(false)}>
+                    <Button variant="ghost" className="w-full justify-start font-bold uppercase tracking-widest text-primary">
+                      <ShieldAlert className="h-4 w-4 mr-2" />
+                      Admin Panel
+                    </Button>
+                  </Link>
                   <Button variant="ghost" className="w-full justify-start font-bold uppercase tracking-widest text-black">Settings</Button>
-                  <Link href="/" className="w-full">
+                  <Link href="/" className="w-full" onClick={() => setIsOpen(false)}>
                     <Button variant="destructive" className="w-full font-bold uppercase tracking-widest">Log Out</Button>
                   </Link>
                 </div>
