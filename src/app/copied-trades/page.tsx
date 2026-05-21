@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Navbar } from "@/components/navbar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -12,8 +12,8 @@ import { useUser, useDoc, updateUserProfile } from "@/firebase";
 
 export default function CopiedTrades() {
   const { user } = useUser();
-  const userRef = useMemo(() => user?.uid || null, [user]);
-  const { data: userProfile } = useDoc(userRef as any);
+  const userPath = user ? `users/${user.uid}` : null;
+  const { data: userProfile } = useDoc(userPath);
 
   const [isTrading, setIsTrading] = useState(false);
   const [todayPnL, setTodayPnL] = useState(0);

@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { Navbar } from "@/components/navbar";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -20,8 +20,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { useUser, useFirestore, useDoc } from "@/firebase";
-import { doc, updateDoc, increment } from "firebase/firestore";
+import { useUser, useDoc, updateUserProfile, increment } from "@/firebase";
 
 const TRADER_NAMES = [
   "Alex Sterling", "Elena Vance", "Marcus Chen", "Sarah Jenkins", 
@@ -32,14 +31,8 @@ const TRADER_NAMES = [
 export default function Dashboard() {
   const router = useRouter();
   const { user, loading: authLoading } = useUser();
-  const db = useFirestore();
-  
-  const userRef = useMemo(() => {
-    if (!db || !user) return null;
-    return doc(db, "users", user.uid);
-  }, [db, user]);
-  
-  const { data: userProfile, loading: profileLoading } = useDoc(userRef);
+  const userPath = user ? `users/${user.uid}` : null;
+  const { data: userProfile, loading: profileLoading } = useDoc(userPath);
   
   const [hasNotification, setHasNotification] = useState(true);
   const [activeTraders, setActiveTraders] = useState([
@@ -55,7 +48,7 @@ export default function Dashboard() {
   }, [user, authLoading, router]);
 
   useEffect(() => {
-    if (!user || !db) return;
+    if (!user) return;
 
     const checkDeposit = async () => {
       const pendingStr = localStorage.getItem(`pending_deposit_${user.uid}`);
@@ -65,7 +58,7 @@ export default function Dashboard() {
         const threeMinutes = 3 * 60 * 1000;
         
         if (now - timestamp >= threeMinutes) {
-          await updateDoc(doc(db, "users", user.uid), {
+          await updateUserProfile(user.uid, {
             balance: increment(Number(amount))
           });
           localStorage.removeItem(`pending_deposit_${user.uid}`);
@@ -97,7 +90,7 @@ export default function Dashboard() {
       clearInterval(nameInterval);
       clearInterval(statsInterval);
     };
-  }, [user, db]);
+  }, [user]);
 
   if (authLoading || profileLoading) {
     return (

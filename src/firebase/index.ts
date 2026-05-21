@@ -7,26 +7,36 @@ import {
   Auth, 
   signInWithEmailAndPassword as firebaseSignIn, 
   createUserWithEmailAndPassword as firebaseCreateUser, 
-  onAuthStateChanged, 
   signOut as firebaseSignOut, 
-  User 
 } from 'firebase/auth';
 import { 
   getFirestore, 
   Firestore, 
   doc, 
-  setDoc as firebaseSetDoc, 
-  getDoc as firebaseGetDoc, 
+  updateDoc as firebaseUpdateDoc, 
   collection, 
   addDoc as firebaseAddDoc, 
-  updateDoc as firebaseUpdateDoc, 
-  onSnapshot, 
   serverTimestamp, 
   increment as firebaseIncrement 
 } from 'firebase/firestore';
 import { firebaseConfig } from './config';
 
-const isPlaceholder = firebaseConfig.apiKey === "AIzaSy..." || !firebaseConfig.apiKey;
+export const isPlaceholder = firebaseConfig.apiKey === "AIzaSy..." || !firebaseConfig.apiKey;
+
+// Simple Event Emitter for Mock Reactivity
+class MockEmitter {
+  private listeners: Record<string, ((data: any) => void)[]> = {};
+  on(event: string, cb: any) {
+    if (!this.listeners[event]) this.listeners[event] = [];
+    this.listeners[event].push(cb);
+    return () => { this.listeners[event] = this.listeners[event].filter(l => l !== cb); };
+  }
+  emit(event: string, data: any) {
+    if (this.listeners[event]) this.listeners[event].forEach(cb => cb(data));
+  }
+}
+
+const mockEvents = new MockEmitter();
 
 // Simulated Security Layer (Local Persistence)
 class MockAuth {
@@ -50,10 +60,12 @@ class MockAuth {
     const user = { uid: `mock_${Date.now()}`, email };
     this.currentUser = user;
     localStorage.setItem('mock_user', JSON.stringify(user));
+    
     // Initialize user in mock DB
     const db = JSON.parse(localStorage.getItem('mock_db_users') || '{}');
     db[user.uid] = { uid: user.uid, email, balance: 0, role: 'user', name: email.split('@')[0], createdAt: new Date().toISOString() };
     localStorage.setItem('mock_db_users', JSON.stringify(db));
+    
     this.notify();
     return { user };
   }
@@ -82,6 +94,8 @@ class MockFirestore {
     const db = JSON.parse(localStorage.getItem('mock_db_users') || '{}');
     db[docId] = { ...db[docId], ...data };
     localStorage.setItem('mock_db_users', JSON.stringify(db));
+    mockEvents.emit(`doc_users_${docId}`, db[docId]);
+    mockEvents.emit(`collection_users`, Object.values(db));
   }
   async updateDoc(docId: string, data: any) { return this.setDoc(docId, data); }
   async getDoc(docId: string) {
@@ -90,9 +104,10 @@ class MockFirestore {
   }
   async addDoc(collName: string, data: any) {
     const db = JSON.parse(localStorage.getItem(`mock_db_${collName}`) || '[]');
-    const newDoc = { ...data, id: Date.now().toString() };
+    const newDoc = { ...data, id: Date.now().toString(), timestamp: new Date().toISOString() };
     db.push(newDoc);
     localStorage.setItem(`mock_db_${collName}`, JSON.stringify(db));
+    mockEvents.emit(`collection_${collName}`, db);
     return { id: newDoc.id };
   }
 }
@@ -150,6 +165,7 @@ export async function createDeposit(data: any) {
   return firebaseAddDoc(collection(firestore, "deposits"), { ...data, timestamp: serverTimestamp() });
 }
 
+export { mockEvents };
 export * from './provider';
 export * from './auth/use-user';
 export * from './firestore/use-doc';

@@ -3,7 +3,7 @@
 
 import { useState } from "react";
 import { Navbar } from "@/components/navbar";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { 
   Users, 
@@ -11,7 +11,6 @@ import {
   ArrowUpCircle, 
   CheckCircle2, 
   XCircle, 
-  LayoutDashboard,
   ShieldCheck,
   Search,
   Wallet
@@ -20,37 +19,22 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-
-// Mock data for initial admin view
-const MOCK_USERS = [
-  { id: "u1", name: "John Doe", email: "john@example.com", balance: 1450.50, status: "Active" },
-  { id: "u2", name: "Sarah Smith", email: "sarah@example.com", balance: 0.00, status: "Active" },
-];
-
-const MOCK_DEPOSITS = [
-  { id: "d1", user: "John Doe", amount: 500, txId: "TX7892341", status: "pending", time: "2 hours ago" },
-  { id: "d2", user: "Jane Foster", amount: 1200, txId: "TX0012933", status: "pending", time: "5 mins ago" },
-];
+import { useCollection, updateUserProfile, increment } from "@/firebase";
 
 export default function AdminPanel() {
-  const [users, setUsers] = useState(MOCK_USERS);
-  const [deposits, setDeposits] = useState(MOCK_DEPOSITS);
+  const { data: users } = useCollection<any>('users');
+  const { data: deposits } = useCollection<any>('deposits');
   const { toast } = useToast();
 
-  const handleApproveDeposit = (id: string, amount: number) => {
-    setDeposits(prev => prev.filter(d => d.id !== id));
+  const handleApproveDeposit = async (id: string, userId: string, amount: number) => {
+    // In Mock mode, we just update the user's balance
+    await updateUserProfile(userId, {
+      balance: increment(amount)
+    });
+    
     toast({
       title: "Deposit Approved",
       description: `The amount of $${amount} has been added to the user's account.`,
-    });
-  };
-
-  const handleRejectDeposit = (id: string) => {
-    setDeposits(prev => prev.filter(d => d.id !== id));
-    toast({
-      variant: "destructive",
-      title: "Deposit Rejected",
-      description: "Transaction has been flagged as invalid.",
     });
   };
 
@@ -73,7 +57,7 @@ export default function AdminPanel() {
             </div>
             <div className="pr-4">
               <p className="text-[10px] font-black uppercase text-muted-foreground">Total Users</p>
-              <p className="font-black text-lg">1,242</p>
+              <p className="font-black text-lg">{users?.length || 0}</p>
             </div>
           </div>
         </header>
@@ -110,12 +94,12 @@ export default function AdminPanel() {
                           <Wallet className="h-6 w-6 text-primary" />
                         </div>
                         <div className="space-y-1">
-                          <h3 className="font-black text-xl">{deposit.user}</h3>
+                          <h3 className="font-black text-xl">{deposit.userEmail}</h3>
                           <div className="flex items-center gap-3">
                             <Badge variant="outline" className="text-[10px] font-mono bg-muted/50 border-none">
-                              TX: {deposit.txId}
+                              TX: {deposit.transactionId}
                             </Badge>
-                            <span className="text-[10px] text-muted-foreground font-bold uppercase">{deposit.time}</span>
+                            <span className="text-[10px] text-muted-foreground font-bold uppercase">{new Date(deposit.timestamp).toLocaleTimeString()}</span>
                           </div>
                         </div>
                       </div>
@@ -127,14 +111,13 @@ export default function AdminPanel() {
 
                       <div className="flex items-center gap-3 w-full md:w-auto">
                         <Button 
-                          onClick={() => handleApproveDeposit(deposit.id, deposit.amount)}
+                          onClick={() => handleApproveDeposit(deposit.id, deposit.userId, deposit.amount)}
                           className="flex-1 bg-accent hover:bg-accent/90 text-white font-black uppercase tracking-widest h-12 rounded-xl"
                         >
                           <CheckCircle2 className="h-4 w-4 mr-2" />
                           Approve
                         </Button>
                         <Button 
-                          onClick={() => handleRejectDeposit(deposit.id)}
                           variant="outline"
                           className="flex-1 border-destructive text-destructive hover:bg-destructive/5 font-black uppercase tracking-widest h-12 rounded-xl"
                         >
@@ -167,11 +150,11 @@ export default function AdminPanel() {
                 </thead>
                 <tbody>
                   {users.map(user => (
-                    <tr key={user.id} className="border-b hover:bg-muted/10 transition-colors">
+                    <tr key={user.uid} className="border-b hover:bg-muted/10 transition-colors">
                       <td className="p-6">
                         <div className="flex items-center gap-4">
                           <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-black text-xs">
-                            {user.name[0]}
+                            {user.name?.[0] || 'U'}
                           </div>
                           <div>
                             <p className="font-black text-sm uppercase">{user.name}</p>
@@ -180,7 +163,7 @@ export default function AdminPanel() {
                         </div>
                       </td>
                       <td className="p-6">
-                        <p className="font-black font-mono text-lg">${user.balance.toFixed(2)}</p>
+                        <p className="font-black font-mono text-lg">${(user.balance || 0).toFixed(2)}</p>
                       </td>
                       <td className="p-6">
                         <Badge className="bg-accent/10 text-accent font-bold text-[9px] border-none px-3">ACTIVE</Badge>
