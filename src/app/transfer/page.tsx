@@ -20,11 +20,9 @@ import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { useUser, useDoc, createDeposit } from "@/firebase";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { cn } from "@/lib/utils";
 
 const CRYPTO_WALLETS = [
-  { id: 'ib', name: "IB Wallet", icon: <div className="w-5 h-5 rounded-full border border-gray-400 flex items-center justify-center text-[8px] font-bold text-gray-400">IB</div>, symbol: "USD" },
   { id: 'btc', name: "Crypto wallet (BTC)", icon: <Bitcoin className="h-5 w-5 text-[#F7931A]" />, symbol: "BTC" },
   { id: 'usdt', name: "Crypto wallet (USDT TRC20)", icon: <CircleDollarSign className="h-5 w-5 text-[#26A17B]" />, symbol: "USDT" },
   { id: 'trx', name: "TRON (TRX)", icon: <TrendingUp className="h-5 w-5 text-[#FF0013]" />, symbol: "TRX" },
@@ -35,7 +33,8 @@ const CRYPTO_WALLETS = [
 export default function TransferPage() {
   const router = useRouter();
   const { user } = useUser();
-  const [fundingOpen, setFundingOpen] = useState(false);
+  const [listOpen, setListOpen] = useState(false);
+  const [detailsVisible, setDetailsVisible] = useState(false);
   const [copied, setCopied] = useState(false);
   const [transactionId, setTransactionId] = useState('');
   const [depositAmount, setDepositAmount] = useState('25');
@@ -75,7 +74,7 @@ export default function TransferPage() {
     });
 
     toast({ title: "Submission Received", description: "Admin will review and approve your deposit shortly." });
-    setFundingOpen(false);
+    setDetailsVisible(false);
   };
 
   const handleCopyTradeRedirect = () => {
@@ -88,11 +87,17 @@ export default function TransferPage() {
     router.push('/copied-trades');
   };
 
+  const handleWalletSelect = (id: string) => {
+    setSelectedWalletId(id);
+    setListOpen(false);
+    setDetailsVisible(true);
+  };
+
   return (
     <div className="flex flex-col min-h-screen bg-[#F8F9FC] text-foreground font-body">
       <Navbar />
       <main className="flex-1 container mx-auto px-4 py-8 max-w-xl space-y-8">
-        {/* Available Capital - AT THE TOP */}
+        {/* Available Capital */}
         <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex items-center justify-between">
           <div>
             <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Available Capital</p>
@@ -113,35 +118,36 @@ export default function TransferPage() {
           </div>
         </div>
 
+        {/* From account Section */}
         <div className="space-y-4">
           <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">From account</Label>
-          <Collapsible open={fundingOpen} onOpenChange={setFundingOpen} className="w-full">
-            <CollapsibleTrigger asChild>
-              <button className={cn(
-                "w-full h-auto p-4 bg-[#121412] border border-accent/40 rounded-xl flex items-center justify-between transition-all",
-                fundingOpen ? "ring-2 ring-accent" : ""
-              )}>
-                <div className="flex items-center gap-4">
-                  <div className="bg-accent/20 border border-accent/40 px-2 py-0.5 rounded text-[10px] font-black text-accent uppercase tracking-wider">MT5</div>
-                  <span className="text-[15px] font-black text-white tracking-tight">{userProfile?.uid || "332323752"}</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <span className="text-[13px] font-bold text-gray-400">0.00 USD</span>
-                  <ChevronDown className={cn("h-4 w-4 text-gray-500 transition-transform", fundingOpen && "rotate-180")} />
-                </div>
-              </button>
-            </CollapsibleTrigger>
-            
-            <CollapsibleContent className="mt-2 animate-in slide-in-from-top-2 duration-300">
-              {/* Wallet List List (Rolls down with borders) */}
-              <div className="bg-[#121412] border border-[#2A2D2A] rounded-xl overflow-hidden mb-4 divide-y divide-[#2A2D2A]">
+          <div className="relative">
+            <button 
+              onClick={() => setListOpen(!listOpen)}
+              className={cn(
+                "w-full h-auto p-4 bg-[#121412] border border-[#2A2D2A] rounded-xl flex items-center justify-between transition-all hover:bg-[#1A1C1A]",
+                listOpen ? "ring-2 ring-accent" : ""
+              )}
+            >
+              <div className="flex items-center gap-4">
+                <div className="bg-accent/20 border border-accent/40 px-2 py-0.5 rounded text-[10px] font-black text-accent uppercase tracking-wider">MT5</div>
+                <span className="text-[15px] font-black text-white tracking-tight">{userProfile?.uid || "332323752"}</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="text-[13px] font-bold text-gray-400">0.00 USD</span>
+                <ChevronDown className={cn("h-4 w-4 text-gray-500 transition-transform", listOpen && "rotate-180")} />
+              </div>
+            </button>
+
+            {listOpen && (
+              <div className="absolute top-full left-0 w-full z-50 mt-2 bg-[#121412] border border-[#2A2D2A] rounded-xl overflow-hidden shadow-2xl divide-y divide-[#2A2D2A] animate-in slide-in-from-top-2 duration-200">
                 {CRYPTO_WALLETS.map((wallet) => (
                   <div 
                     key={wallet.id} 
-                    onClick={() => setSelectedWalletId(wallet.id)}
+                    onClick={() => handleWalletSelect(wallet.id)}
                     className={cn(
-                      "flex items-center justify-between p-4 cursor-pointer transition-all",
-                      selectedWalletId === wallet.id ? "bg-white/10" : "hover:bg-white/5"
+                      "flex items-center justify-between p-4 cursor-pointer transition-all hover:bg-white/5",
+                      selectedWalletId === wallet.id ? "bg-white/10" : ""
                     )}
                   >
                     <div className="flex items-center gap-3">
@@ -152,52 +158,68 @@ export default function TransferPage() {
                   </div>
                 ))}
               </div>
+            )}
+          </div>
+        </div>
 
-              {/* Funding Details (White Background, Black Text) */}
-              <div className="bg-white p-8 border border-gray-200 rounded-[2rem] shadow-2xl space-y-8">
-                <div className="space-y-6">
-                  <h2 className="text-sm font-black uppercase text-black tracking-widest leading-tight">DEPOSIT TO FUND YOUR COPY TRADING ACCOUNT</h2>
-                  
-                  <div className="space-y-2">
-                    <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">copy the address below ({activeWallet?.symbol})</p>
-                    <div className="flex items-center gap-3 bg-muted/30 p-4 rounded-xl border border-dashed border-gray-200">
-                      <span className="flex-1 font-mono text-[11px] break-all text-black font-bold">{walletAddress}</span>
-                      <button onClick={() => handleCopy(walletAddress)} className="p-3 bg-white hover:bg-muted/50 rounded-lg transition-colors shadow-sm">
-                        {copied ? <Check className="h-4 w-4 text-accent" /> : <Copy className="h-4 w-4 text-primary" />}
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 gap-6 pt-6 border-t border-muted/30">
-                    <div className="space-y-2">
-                      <Label className="text-[10px] font-black uppercase tracking-widest text-black ml-1">Amount</Label>
-                      <Input 
-                        placeholder="25" 
-                        type="number" 
-                        value={depositAmount} 
-                        onChange={(e) => setDepositAmount(e.target.value)}
-                        className="h-14 bg-muted/20 border-none text-xl font-black rounded-xl text-black"
-                      />
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Label className="text-[10px] font-black uppercase tracking-widest text-black ml-1">Transaction ID</Label>
-                      <Input 
-                        placeholder="tyfugfigop" 
-                        value={transactionId} 
-                        onChange={(e) => setTransactionId(e.target.value)}
-                        className="h-14 bg-muted/20 border-none font-mono text-black rounded-xl font-bold"
-                      />
-                    </div>
-
-                    <Button onClick={handleSubmitVerification} className="w-full bg-primary text-white font-black uppercase tracking-widest h-16 rounded-2xl shadow-xl shadow-primary/20">
-                      Submit Verification
-                    </Button>
-                  </div>
+        {/* Funding Details Dropdown (White/Black) */}
+        {detailsVisible && (
+          <div className="bg-white p-8 border border-gray-200 rounded-[2rem] shadow-2xl space-y-8 animate-in slide-in-from-top-2 duration-300">
+            <div className="space-y-6">
+              <h2 className="text-[11px] font-black uppercase text-black tracking-widest leading-tight">DEPOSIT TO FUND YOUR COPY TRADING ACCOUNT</h2>
+              
+              <div className="space-y-2">
+                <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">copy the address below ({activeWallet?.symbol})</p>
+                <div className="flex items-center gap-3 bg-muted/30 p-4 rounded-xl border border-dashed border-gray-200">
+                  <span className="flex-1 font-mono text-[11px] break-all text-black font-bold">{walletAddress}</span>
+                  <button onClick={() => handleCopy(walletAddress)} className="p-3 bg-white hover:bg-muted/50 rounded-lg transition-colors shadow-sm">
+                    {copied ? <Check className="h-4 w-4 text-accent" /> : <Copy className="h-4 w-4 text-primary" />}
+                  </button>
                 </div>
               </div>
-            </CollapsibleContent>
-          </Collapsible>
+
+              <div className="grid grid-cols-1 gap-6 pt-6 border-t border-muted/30">
+                <div className="space-y-2">
+                  <Label className="text-[10px] font-black uppercase tracking-widest text-black ml-1">Amount</Label>
+                  <Input 
+                    placeholder="25" 
+                    type="number" 
+                    value={depositAmount} 
+                    onChange={(e) => setDepositAmount(e.target.value)}
+                    className="h-14 bg-muted/20 border-none text-xl font-black rounded-xl text-black"
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label className="text-[10px] font-black uppercase tracking-widest text-black ml-1">Transaction ID</Label>
+                  <Input 
+                    placeholder="tyfugfigop" 
+                    value={transactionId} 
+                    onChange={(e) => setTransactionId(e.target.value)}
+                    className="h-14 bg-muted/20 border-none font-mono text-black rounded-xl font-bold"
+                  />
+                </div>
+
+                <Button onClick={handleSubmitVerification} className="w-full bg-primary text-white font-black uppercase tracking-widest h-16 rounded-2xl shadow-xl shadow-primary/20">
+                  Submit Verification
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* To account Section (Dormant) */}
+        <div className="space-y-4">
+          <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">To account</Label>
+          <div className="w-full h-auto p-4 bg-white border border-gray-100 rounded-xl flex items-center justify-between opacity-60 cursor-not-allowed">
+            <div className="flex items-center gap-4">
+              <div className="bg-primary/10 px-2 py-0.5 rounded text-[10px] font-black text-primary uppercase tracking-wider">Trading</div>
+              <span className="text-[15px] font-black text-black tracking-tight">Main Portfolio</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <span className="text-[13px] font-bold text-primary">${(userProfile?.balance || 0).toFixed(2)} USD</span>
+            </div>
+          </div>
         </div>
 
         {/* Custom Trade Amount Section */}
