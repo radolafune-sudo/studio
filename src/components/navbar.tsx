@@ -40,20 +40,24 @@ export function Navbar() {
 
   const Logo = () => (
     <div className="flex flex-col items-start leading-none group cursor-pointer">
-      <div className="flex items-center gap-1.5">
-        <span className="text-[28px] font-black text-primary tracking-tighter uppercase italic">JM</span>
-        <span className="text-[24px] font-black text-primary tracking-tighter uppercase">JUST MARKETS</span>
+      <div className="flex items-center gap-2">
+        <div className="bg-primary w-8 h-8 rounded-md flex items-center justify-center text-white font-black text-sm shadow-sm">
+          JM
+        </div>
+        <div className="flex flex-col">
+          <span className="text-[20px] font-black text-black tracking-tighter uppercase">JUST MARKETS</span>
+          <span className="text-[7px] font-bold text-muted-foreground tracking-[0.3em] uppercase w-full text-center">
+            COPY TRADING PLATFORM
+          </span>
+        </div>
       </div>
-      <span className="text-[9px] font-bold text-muted-foreground tracking-[0.3em] uppercase mt-0.5 w-full text-center">
-        COPY TRADING PLATFORM
-      </span>
     </div>
   );
 
   return (
     <nav className="sticky top-0 z-50 w-full border-b bg-white">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex h-24 items-center justify-between">
+        <div className="flex h-20 items-center justify-between">
           <div className="flex items-center">
             <Link href="/">
               <Logo />
@@ -84,7 +88,7 @@ export function Navbar() {
                   LOG IN
                 </Link>
                 <Link href="/register">
-                  <Button className="bg-primary text-white hover:bg-primary/90 px-10 h-12 rounded-full font-black text-[13px] uppercase tracking-widest shadow-xl shadow-primary/30">
+                  <Button className="bg-primary text-white hover:bg-primary/90 px-10 h-11 rounded-full font-black text-[11px] uppercase tracking-widest shadow-xl shadow-primary/30">
                     REGISTER
                   </Button>
                 </Link>
