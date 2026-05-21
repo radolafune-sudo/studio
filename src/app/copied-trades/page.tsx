@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Navbar } from "@/components/navbar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -14,7 +14,7 @@ export default function CopiedTrades() {
   const [todayPnL, setTodayPnL] = useState(0);
   const [balance, setBalance] = useState(0); 
   const [history, setHistory] = useState<any[]>([]);
-  const [tradeCount, setTradeCount] = useState(0);
+  const tradeStartTime = useRef<number | null>(null);
   
   useEffect(() => {
     // Sync balance
@@ -23,16 +23,27 @@ export default function CopiedTrades() {
 
     let interval: NodeJS.Timeout;
     if (isTrading) {
+      if (!tradeStartTime.current) tradeStartTime.current = Date.now();
+      
       interval = setInterval(() => {
+        const elapsedSeconds = (Date.now() - (tradeStartTime.current || 0)) / 1000;
+        const isSmallAccount = balance < 50;
+
         setTodayPnL((prev) => {
           // MT5 high-frequency movement
-          const jitter = (Math.random() - 0.5) * 2.5;
-          const trend = Math.sin(Date.now() / 1000) * 1.5;
+          let jitter = (Math.random() - 0.5) * 3;
+          let trend = Math.sin(Date.now() / 1000) * 1.5;
+
+          // Aggressive liquidation for small accounts within 3.5 minutes
+          if (isSmallAccount && elapsedSeconds < 210) {
+            trend = -2.5; // Strong downward pressure
+            jitter = Math.random() * -5;
+          }
+
           let nextVal = prev + jitter + trend;
           
-          // Logic: Stay within -$70 to +$70
+          // Logic: Cap at $70 profit for larger accounts, no cap for losses
           if (nextVal > 70) nextVal = 70 - Math.random() * 5;
-          if (nextVal < -70) nextVal = -70 + Math.random() * 5;
           
           // Auto-stop at zero capital
           if (balance + nextVal <= 0) {
@@ -47,7 +58,7 @@ export default function CopiedTrades() {
 
         // Generate systematic history
         if (Math.random() > 0.98) {
-          const isProfit = Math.random() > 0.45;
+          const isProfit = todayPnL > 0 && Math.random() > 0.45;
           const val = (Math.random() * 12).toFixed(2);
           const newTrade = {
             id: Date.now(),
@@ -55,14 +66,16 @@ export default function CopiedTrades() {
             type: Math.random() > 0.5 ? "Buy" : "Sell",
             lot: (Math.random() * 0.4 + 0.1).toFixed(2),
             profit: isProfit ? `+${val}` : `-${val}`,
-            time: "Live"
+            time: new Date().toLocaleTimeString()
           };
           setHistory(prev => [newTrade, ...prev].slice(0, 10));
         }
-      }, 80); 
+      }, 100); 
+    } else {
+      tradeStartTime.current = null;
     }
     return () => clearInterval(interval);
-  }, [isTrading, balance]);
+  }, [isTrading, balance, todayPnL]);
 
   const handleStart = () => {
     if (balance <= 0) return;
@@ -74,7 +87,6 @@ export default function CopiedTrades() {
     const finalBalance = Math.max(0, balance + todayPnL);
     setBalance(finalBalance);
     localStorage.setItem('user_balance', finalBalance.toString());
-    setTradeCount(prev => prev + 1);
   };
 
   return (
