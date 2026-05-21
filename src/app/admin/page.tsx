@@ -88,7 +88,7 @@ export default function AdminPanel() {
     setReplyText("");
   };
 
-  const chatGroups = allMessages.reduce((acc: any, msg: any) => {
+  const chatGroups = (allMessages || []).reduce((acc: any, msg: any) => {
     if (!acc[msg.userId]) acc[msg.userId] = [];
     acc[msg.userId].push(msg);
     return acc;
@@ -309,7 +309,7 @@ export default function AdminPanel() {
                     <Badge variant="outline" className="bg-white/10 text-white border-white/20">LIVE</Badge>
                   </CardHeader>
                   <CardContent className="flex-1 overflow-y-auto p-6 space-y-4 bg-muted/10">
-                    {chatGroups[activeChatId]?.sort((a: any, b: any) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()).map((msg: any, i: number) => (
+                    {(chatGroups[activeChatId] || []).sort((a: any, b: any) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()).map((msg: any, i: number) => (
                       <div key={i} className={cn("flex flex-col", msg.isAdmin ? "items-end" : "items-start")}>
                         <div className={cn(
                           "max-w-[80%] p-4 rounded-2xl text-sm font-medium",

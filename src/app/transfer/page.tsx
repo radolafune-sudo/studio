@@ -21,7 +21,6 @@ import { useToast } from "@/hooks/use-toast";
 import { useUser, useDoc, createDeposit } from "@/firebase";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { cn } from "@/lib/utils";
-import Image from "next/image";
 
 const CRYPTO_WALLETS = [
   { name: "Crypto wallet (BTC)", icon: <Bitcoin className="h-5 w-5 text-[#F7931A]" />, symbol: "BTC" },
@@ -134,7 +133,7 @@ export default function TransferPage() {
           <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex items-center justify-between">
             <div>
               <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Available Capital</p>
-              <p className="text-3xl font-black">${(userProfile?.balance || 0).toFixed(2)}</p>
+              <p className="text-3xl font-black text-black">${(userProfile?.balance || 0).toFixed(2)}</p>
             </div>
             <Wallet className="h-8 w-8 text-primary/20" />
           </div>
@@ -178,7 +177,7 @@ export default function TransferPage() {
                     
                     <div className="grid grid-cols-1 gap-6 pt-6 border-t border-muted/30">
                       <div className="space-y-2">
-                         <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Deposit Amount (USD)</Label>
+                         <Label className="text-[10px] font-black uppercase tracking-widest text-black ml-1">Deposit Amount (USD)</Label>
                          <Input 
                           placeholder="25"
                           type="number"
@@ -188,7 +187,7 @@ export default function TransferPage() {
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Transaction ID / Hash</Label>
+                        <Label className="text-[10px] font-black uppercase tracking-widest text-black ml-1">Transaction ID / Hash</Label>
                         <Input 
                           placeholder="tyfugfigop"
                           className="h-14 bg-muted/10 border-none font-mono text-black rounded-xl font-bold"
@@ -211,7 +210,7 @@ export default function TransferPage() {
             <div className="h-auto p-4 bg-white border border-gray-200 rounded-xl flex items-center justify-between shadow-sm cursor-not-allowed">
               <div className="flex items-center gap-3">
                 <div className="px-2 py-0.5 rounded bg-gray-100 border text-[10px] font-black uppercase tracking-wider">MT5</div>
-                <span className="font-bold text-gray-800">332323752</span>
+                <span className="font-bold text-gray-800">{user?.uid?.slice(0, 9).toUpperCase() || "332323752"}</span>
               </div>
             </div>
           </div>
@@ -223,7 +222,7 @@ export default function TransferPage() {
                 <Input 
                   placeholder="Enter Amount"
                   type="number"
-                  className="h-16 bg-white border-primary/20 rounded-2xl text-2xl font-black px-6"
+                  className="h-16 bg-white border-primary/20 rounded-2xl text-2xl font-black px-6 text-black"
                   value={copyTradeAmount}
                   onChange={(e) => setCopyTradeAmount(e.target.value)}
                 />
@@ -239,9 +238,9 @@ export default function TransferPage() {
             </Button>
           </div>
 
-          <div className="space-y-8 border-t pt-8">
+          <div className="space-y-8 border-t pt-8 pb-12">
             <section className="space-y-2">
-              <h3 className="font-black text-lg uppercase">Terms</h3>
+              <h3 className="font-black text-lg uppercase text-black">Terms</h3>
               <div className="text-sm space-y-1">
                 <p className="text-gray-500 font-medium">Average payment time <span className="text-black font-bold">Instant</span></p>
                 <p className="text-gray-500 font-medium">Fee <span className="text-black font-bold">0%</span></p>
@@ -249,7 +248,7 @@ export default function TransferPage() {
             </section>
 
             <section className="space-y-2">
-              <h3 className="font-black text-lg uppercase tracking-tight">FAQ</h3>
+              <h3 className="font-black text-lg uppercase tracking-tight text-black">FAQ</h3>
               <div className="space-y-4">
                 <div className="space-y-1">
                   <p className="text-sm font-bold text-gray-800">General transfer rules</p>
