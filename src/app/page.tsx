@@ -35,21 +35,21 @@ export default function Home() {
 
             <div className="flex-1 relative w-full flex justify-center lg:justify-end mt-12 lg:mt-0">
               <div className="relative w-full max-w-[500px] aspect-[4/5]">
-                {/* Back Phone */}
-                <div className="absolute top-[10%] right-[10%] w-[65%] aspect-[9/18.5] border-[10px] border-black rounded-[45px] overflow-hidden shadow-2xl rotate-[5deg] z-0">
+                {/* Back Phone - Forex Chart 1 */}
+                <div className="absolute top-[10%] right-[10%] w-[65%] aspect-[9/18.5] border-[10px] border-black rounded-[45px] overflow-hidden shadow-2xl rotate-[5deg] z-0 bg-white">
                   <Image 
                     src="https://picsum.photos/seed/trading-chart-1/400/800"
-                    alt="Trading Chart"
+                    alt="Trading Chart Candlesticks"
                     fill
                     className="object-cover"
                     data-ai-hint="trading candlesticks"
                   />
                 </div>
-                {/* Front Phone */}
-                <div className="absolute top-[0%] left-[5%] w-[65%] aspect-[9/18.5] border-[10px] border-black rounded-[45px] overflow-hidden shadow-2xl -rotate-[5deg] z-10">
+                {/* Front Phone - Forex Chart 2 */}
+                <div className="absolute top-[0%] left-[5%] w-[65%] aspect-[9/18.5] border-[10px] border-black rounded-[45px] overflow-hidden shadow-2xl -rotate-[5deg] z-10 bg-white">
                   <Image 
                     src="https://picsum.photos/seed/trading-chart-2/400/800"
-                    alt="Forex Graph"
+                    alt="Forex Market Graph"
                     fill
                     className="object-cover"
                     data-ai-hint="forex graph"

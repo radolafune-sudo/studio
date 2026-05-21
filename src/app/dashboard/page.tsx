@@ -33,7 +33,7 @@ export default function Dashboard() {
   useEffect(() => {
     setIsMounted(true);
     
-    // Erratic live balance movement
+    // Erratic live balance movement simulating MT5
     const balanceInterval = setInterval(() => {
       setLiveBalance((prev) => {
         const volatility = Math.random() > 0.8 ? 5.0 : 0.8;
@@ -46,7 +46,6 @@ export default function Dashboard() {
       });
     }, 120);
 
-    // Live trader statistics updates
     const statsInterval = setInterval(() => {
       setTraderData(prev => prev.map(t => ({
         ...t,
@@ -70,14 +69,12 @@ export default function Dashboard() {
       
       <main className="container mx-auto px-4 py-8 space-y-12 max-w-7xl">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          {/* Banner 1: Blank as requested */}
           <Card className="bg-white border border-border overflow-hidden h-[200px] rounded-[1.5rem] flex items-center relative group shadow-sm">
             <CardContent className="p-8 w-full z-10">
-              {/* Blank section */}
+              {/* Blank section as requested */}
             </CardContent>
           </Card>
 
-          {/* Banner 2: Precision meets performance - No images as requested */}
           <Card className="bg-white border border-border overflow-hidden h-[200px] rounded-[1.5rem] flex items-center relative group shadow-sm">
             <CardContent className="p-8 flex justify-between items-center w-full z-10">
               <div className="max-w-full space-y-2">
@@ -95,7 +92,6 @@ export default function Dashboard() {
           </Card>
         </div>
 
-        {/* Account Summary Card */}
         <Card className="bg-white text-foreground border-none shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden rounded-[2.5rem]">
           <CardContent className="p-8 md:p-12 space-y-8">
             <div className="flex justify-between items-center">
@@ -163,7 +159,6 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        {/* Active Copy Traders Section */}
         <section className="space-y-8">
           <div className="flex items-center justify-between">
             <h2 className="text-3xl font-black uppercase tracking-tight text-foreground flex items-center gap-3">

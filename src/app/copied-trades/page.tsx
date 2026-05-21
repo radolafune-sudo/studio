@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Navbar } from "@/components/navbar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -16,38 +16,47 @@ export default function CopiedTrades() {
   const [balance, setBalance] = useState(450.00); 
   const [history, setHistory] = useState<any[]>([]);
   const [tradeCount, setTradeCount] = useState(0);
+  
+  // Refs for trending movement
+  const trendRef = useRef(0.02);
+  const cycleCountRef = useRef(0);
 
-  // Fast MT5-style movement simulation
   useEffect(() => {
     let interval: NodeJS.Timeout;
     if (isTrading) {
       interval = setInterval(() => {
         setTotalProfit((prev) => {
+          const currentTotal = balance + prev;
           let nextVal = prev;
           
-          // Logic for first 4 trades (Win Cycle: Minimal Profits)
-          if (tradeCount < 4) {
-            const winBias = 0.05; // Minimal bias
-            const fluctuation = (Math.random() - 0.5 + winBias) * 0.3;
-            nextVal = prev + fluctuation;
-            
-            // Ceiling at $99.99
-            if (nextVal >= 99.99) nextVal = 99.99;
-          } 
-          // Logic for 5th trade (Loss Cycle)
-          else if (tradeCount === 4) {
-            const lossBias = -0.5; // Heavy loss bias
-            const fluctuation = (Math.random() - 0.5 + lossBias) * 2.5;
-            nextVal = prev + fluctuation;
-          }
-          // After 5th trade
-          else {
-            const lossBias = -0.3;
-            const fluctuation = (Math.random() - 0.5 + lossBias) * 1.5;
-            nextVal = prev + fluctuation;
+          // Systematic market noise
+          const noise = (Math.random() - 0.5) * 0.4;
+          
+          // Shift trend periodically to simulate market cycles (MT5 style)
+          cycleCountRef.current++;
+          if (cycleCountRef.current > 50) {
+            trendRef.current = (Math.random() - 0.5) * 0.15;
+            cycleCountRef.current = 0;
           }
 
-          // Liquidation logic
+          // Arithmetric for balances > $100 (Unobtrusive drawdown)
+          const balanceBias = currentTotal > 100 ? -0.12 : 0.03;
+          
+          // Phase-based logic
+          if (tradeCount < 4) {
+            // First 4 trades: Winning bias but capped at $100
+            nextVal = prev + noise + trendRef.current + balanceBias;
+            if (nextVal >= 99.99) nextVal = 99.99 - Math.random();
+          } else if (tradeCount === 4) {
+            // 5th trade: Liquidation logic
+            const liquidationBias = -0.8; 
+            nextVal = prev + noise + liquidationBias;
+          } else {
+            // Post 5th trade: Heavy loss bias
+            nextVal = prev + noise - 0.25;
+          }
+
+          // Safety floor
           if (nextVal + balance <= 0) {
             setIsTrading(false);
             return -balance;
@@ -56,13 +65,13 @@ export default function CopiedTrades() {
           return nextVal;
         });
 
-        // Today's PnL movements - making it minimal
+        // Today's PnL movement
         setTodayPnL((prev) => {
-          const change = (Math.random() - 0.5) * 0.1;
+          const change = (Math.random() - 0.5) * 0.15;
           return prev + change;
         });
 
-        // Periodic transaction history update
+        // Transaction history generation
         if (Math.random() > 0.985) {
           const isWin = tradeCount < 4;
           const newTrade = {
@@ -76,10 +85,10 @@ export default function CopiedTrades() {
           };
           setHistory(prev => [newTrade, ...prev].slice(0, 15));
         }
-      }, 100); // Fast interval for MT5 feel
+      }, 100); 
     }
     return () => clearInterval(interval);
-  }, [isTrading, balance, totalProfit, tradeCount]);
+  }, [isTrading, balance, tradeCount]);
 
   const handleStart = () => {
     setIsTrading(true);
@@ -88,12 +97,11 @@ export default function CopiedTrades() {
   const handleStop = () => {
     setIsTrading(false);
     
-    // Specific 100% loss logic for the 5th trade stop
+    // 5th trade 100% loss logic
     if (tradeCount === 4) {
       setTotalProfit(-balance);
     }
     
-    // Increment trade count
     setTradeCount(prev => prev + 1);
   };
 
@@ -102,7 +110,6 @@ export default function CopiedTrades() {
       <Navbar />
       
       <main className="container mx-auto px-4 py-8 max-w-2xl space-y-8">
-        {/* Status Message */}
         <div className={cn(
           "w-full p-4 rounded-2xl flex items-center gap-3 border transition-all duration-500",
           isTrading 
@@ -117,7 +124,6 @@ export default function CopiedTrades() {
           </p>
         </div>
 
-        {/* Header Stats */}
         <div className="space-y-4 bg-white/5 p-6 rounded-[2rem] border border-white/5">
           <div className="flex justify-between items-center">
             <span className="text-muted-foreground font-bold text-xs uppercase tracking-widest">Total Profit</span>
@@ -132,7 +138,7 @@ export default function CopiedTrades() {
             <span className="text-muted-foreground font-bold text-xs uppercase tracking-widest">Today's PnL</span>
             <span className={cn(
               "text-xl font-bold font-mono tracking-tight",
-              todayPnL >= 0 ? "text-[#22C55E]" : "text-red-500"
+              todayPnL.toFixed(2).startsWith('-') ? "text-red-500" : "text-[#22C55E]"
             )}>
               {todayPnL.toFixed(2)} USD
             </span>
@@ -145,7 +151,6 @@ export default function CopiedTrades() {
           </div>
         </div>
 
-        {/* My Master(s) Section */}
         <section className="space-y-6">
           <div className="space-y-1">
             <h2 className="text-2xl font-black tracking-tight uppercase">My Master(s)</h2>
@@ -196,7 +201,6 @@ export default function CopiedTrades() {
           </Card>
         </section>
 
-        {/* My Copied Trades Section */}
         <section className="space-y-6">
           <div className="flex justify-between items-center">
             <h2 className="text-2xl font-black tracking-tight uppercase">History</h2>
@@ -220,7 +224,6 @@ export default function CopiedTrades() {
             </div>
           ) : (
             <div className="space-y-4 pb-12">
-              {/* Active Running Order */}
               {isTrading && (
                 <div className="flex items-center justify-between p-6 bg-primary/5 rounded-[2rem] border border-primary/20 animate-in fade-in duration-500">
                   <div className="flex items-center gap-4">
@@ -241,7 +244,6 @@ export default function CopiedTrades() {
                 </div>
               )}
 
-              {/* Transaction History */}
               {history.map(trade => (
                 <div key={trade.id} className="flex items-center justify-between p-6 bg-[#141A14] rounded-[2rem] border border-white/5 hover:border-white/10 transition-colors">
                   <div className="flex items-center gap-4">
