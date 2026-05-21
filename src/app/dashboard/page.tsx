@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -11,7 +12,6 @@ import {
   Activity,
   CheckCircle2,
   TrendingUp,
-  Home
 } from "lucide-react";
 import Link from "next/link";
 import {
@@ -23,7 +23,6 @@ import {
 export default function Dashboard() {
   const [isMounted, setIsMounted] = useState(false);
   const [hasNotification, setHasNotification] = useState(true);
-  const [liveBalance, setLiveBalance] = useState(7240.50);
   const [traderData, setTraderData] = useState([
     { id: 1, name: "Alex Sterling", return: 42.5, success: 68 },
     { id: 2, name: "Elena Vance", return: 112.8, success: 54 },
@@ -33,19 +32,6 @@ export default function Dashboard() {
   useEffect(() => {
     setIsMounted(true);
     
-    // Erratic live balance movement
-    const balanceInterval = setInterval(() => {
-      setLiveBalance((prev) => {
-        const volatility = Math.random() > 0.8 ? 5.0 : 0.8;
-        const direction = Math.random() > 0.49 ? 1 : -1;
-        const change = direction * Math.random() * volatility;
-        let newVal = prev + change;
-        if (newVal < 5000) newVal = 5000;
-        if (newVal > 50000) newVal = 50000;
-        return newVal;
-      });
-    }, 120);
-
     // Live trader data movement
     const statsInterval = setInterval(() => {
       setTraderData(prev => prev.map(t => ({
@@ -56,7 +42,6 @@ export default function Dashboard() {
     }, 800);
 
     return () => {
-      clearInterval(balanceInterval);
       clearInterval(statsInterval);
     };
   }, []);
@@ -69,9 +54,16 @@ export default function Dashboard() {
       
       <main className="container mx-auto px-4 py-8 space-y-12 max-w-7xl">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <Card className="bg-white border border-border h-[200px] rounded-[1.5rem] flex items-center relative shadow-sm">
+          <Card className="bg-white border border-border h-[200px] rounded-[1.5rem] flex items-center relative shadow-sm overflow-hidden">
             <CardContent className="p-8 w-full">
-              {/* Blank section as requested */}
+              <div className="space-y-1">
+                <h3 className="text-primary font-black text-2xl md:text-3xl tracking-tight leading-tight">
+                  Ready to start today with <br /> a proven strategy?
+                </h3>
+                <p className="text-primary/70 font-black uppercase text-xs tracking-[0.2em] mt-2">
+                  CopyTrade Now!
+                </p>
+              </div>
             </CardContent>
           </Card>
 
@@ -81,11 +73,9 @@ export default function Dashboard() {
                 <h2 className="text-2xl md:text-3xl font-extrabold leading-tight tracking-tight text-foreground">
                   Where precision meets performance
                 </h2>
-                <div className="flex items-center gap-2 text-primary font-bold">
+                <div className="flex items-center gap-2 text-primary font-bold opacity-50">
                   <Activity className="h-4 w-4" />
-                  <span className="text-lg font-mono tracking-tighter">
-                    ${liveBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                  </span>
+                  <span className="text-sm font-black uppercase tracking-widest">Market Live Connection</span>
                 </div>
               </div>
             </CardContent>
@@ -140,12 +130,6 @@ export default function Dashboard() {
             </div>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
-              <Link href="/" className="w-full sm:w-[180px]">
-                <Button variant="ghost" className="w-full h-[64px] rounded-full bg-secondary hover:bg-muted flex items-center justify-center gap-3 font-bold text-lg">
-                  <Home className="h-5 w-5" />
-                  Home
-                </Button>
-              </Link>
               <Link href="/transfer" className="w-full sm:w-[220px]">
                 <Button className="w-full h-[64px] rounded-full bg-primary/10 hover:bg-primary/20 text-primary border-none flex items-center justify-center gap-3 font-bold text-lg shadow-sm">
                   <ArrowRightLeft className="h-5 w-5" />

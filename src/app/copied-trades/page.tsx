@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -18,20 +19,25 @@ export default function CopiedTrades() {
   useEffect(() => {
     let interval: NodeJS.Timeout;
     if (isTrading) {
+      // High-speed MT5 movement (50ms interval for jittery reality)
       interval = setInterval(() => {
-        // PnL movement erraticly between -70 and 70
         setTodayPnL((prev) => {
-          const change = (Math.random() - 0.5) * 2;
-          let nextVal = prev + change;
-          if (nextVal > 70) nextVal = 70 - Math.random() * 5;
-          if (nextVal < -70) nextVal = -70 + Math.random() * 5;
+          // Systematic wave with erratic jitter
+          const jitter = (Math.random() - 0.5) * 1.5;
+          const trend = Math.sin(Date.now() / 1500) * 0.5;
+          let nextVal = prev + jitter + trend;
+          
+          // Cap at $70 as requested
+          if (nextVal > 70) nextVal = 70 - Math.random() * 2;
+          if (nextVal < -70) nextVal = -70 + Math.random() * 2;
+          
           return nextVal;
         });
 
         // High frequency transaction feed
-        if (Math.random() > 0.98) {
+        if (Math.random() > 0.985) {
           const isWin = tradeCount < 4;
-          const profitVal = isWin ? (Math.random() * 5).toFixed(2) : (Math.random() * -15).toFixed(2);
+          const profitVal = isWin ? (Math.random() * 8).toFixed(2) : (Math.random() * -20).toFixed(2);
           const newTrade = {
             id: Date.now(),
             pair: "XAUUSD",
@@ -42,7 +48,7 @@ export default function CopiedTrades() {
           };
           setHistory(prev => [newTrade, ...prev].slice(0, 15));
         }
-      }, 100); 
+      }, 50); 
     }
     return () => clearInterval(interval);
   }, [isTrading, tradeCount]);
@@ -53,8 +59,9 @@ export default function CopiedTrades() {
 
   const handleStop = () => {
     setIsTrading(false);
+    // Liquidation logic on 5th trade
     if (tradeCount >= 4) {
-      setBalance(0); // 5th trade liquidation
+      setBalance(0); 
       setTodayPnL(-balance);
     }
     setTradeCount(prev => prev + 1);
@@ -77,10 +84,10 @@ export default function CopiedTrades() {
           </p>
         </div>
 
-        <div className="space-y-6 bg-white/5 p-8 rounded-[2.5rem] border border-white/5 text-center">
+        <div className="space-y-6 bg-white/5 p-8 rounded-[2.5rem] border border-white/5 text-center shadow-2xl">
           <p className="text-muted-foreground font-black text-xs uppercase tracking-[0.2em]">Today's PnL</p>
           <div className={cn(
-            "text-6xl font-black font-mono tracking-tighter transition-colors duration-200",
+            "text-7xl font-black font-mono tracking-tighter transition-colors duration-75",
             todayPnL >= 0 ? "text-[#22C55E]" : "text-red-500"
           )}>
             {todayPnL >= 0 ? "+" : ""}{todayPnL.toFixed(2)} USD

@@ -1,8 +1,9 @@
+
 import { Navbar } from "@/components/navbar";
 import { Button } from "@/components/ui/button";
 import { MessageCircle } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
+import { LiveChart } from "@/components/live-chart";
 
 export default function Home() {
   return (
@@ -32,34 +33,9 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="flex-1 relative w-full flex justify-center lg:justify-end mt-12 lg:mt-0">
-              <div className="relative w-full max-w-[550px] aspect-[1/1]">
-                {/* Back Phone - Strategy/Summary */}
-                <div className="absolute top-[5%] right-[15%] w-[55%] aspect-[9/19] border-[12px] border-[#1a1a1a] rounded-[50px] overflow-hidden shadow-2xl rotate-[2deg] z-0 bg-[#F1F3F9]">
-                  <Image 
-                    src="https://picsum.photos/seed/jm-strategy/400/800"
-                    alt="Ready to start banner"
-                    fill
-                    className="object-cover"
-                    data-ai-hint="trading banner"
-                  />
-                  <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-[#E7F6ED] to-transparent p-6">
-                    <div className="bg-white/80 backdrop-blur-sm p-4 rounded-2xl border border-white/20">
-                      <p className="text-sm font-black text-[#1A2E24] leading-tight">Ready to start today with a proven strategy?</p>
-                      <button className="mt-2 text-[10px] font-black uppercase text-[#22C55E]">Copy Trade Now</button>
-                    </div>
-                  </div>
-                </div>
-                {/* Front Phone - Main Chart */}
-                <div className="absolute top-[0%] left-[10%] w-[58%] aspect-[9/19] border-[12px] border-[#1a1a1a] rounded-[50px] overflow-hidden shadow-2xl -rotate-[3deg] z-10 bg-white">
-                  <Image 
-                    src="https://picsum.photos/seed/jm-chart-live/400/800"
-                    alt="Forex Live Chart"
-                    fill
-                    className="object-cover"
-                    data-ai-hint="forex graph"
-                  />
-                </div>
+            <div className="flex-1 relative w-full flex justify-center lg:justify-end mt-12 lg:mt-0 min-h-[500px]">
+              <div className="relative w-full max-w-[600px] h-[500px]">
+                <LiveChart />
               </div>
             </div>
           </div>
