@@ -43,7 +43,6 @@ export default function TransferPage() {
   
   const userRef = useMemo(() => user?.uid ? `users/${user.uid}` : null, [user]);
   const { data: userProfile } = useDoc(userRef);
-  
   const { data: globalSettings } = useDoc('settings/global');
   
   const activeWallet = CRYPTO_WALLETS.find(w => w.id === selectedWalletId);
@@ -52,24 +51,15 @@ export default function TransferPage() {
   const handleCopy = (address: string) => {
     navigator.clipboard.writeText(address);
     setCopied(true);
-    toast({
-      title: "Address Copied",
-      description: "Wallet address has been copied to your clipboard.",
-    });
+    toast({ title: "Address Copied", description: "Wallet address has been copied to your clipboard." });
     setTimeout(() => setCopied(false), 2000);
   };
 
   const handleSubmitVerification = async () => {
     if (!user) return;
-    
     const numAmount = Number(depositAmount);
-    if (!numAmount || numAmount <= 0) {
-      toast({ variant: "destructive", title: "Invalid Amount", description: "Please enter a valid amount." });
-      return;
-    }
-
-    if (!transactionId) {
-      toast({ variant: "destructive", title: "Missing Transaction ID", description: "Please provide the Transaction ID." });
+    if (!numAmount || numAmount <= 0 || !transactionId) {
+      toast({ variant: "destructive", title: "Error", description: "Fill all details correctly." });
       return;
     }
 
@@ -82,38 +72,25 @@ export default function TransferPage() {
       walletType: activeWallet?.name
     });
 
-    toast({
-      title: "Submission Received",
-      description: "Admin will review and approve your deposit shortly.",
-    });
-
+    toast({ title: "Submission Received", description: "Admin will review and approve your deposit shortly." });
     setFundingOpen(false);
   };
 
   const handleCopyTradeRedirect = () => {
     const balance = userProfile?.balance || 0;
     const amount = Number(copyTradeAmount);
-    
-    if (!amount || amount <= 0) {
-      toast({ variant: "destructive", title: "Invalid Amount", description: "Enter copy trade amount." });
+    if (!amount || amount <= 0 || balance < amount) {
+      toast({ variant: "destructive", title: "Error", description: "Insufficient capital." });
       return;
     }
-
-    if (balance < amount) {
-      toast({ variant: "destructive", title: "Insufficient Balance", description: `Available: $${balance.toFixed(2)}` });
-      return;
-    }
-
     router.push('/copied-trades');
   };
 
   return (
     <div className="flex flex-col min-h-screen bg-[#F8F9FC] text-foreground font-body">
       <Navbar />
-      
       <main className="flex-1 container mx-auto px-4 py-8 max-w-xl">
         <div className="space-y-6">
-          {/* Section 1: Available Capital - NOW FIRST */}
           <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex items-center justify-between">
             <div>
               <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Available Capital</p>
@@ -122,10 +99,8 @@ export default function TransferPage() {
             <Wallet className="h-8 w-8 text-primary/20" />
           </div>
 
-          {/* Section 2: From Account (Trigger as seen in image) */}
           <div className="space-y-4">
             <Label className="text-sm font-bold text-gray-600">From account</Label>
-            
             <Collapsible open={fundingOpen} onOpenChange={setFundingOpen} className="w-full">
               <CollapsibleTrigger asChild>
                 <button className={cn(
@@ -147,9 +122,7 @@ export default function TransferPage() {
                       )}
                     >
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center">
-                          {wallet.icon}
-                        </div>
+                        <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center">{wallet.icon}</div>
                         <span className="text-[11px] font-black text-white uppercase tracking-tight">{wallet.name}</span>
                       </div>
                       <span className="text-[10px] font-mono text-gray-400">0.00 {wallet.symbol}</span>
@@ -160,13 +133,10 @@ export default function TransferPage() {
                   </div>
                 </button>
               </CollapsibleTrigger>
-              
-              {/* DROP DOWN CONTENTS - WHITE BACKGROUND, BLACK TYPE */}
               <CollapsibleContent className="mt-2 animate-in slide-in-from-top-2 duration-300">
                 <div className="bg-white p-8 border border-gray-100 rounded-[2.5rem] shadow-2xl space-y-8">
                   <div className="space-y-6">
                     <h2 className="text-sm font-black uppercase text-black tracking-widest leading-tight">DEPOSIT TO FUND YOUR COPY TRADING ACCOUNT</h2>
-                    
                     <div className="space-y-2">
                       <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">copy the address below ({activeWallet?.symbol})</p>
                       <div className="flex items-center gap-3 bg-muted/30 p-4 rounded-xl border border-dashed border-gray-200">
@@ -176,25 +146,19 @@ export default function TransferPage() {
                         </button>
                       </div>
                     </div>
-                    
                     <div className="grid grid-cols-1 gap-6 pt-6 border-t border-muted/30">
                       <div className="space-y-2">
-                         <Label className="text-[10px] font-black uppercase tracking-widest text-black ml-1">Amount (USD)</Label>
-                         <Input 
-                          placeholder="25"
-                          type="number"
+                        <Label className="text-[10px] font-black uppercase tracking-widest text-black ml-1">Amount (USD)</Label>
+                        <Input 
+                          placeholder="25" type="number" value={depositAmount} onChange={(e) => setDepositAmount(e.target.value)}
                           className="h-14 bg-muted/20 border-none text-xl font-black rounded-xl text-black"
-                          value={depositAmount}
-                          onChange={(e) => setDepositAmount(e.target.value)}
                         />
                       </div>
                       <div className="space-y-2">
                         <Label className="text-[10px] font-black uppercase tracking-widest text-black ml-1">Transaction ID</Label>
                         <Input 
-                          placeholder="tyfugfigop"
+                          placeholder="tyfugfigop" value={transactionId} onChange={(e) => setTransactionId(e.target.value)}
                           className="h-14 bg-muted/20 border-none font-mono text-black rounded-xl font-bold"
-                          value={transactionId}
-                          onChange={(e) => setTransactionId(e.target.value)}
                         />
                       </div>
                       <Button onClick={handleSubmitVerification} className="w-full bg-primary text-white font-black uppercase tracking-widest h-16 rounded-2xl shadow-xl shadow-primary/20">
@@ -217,22 +181,17 @@ export default function TransferPage() {
             </div>
           </div>
 
-          {/* New Amount Choice Box before Copy Trade button */}
           <div className="pt-8 space-y-4">
             <div className="space-y-2">
               <Label className="text-[11px] font-black uppercase tracking-widest text-primary ml-1">Enter amount to copy trade</Label>
               <div className="relative">
                 <Input 
-                  placeholder="Enter Amount"
-                  type="number"
+                  placeholder="Enter Amount" type="number" value={copyTradeAmount} onChange={(e) => setCopyTradeAmount(e.target.value)}
                   className="h-16 bg-white border-primary/20 rounded-2xl text-2xl font-black px-6 text-black"
-                  value={copyTradeAmount}
-                  onChange={(e) => setCopyTradeAmount(e.target.value)}
                 />
                 <span className="absolute right-6 top-1/2 -translate-y-1/2 text-muted-foreground font-black">USD</span>
               </div>
             </div>
-
             <Button 
               onClick={handleCopyTradeRedirect}
               className="w-full h-16 bg-blue-600 text-white font-black uppercase text-xl rounded-full shadow-2xl hover:scale-[1.02] active:scale-[0.98] transition-all"

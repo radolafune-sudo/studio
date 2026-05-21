@@ -11,7 +11,6 @@ import {
   CheckCircle2, 
   ShieldCheck,
   Wallet,
-  Settings,
   Save,
   MessageSquare,
   Send,
@@ -20,7 +19,6 @@ import {
   TrendingUp,
   Activity
 } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -49,11 +47,14 @@ export default function AdminPanel() {
   const [replyText, setReplyText] = useState("");
   const [activeChatId, setActiveChatId] = useState<string | null>(null);
 
-  const handleUpdateWallets = async () => {
+  const handleUpdateWallet = async (walletId: string) => {
+    const newVal = walletEdits[walletId];
+    if (!newVal) return;
+
+    const updatedWallets = { ...globalSettings?.wallets, [walletId]: newVal };
     const { firestore } = initializeFirebase();
-    const updatedWallets = { ...globalSettings?.wallets, ...walletEdits };
     
-    if (firestore) {
+    if (firestore && typeof firestore.collection !== 'undefined') {
       await setDoc(doc(firestore, "settings", "global"), {
         wallets: updatedWallets
       }, { merge: true });
@@ -61,31 +62,30 @@ export default function AdminPanel() {
       await updateUserProfile('global', { wallets: updatedWallets }, 'settings');
     }
 
-    toast({ title: "System Updated", description: "All wallet addresses refreshed." });
-    setWalletEdits({});
+    toast({ title: "Wallet Updated", description: `${walletId.toUpperCase()} address changed successfully.` });
+    setWalletEdits(prev => {
+      const next = { ...prev };
+      delete next[walletId];
+      return next;
+    });
   };
 
   const handleApproveDeposit = async (id: string, userId: string, amount: number) => {
-    // 1. Credit User Balance
     await updateUserProfile(userId, { balance: increment(amount) });
-    
-    // 2. Mark Deposit as Approved
     const { firestore } = initializeFirebase();
-    if (firestore) {
+    if (firestore && typeof firestore.collection !== 'undefined') {
       await setDoc(doc(firestore, "deposits", id), { status: "approved" }, { merge: true });
     } else {
       await updateUserProfile(id, { status: "approved" }, 'deposits');
     }
-
-    toast({ title: "Deposit Approved", description: `$${amount} credited instantly.` });
+    toast({ title: "Approved Fast", description: `$${amount} credited instantly.` });
   };
 
   const handleUpdateBalance = async (userId: string) => {
     const val = editingBalance[userId];
     if (val === undefined || isNaN(Number(val))) return;
-
     await updateUserProfile(userId, { balance: Number(val) });
-    toast({ title: "Balance Updated", description: `Set to $${Number(val).toFixed(2)}.` });
+    toast({ title: "Balance Updated", description: `User balance set to $${Number(val).toFixed(2)}.` });
   };
 
   const handleSendReply = async () => {
@@ -103,7 +103,6 @@ export default function AdminPanel() {
   return (
     <div className="flex flex-col min-h-screen bg-[#F8F9FC] font-body">
       <Navbar />
-      
       <main className="container mx-auto px-4 py-8 max-w-7xl">
         <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
           <div className="space-y-1">
@@ -113,7 +112,6 @@ export default function AdminPanel() {
             </div>
             <p className="text-muted-foreground font-medium">Real-time oversight and system management.</p>
           </div>
-          
           <div className="flex items-center gap-2 bg-white p-3 rounded-2xl shadow-sm border border-gray-100">
             <Users className="h-5 w-5 text-primary" />
             <div>
@@ -145,24 +143,26 @@ export default function AdminPanel() {
                 <CardTitle className="text-sm font-black uppercase text-primary">Global Wallet Configuration</CardTitle>
               </CardHeader>
               <CardContent className="p-8 space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   {WALLET_TYPES.map(type => (
-                    <div key={type.id} className="space-y-2">
+                    <div key={type.id} className="space-y-3 bg-muted/10 p-4 rounded-2xl border border-muted/20">
                       <Label className="text-[10px] font-black uppercase text-muted-foreground flex items-center gap-2">
                         {type.icon} {type.name}
                       </Label>
-                      <Input 
-                        placeholder={globalSettings?.wallets?.[type.id] || "Enter address..."}
-                        className="h-12 bg-muted/20 border-none font-mono text-xs"
-                        value={walletEdits[type.id] || ""}
-                        onChange={(e) => setWalletEdits({...walletEdits, [type.id]: e.target.value})}
-                      />
+                      <div className="flex gap-2">
+                        <Input 
+                          placeholder={globalSettings?.wallets?.[type.id] || "Enter address..."}
+                          className="h-12 bg-white border-none font-mono text-xs shadow-sm"
+                          value={walletEdits[type.id] || ""}
+                          onChange={(e) => setWalletEdits({...walletEdits, [type.id]: e.target.value})}
+                        />
+                        <Button onClick={() => handleUpdateWallet(type.id)} size="icon" className="h-12 w-12 bg-primary rounded-xl">
+                          <Save className="h-5 w-5" />
+                        </Button>
+                      </div>
                     </div>
                   ))}
                 </div>
-                <Button onClick={handleUpdateWallets} className="h-14 px-12 bg-accent font-black uppercase tracking-widest rounded-xl">
-                  Update All Addresses
-                </Button>
               </CardContent>
             </Card>
           </TabsContent>

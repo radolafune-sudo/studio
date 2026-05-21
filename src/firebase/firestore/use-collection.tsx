@@ -19,7 +19,6 @@ export function useCollection<T = DocumentData>(path: string | null) {
     }
 
     if (isPlaceholder) {
-      // Mock Listener - Completely bypasses Firebase SDK functions
       const getMockData = () => {
         const raw = localStorage.getItem(`mock_db_${path}`) || (path === 'users' ? '{}' : '[]');
         return path === 'users' ? Object.values(JSON.parse(raw)) : JSON.parse(raw);
@@ -32,8 +31,7 @@ export function useCollection<T = DocumentData>(path: string | null) {
         setData(updatedList as T[]);
       });
       return () => unsubscribe();
-    } else if (firestore) {
-      // Real Listener - Only call SDK functions if we have a real firestore instance
+    } else if (firestore && !isPlaceholder) {
       try {
         const q = query(collection(firestore, path));
         const unsubscribe = onSnapshot(

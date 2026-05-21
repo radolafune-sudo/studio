@@ -18,16 +18,14 @@ export function useDoc<T = DocumentData>(path: string | null) {
       return;
     }
 
-    // Extract collection and docId from path (e.g., "users/123")
     const parts = path.split('/');
     const collectionName = parts[0];
     const docId = parts[1] || '';
 
     if (isPlaceholder) {
-      // Mock Listener - Completely bypasses Firebase SDK functions
       const getMockDoc = () => {
-        const db = JSON.parse(localStorage.getItem(`mock_db_${collectionName}`) || (collectionName === 'users' ? '{}' : '[]'));
-        return collectionName === 'users' ? db[docId] : (Array.isArray(db) ? db.find((d: any) => d.id === docId) : null);
+        const db = JSON.parse(localStorage.getItem(`mock_db_${collectionName}`) || (collectionName === 'users' || collectionName === 'settings' ? '{}' : '[]'));
+        return collectionName === 'users' || collectionName === 'settings' ? db[docId] : (Array.isArray(db) ? db.find((d: any) => d.id === docId) : null);
       };
 
       setData(getMockDoc() || null);
@@ -37,8 +35,7 @@ export function useDoc<T = DocumentData>(path: string | null) {
         setData(updatedData);
       });
       return () => unsubscribe();
-    } else if (firestore && docId) {
-      // Real Listener - Only call SDK functions if we have a real firestore instance
+    } else if (firestore && docId && !isPlaceholder) {
       try {
         const unsubscribe = onSnapshot(
           doc(firestore, collectionName, docId),
