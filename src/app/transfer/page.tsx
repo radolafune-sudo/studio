@@ -14,7 +14,7 @@ import {
   Globe,
   Wallet
 } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import {
   Select,
@@ -23,6 +23,8 @@ import {
   SelectTrigger,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
+import { useUser, useFirestore, useDoc } from "@/firebase";
+import { doc, addDoc, collection, serverTimestamp } from "firebase/firestore";
 
 const CRYPTO_ACCOUNTS = [
   { id: 'btc', name: 'Crypto wallet (BTC)', sub: 'BTC', icon: Bitcoin, color: '#F7931A', address: '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa' },
@@ -34,23 +36,19 @@ const CRYPTO_ACCOUNTS = [
 
 export default function TransferPage() {
   const router = useRouter();
+  const { user } = useUser();
+  const db = useFirestore();
   const [fundingAccount, setFundingAccount] = useState('btc');
   const [copied, setCopied] = useState(false);
   const [transactionId, setTransactionId] = useState('');
   const [amount, setAmount] = useState('');
-  const [balance, setBalance] = useState(0);
   const { toast } = useToast();
+  const copyTradeRef = useRef<HTMLDivElement>(null);
   
-  const selectedFunding = CRYPTO_ACCOUNTS.find(a => a.id === fundingAccount);
+  const userProfileRef = user && db ? doc(db, "users", user.uid) : null;
+  const { data: userProfile } = useDoc(userProfileRef);
 
-  useEffect(() => {
-    const syncBalance = () => {
-      setBalance(Number(localStorage.getItem('user_balance') || '0'));
-    };
-    syncBalance();
-    const interval = setInterval(syncBalance, 2000);
-    return () => clearInterval(interval);
-  }, []);
+  const selectedFunding = CRYPTO_ACCOUNTS.find(a => a.id === fundingAccount);
 
   const handleCopy = (address: string) => {
     navigator.clipboard.writeText(address);
@@ -62,7 +60,9 @@ export default function TransferPage() {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const handleSubmitTransfer = () => {
+  const handleSubmitVerification = async () => {
+    if (!user || !db) return;
+    
     const numAmount = Number(amount);
     if (!numAmount || numAmount <= 0) {
       toast({
@@ -82,7 +82,18 @@ export default function TransferPage() {
       return;
     }
 
-    localStorage.setItem('pending_deposit', JSON.stringify({
+    // Submit deposit to Firestore
+    addDoc(collection(db, "deposits"), {
+      userId: user.uid,
+      userEmail: user.email,
+      amount: numAmount,
+      transactionId: transactionId,
+      status: "pending",
+      timestamp: serverTimestamp()
+    });
+
+    // Save locally for the 3-minute UI simulation
+    localStorage.setItem(`pending_deposit_${user.uid}`, JSON.stringify({
       amount: numAmount,
       timestamp: Date.now()
     }));
@@ -92,16 +103,17 @@ export default function TransferPage() {
       description: "Your deposit will reflect in your dashboard in 3 minutes.",
     });
     
-    setTransactionId('');
-    setAmount('');
+    // Smooth scroll to Copy Trade section
+    copyTradeRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
   const handleCopyTradeRedirect = () => {
+    const balance = userProfile?.balance || 0;
     if (balance < 25) {
       toast({
         variant: "destructive",
         title: "Insufficient Balance",
-        description: "The minimum copy trade amount is required. Your deposit may still be pending verification.",
+        description: "The minimum copy trade amount is $25. Your deposit may still be pending verification.",
       });
       return;
     }
@@ -162,7 +174,8 @@ export default function TransferPage() {
                     {copied ? <Check className="h-4 w-4 text-green-600" /> : <Copy className="h-4 w-4" />}
                   </button>
                 </div>
-                <div className="space-y-3">
+                
+                <div className="space-y-3 pt-4">
                   <div className="space-y-1">
                      <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Amount</Label>
                      <Input 
@@ -182,7 +195,7 @@ export default function TransferPage() {
                       onChange={(e) => setTransactionId(e.target.value)}
                     />
                   </div>
-                  <Button onClick={handleSubmitTransfer} className="w-full bg-blue-600 text-white font-bold h-11 rounded-xl shadow-md">
+                  <Button onClick={handleSubmitVerification} className="w-full bg-blue-600 text-white font-bold h-11 rounded-xl shadow-md">
                     Submit Verification
                   </Button>
                 </div>
@@ -199,11 +212,11 @@ export default function TransferPage() {
               </div>
             </div>
 
-            <div className="pt-8 space-y-8">
+            <div ref={copyTradeRef} className="pt-8 space-y-8">
               <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex items-center justify-between">
                 <div>
                   <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Available Capital</p>
-                  <p className="text-3xl font-black">${balance.toFixed(2)}</p>
+                  <p className="text-3xl font-black">${(userProfile?.balance || 0).toFixed(2)}</p>
                 </div>
                 <Wallet className="h-8 w-8 text-primary/20" />
               </div>
