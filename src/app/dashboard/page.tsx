@@ -43,9 +43,9 @@ export default function Dashboard() {
   
   const [hasNotification, setHasNotification] = useState(true);
   const [activeTraders, setActiveTraders] = useState([
-    { id: 1, name: "Alex Sterling", return: 42.5, success: 88.4 },
-    { id: 2, name: "Elena Vance", return: 112.8, success: 91.2 },
-    { id: 3, name: "Marcus Chen", return: 28.1, success: 85.7 },
+    { id: 1, name: "Alex Sterling", return: 42.5, success: 92.4 },
+    { id: 2, name: "Elena Vance", return: 112.8, success: 94.1 },
+    { id: 3, name: "Marcus Chen", return: 28.1, success: 89.7 },
   ]);
 
   useEffect(() => {
@@ -65,7 +65,6 @@ export default function Dashboard() {
         const threeMinutes = 3 * 60 * 1000;
         
         if (now - timestamp >= threeMinutes) {
-          // Update balance in Firestore
           await updateDoc(doc(db, "users", user.uid), {
             balance: increment(Number(amount))
           });

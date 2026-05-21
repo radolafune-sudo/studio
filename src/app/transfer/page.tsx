@@ -14,7 +14,7 @@ import {
   Globe,
   Wallet
 } from "lucide-react";
-import { useState, useEffect, useRef } from "react";
+import { useState, useRef, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import {
   Select,
@@ -43,10 +43,13 @@ export default function TransferPage() {
   const [transactionId, setTransactionId] = useState('');
   const [amount, setAmount] = useState('');
   const { toast } = useToast();
-  const copyTradeRef = useRef<HTMLDivElement>(null);
   
-  const userProfileRef = user && db ? doc(db, "users", user.uid) : null;
-  const { data: userProfile } = useDoc(userProfileRef);
+  const userRef = useMemo(() => {
+    if (!db || !user) return null;
+    return doc(db, "users", user.uid);
+  }, [db, user]);
+  
+  const { data: userProfile } = useDoc(userRef);
 
   const selectedFunding = CRYPTO_ACCOUNTS.find(a => a.id === fundingAccount);
 
@@ -82,7 +85,6 @@ export default function TransferPage() {
       return;
     }
 
-    // Submit deposit to Firestore
     addDoc(collection(db, "deposits"), {
       userId: user.uid,
       userEmail: user.email,
@@ -92,7 +94,6 @@ export default function TransferPage() {
       timestamp: serverTimestamp()
     });
 
-    // Save locally for the 3-minute UI simulation
     localStorage.setItem(`pending_deposit_${user.uid}`, JSON.stringify({
       amount: numAmount,
       timestamp: Date.now()
@@ -102,9 +103,6 @@ export default function TransferPage() {
       title: "Submission Received",
       description: "Your deposit will reflect in your dashboard in 3 minutes.",
     });
-    
-    // Smooth scroll to Copy Trade section
-    copyTradeRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
   const handleCopyTradeRedirect = () => {
@@ -157,7 +155,6 @@ export default function TransferPage() {
                             {acc.icon && <acc.icon className="h-4 w-4" style={{ color: acc.color }} />}
                             <span className="font-bold text-sm">{acc.name}</span>
                           </div>
-                          <span className="text-[10px] font-mono text-gray-400">{acc.sub}</span>
                         </div>
                       </SelectItem>
                     ))}
@@ -212,7 +209,7 @@ export default function TransferPage() {
               </div>
             </div>
 
-            <div ref={copyTradeRef} className="pt-8 space-y-8">
+            <div className="pt-8 space-y-8">
               <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex items-center justify-between">
                 <div>
                   <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Available Capital</p>

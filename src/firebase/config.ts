@@ -2,6 +2,7 @@
 export const firebaseConfig = {
   // IMPORTANT: You MUST replace these placeholder values with your actual config from the Firebase Console
   // Go to Project Settings > General > Your Apps > SDK setup and configuration > Config
+  // This is required to fix the "api-key-not-valid" error.
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || "AIzaSy...", 
   authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || "your-app.firebaseapp.com",
   projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "your-app",
