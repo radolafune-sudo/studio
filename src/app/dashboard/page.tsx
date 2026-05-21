@@ -75,6 +75,7 @@ export default function Dashboard() {
 
     const depositInterval = setInterval(checkDeposit, 5000);
     
+    // Rotate names every minute
     const nameInterval = setInterval(() => {
       setActiveTraders(prev => prev.map((t, idx) => ({
         ...t,
@@ -82,6 +83,7 @@ export default function Dashboard() {
       })));
     }, 60000);
 
+    // Live stats updates
     const statsInterval = setInterval(() => {
       setActiveTraders(prev => prev.map(t => ({
         ...t,

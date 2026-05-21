@@ -6,7 +6,7 @@ import { Navbar } from "@/components/navbar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Zap, Play, Square, Loader2, Info, Wallet } from "lucide-react";
+import { Zap, Play, Square, Loader2, Info } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useUser, useFirestore, useDoc } from "@/firebase";
 import { doc, updateDoc } from "firebase/firestore";
@@ -37,17 +37,25 @@ export default function CopiedTrades() {
 
           const isSmallAccount = (userProfile.balance || 0) < 50;
 
+          // 3.5 minute safety rule (210 seconds)
           if (isSmallAccount && elapsedSeconds < 210) {
+            // Systematic downward trend for small accounts, but capped at $24 loss
             nextVal = prev - (Math.random() * 2 + 0.5);
+            if (nextVal < -24) {
+              nextVal = -24 + Math.random() * 0.5;
+            }
           } else if (elapsedSeconds < 210) {
+            // Normal accounts: Cap initial losses at $24
             if (nextVal < -24) {
               nextVal = -24 + Math.random() * 0.5;
             }
           }
           
+          // Force ranges between -$70 and +$70
           if (nextVal > 70) nextVal = 70 - Math.random() * 5;
           if (nextVal < -70) nextVal = -70 + Math.random() * 5;
           
+          // Auto-stop if balance hits zero
           const currentTotal = (userProfile.balance || 0) + nextVal;
           if (currentTotal <= 0) {
             setIsTrading(false);
@@ -58,6 +66,7 @@ export default function CopiedTrades() {
           return nextVal;
         });
 
+        // Live Feed Updates (MetaTrader Speed)
         if (Math.random() > 0.98) {
           const isProfit = todayPnL > 0 && Math.random() > 0.4;
           const val = (Math.random() * 12).toFixed(2);
@@ -71,7 +80,7 @@ export default function CopiedTrades() {
           };
           setHistory(prev => [newTrade, ...prev].slice(0, 10));
         }
-      }, 80); 
+      }, 80); // 80ms for MT5 high-frequency jitter
     } else {
       tradeStartTime.current = null;
     }
@@ -108,6 +117,7 @@ export default function CopiedTrades() {
           </p>
         </div>
 
+        {/* Large MT5-Style PnL Header */}
         <div className="grid grid-cols-1 gap-4">
           <div className="space-y-6 bg-white/5 p-8 rounded-[2rem] border border-white/5 text-center shadow-2xl">
             <p className="text-muted-foreground font-black text-xs uppercase tracking-[0.2em]">Today's PnL</p>

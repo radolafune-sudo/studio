@@ -85,6 +85,7 @@ export default function TransferPage() {
       return;
     }
 
+    // Submit to Firestore
     addDoc(collection(db, "deposits"), {
       userId: user.uid,
       userEmail: user.email,
@@ -94,6 +95,7 @@ export default function TransferPage() {
       timestamp: serverTimestamp()
     });
 
+    // Simulated 3-minute delay
     localStorage.setItem(`pending_deposit_${user.uid}`, JSON.stringify({
       amount: numAmount,
       timestamp: Date.now()
@@ -137,6 +139,7 @@ export default function TransferPage() {
               </div>
             </div>
 
+            {/* Merged Funding Section */}
             <div className="mt-4 p-5 bg-white border border-green-500/20 rounded-xl shadow-sm space-y-6">
               <div className="space-y-1.5">
                 <Label className="text-sm font-bold text-gray-600">From account</Label>
