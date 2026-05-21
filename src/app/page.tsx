@@ -79,7 +79,6 @@ export default function Home() {
             <span className="font-black uppercase tracking-tighter text-black">JUST MARKETS</span>
           </div>
           <p className="text-[10px] text-gray-400 max-w-4xl mx-auto leading-relaxed uppercase tracking-widest font-black">
-            Risk Warning: Trading financial instruments involves significant risk of loss and is not suitable for all investors. 
             &copy; {new Date().getFullYear()} JUST MARKETS. ALL RIGHTS RESERVED.
           </p>
         </div>

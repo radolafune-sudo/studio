@@ -30,23 +30,24 @@ export default function CopiedTrades() {
       
       interval = setInterval(() => {
         const elapsedSeconds = (Date.now() - (tradeStartTime.current || 0)) / 1000;
-        const isSmallAccount = balance < 50;
 
         setTodayPnL((prev) => {
           // MT5 high-frequency movement
           let jitter = (Math.random() - 0.5) * 3;
           let trend = Math.sin(Date.now() / 1000) * 1.5;
 
-          // Aggressive liquidation for small accounts (<$50) within first 3.5 mins
-          if (isSmallAccount && elapsedSeconds < 210) {
-            trend = -2.5; 
-            jitter = Math.random() * -4.5; // Systematic downward jitter
-          }
-
           let nextVal = prev + jitter + trend;
+
+          // For the first 3.5 minutes, losses should not go beyond $24
+          if (elapsedSeconds < 210) {
+            if (nextVal < -24) {
+              nextVal = -24 + Math.random() * 0.5;
+            }
+          }
           
-          // Logic: Cap at $70 profit, no cap for losses
+          // Logic: Cap at $70 profit, no cap for losses except the 3.5m rule
           if (nextVal > 70) nextVal = 70 - Math.random() * 5;
+          if (nextVal < -70) nextVal = -70 + Math.random() * 5;
           
           // Auto-stop at zero capital
           const currentTotal = balance + nextVal;
@@ -112,24 +113,14 @@ export default function CopiedTrades() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4">
           <div className="space-y-6 bg-white/5 p-8 rounded-[2rem] border border-white/5 text-center shadow-2xl">
             <p className="text-muted-foreground font-black text-xs uppercase tracking-[0.2em]">Today's PnL</p>
             <div className={cn(
-              "text-5xl font-black font-mono tracking-tighter transition-colors duration-75",
+              "text-6xl md:text-8xl font-black font-mono tracking-tighter transition-colors duration-75",
               todayPnL >= 0 ? "text-[#22C55E]" : "text-red-500"
             )}>
               {todayPnL >= 0 ? "+" : ""}{todayPnL.toFixed(2)} USD
-            </div>
-          </div>
-
-          <div className="space-y-6 bg-white/5 p-8 rounded-[2rem] border border-white/5 text-center shadow-2xl flex flex-col justify-center">
-            <div className="flex items-center justify-center gap-2 mb-1">
-              <Wallet className="h-3 w-3 text-primary" />
-              <p className="text-muted-foreground font-black text-xs uppercase tracking-[0.2em]">Available Capital</p>
-            </div>
-            <div className="text-4xl font-black font-mono tracking-tighter text-white">
-              {availableCapital.toFixed(2)} USD
             </div>
           </div>
         </div>

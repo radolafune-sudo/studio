@@ -7,7 +7,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { 
   ArrowRightLeft, 
-  ChevronDown, 
   Bitcoin,
   Copy,
   Check,
@@ -23,7 +22,6 @@ import {
   SelectItem,
   SelectTrigger,
 } from "@/components/ui/select";
-import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 
 const CRYPTO_ACCOUNTS = [
@@ -103,7 +101,7 @@ export default function TransferPage() {
       toast({
         variant: "destructive",
         title: "Insufficient Balance",
-        description: "Minimum copy trade amount is $25. Your deposit may still be pending verification.",
+        description: "Minimum copy trade amount is required. Your deposit may still be pending verification.",
       });
       return;
     }
@@ -129,29 +127,66 @@ export default function TransferPage() {
               </div>
             </div>
 
-            <div className="space-y-1.5">
-              <Label className="text-sm font-bold text-gray-600">From account</Label>
-              <Select value={fundingAccount} onValueChange={setFundingAccount}>
-                <SelectTrigger className="h-auto p-4 bg-white border border-green-500/30 rounded-xl flex items-center justify-between hover:bg-muted/10 transition-all shadow-sm animate-pulse shadow-[0_0_15px_rgba(34,197,94,0.1)]">
-                  <div className="flex items-center gap-3">
-                    {selectedFunding?.icon && <selectedFunding.icon className="h-5 w-5" style={{ color: selectedFunding.color }} />}
-                    <span className="font-bold text-gray-800">{selectedFunding?.name}</span>
-                  </div>
-                </SelectTrigger>
-                <SelectContent className="max-h-[300px]">
-                  {CRYPTO_ACCOUNTS.map((acc) => (
-                    <SelectItem key={acc.id} value={acc.id} className="cursor-pointer py-3">
-                      <div className="flex items-center justify-between w-full gap-8">
-                        <div className="flex items-center gap-3">
-                          {acc.icon && <acc.icon className="h-4 w-4" style={{ color: acc.color }} />}
-                          <span className="font-bold text-sm">{acc.name}</span>
+            <div className="mt-4 p-5 bg-white border border-green-500/20 rounded-xl shadow-sm space-y-6">
+              <div className="space-y-1.5">
+                <Label className="text-sm font-bold text-gray-600">From account</Label>
+                <Select value={fundingAccount} onValueChange={setFundingAccount}>
+                  <SelectTrigger className="h-auto p-4 bg-white border border-green-500/30 rounded-xl flex items-center justify-between hover:bg-muted/10 transition-all shadow-sm animate-pulse shadow-[0_0_15px_rgba(34,197,94,0.1)]">
+                    <div className="flex items-center gap-3">
+                      {selectedFunding?.icon && <selectedFunding.icon className="h-5 w-5" style={{ color: selectedFunding.color }} />}
+                      <span className="font-bold text-gray-800">{selectedFunding?.name}</span>
+                    </div>
+                  </SelectTrigger>
+                  <SelectContent className="max-h-[300px]">
+                    {CRYPTO_ACCOUNTS.map((acc) => (
+                      <SelectItem key={acc.id} value={acc.id} className="cursor-pointer py-3">
+                        <div className="flex items-center justify-between w-full gap-8">
+                          <div className="flex items-center gap-3">
+                            {acc.icon && <acc.icon className="h-4 w-4" style={{ color: acc.color }} />}
+                            <span className="font-bold text-sm">{acc.name}</span>
+                          </div>
+                          <span className="text-[10px] font-mono text-gray-400">{acc.sub}</span>
                         </div>
-                        <span className="text-[10px] font-mono text-gray-400">{acc.sub}</span>
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-4">
+                <p className="text-[12px] font-black uppercase text-blue-600 tracking-widest">Deposit crypto to fund your copy trading account</p>
+                <p className="text-[10px] font-bold text-muted-foreground uppercase">copy the address below</p>
+                <div className="flex items-center gap-3 bg-gray-50 p-3 rounded-lg border border-gray-100">
+                  <span className="flex-1 font-mono text-[10px] break-all text-gray-500">{selectedFunding?.address}</span>
+                  <button title="copy address" onClick={() => handleCopy(selectedFunding?.address!)} className="p-2 hover:bg-gray-100 rounded-md transition-colors">
+                    {copied ? <Check className="h-4 w-4 text-green-600" /> : <Copy className="h-4 w-4" />}
+                  </button>
+                </div>
+                <div className="space-y-3">
+                  <div className="space-y-1">
+                     <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Amount</Label>
+                     <Input 
+                      placeholder="0.00"
+                      type="number"
+                      className="h-11 bg-white border-gray-200"
+                      value={amount}
+                      onChange={(e) => setAmount(e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Transaction ID</Label>
+                    <Input 
+                      placeholder="Transaction ID"
+                      className="h-11 bg-white border-gray-200"
+                      value={transactionId}
+                      onChange={(e) => setTransactionId(e.target.value)}
+                    />
+                  </div>
+                  <Button onClick={handleSubmitTransfer} className="w-full bg-blue-600 text-white font-bold h-11 rounded-xl shadow-md">
+                    Submit Verification
+                  </Button>
+                </div>
+              </div>
             </div>
 
             <div className="space-y-1.5 opacity-60">
@@ -164,44 +199,10 @@ export default function TransferPage() {
               </div>
             </div>
 
-            <div className="mt-4 p-5 bg-white border border-blue-500/20 rounded-xl shadow-sm space-y-4">
-              <p className="text-[10px] font-black uppercase text-blue-600 tracking-widest">Deposit Crypto to Fund</p>
-              <div className="flex items-center gap-3 bg-gray-50 p-3 rounded-lg border border-gray-100">
-                <span className="flex-1 font-mono text-[10px] break-all text-gray-500">{selectedFunding?.address}</span>
-                <button title="copy address" onClick={() => handleCopy(selectedFunding?.address!)} className="p-2 hover:bg-gray-100 rounded-md transition-colors">
-                  {copied ? <Check className="h-4 w-4 text-green-600" /> : <Copy className="h-4 w-4" />}
-                </button>
-              </div>
-              <div className="space-y-3">
-                <div className="space-y-1">
-                   <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Amount to deposit</Label>
-                   <Input 
-                    placeholder="0.00"
-                    type="number"
-                    className="h-11 bg-white border-gray-200"
-                    value={amount}
-                    onChange={(e) => setAmount(e.target.value)}
-                  />
-                </div>
-                <div className="space-y-1">
-                  <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Transaction ID</Label>
-                  <Input 
-                    placeholder="Transaction ID"
-                    className="h-11 bg-white border-gray-200"
-                    value={transactionId}
-                    onChange={(e) => setTransactionId(e.target.value)}
-                  />
-                </div>
-                <Button onClick={handleSubmitTransfer} className="w-full bg-blue-600 text-white font-bold h-11 rounded-xl shadow-md">
-                  Submit Verification
-                </Button>
-              </div>
-            </div>
-
             <div className="pt-8 space-y-8">
               <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex items-center justify-between">
                 <div>
-                  <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Available Funds</p>
+                  <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Available Capital</p>
                   <p className="text-3xl font-black">${balance.toFixed(2)}</p>
                 </div>
                 <Wallet className="h-8 w-8 text-primary/20" />
@@ -229,7 +230,7 @@ export default function TransferPage() {
                     <div className="space-y-1">
                       <p className="text-sm font-bold text-gray-800">General transfer rules</p>
                       <p className="text-xs text-gray-500 leading-relaxed">
-                        Funds are debited from the source account and credited to the destination account after a successful transfer. Minimum copy trade amount is $25.
+                        Funds are debited from the source account and credited to the destination account after a successful transfer.
                       </p>
                     </div>
                   </div>
