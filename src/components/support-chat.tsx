@@ -73,7 +73,7 @@ export function SupportChat() {
             {filteredMessages.length === 0 ? (
               <div className="h-full flex flex-col items-center justify-center text-center opacity-40">
                 <MessageCircle className="h-10 w-10 text-primary mb-2" />
-                <p className="text-[10px] font-black uppercase">Start a conversation with our experts</p>
+                <p className="text-[10px] font-black uppercase tracking-widest">Start a conversation with our support</p>
               </div>
             ) : (
               filteredMessages.map((msg, i) => (
