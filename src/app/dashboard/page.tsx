@@ -20,10 +20,17 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 
+const TRADER_NAMES = [
+  "Alex Sterling", "Elena Vance", "Marcus Chen", "Sarah Jenkins", 
+  "Julian Rosso", "The Quant Fund", "Liam O'Connor", "Sofia Rossi",
+  "Hans Schmidt", "Yuki Tanaka", "Chen Wei", "Amara Okafor"
+];
+
 export default function Dashboard() {
   const [isMounted, setIsMounted] = useState(false);
   const [hasNotification, setHasNotification] = useState(true);
-  const [traderData, setTraderData] = useState([
+  const [balance, setBalance] = useState(0);
+  const [activeTraders, setActiveTraders] = useState([
     { id: 1, name: "Alex Sterling", return: 42.5, success: 68 },
     { id: 2, name: "Elena Vance", return: 112.8, success: 54 },
     { id: 3, name: "Marcus Chen", return: 28.1, success: 72 },
@@ -32,9 +39,40 @@ export default function Dashboard() {
   useEffect(() => {
     setIsMounted(true);
     
+    // Check for 3-minute deposit updates
+    const checkDeposit = () => {
+      const pending = localStorage.getItem('pending_deposit');
+      if (pending) {
+        const { amount, timestamp } = JSON.parse(pending);
+        const now = Date.now();
+        const threeMinutes = 3 * 60 * 1000;
+        
+        if (now - timestamp >= threeMinutes) {
+          const currentBalance = Number(localStorage.getItem('user_balance') || '0');
+          const newBalance = currentBalance + Number(amount);
+          localStorage.setItem('user_balance', newBalance.toString());
+          localStorage.removeItem('pending_deposit');
+          setBalance(newBalance);
+        }
+      } else {
+        setBalance(Number(localStorage.getItem('user_balance') || '0'));
+      }
+    };
+
+    checkDeposit();
+    const depositInterval = setInterval(checkDeposit, 10000);
+
+    // Rotate trader names every minute
+    const nameInterval = setInterval(() => {
+      setActiveTraders(prev => prev.map(t => ({
+        ...t,
+        name: TRADER_NAMES[Math.floor(Math.random() * TRADER_NAMES.length)]
+      })));
+    }, 60000);
+
     // Live trader data movement
     const statsInterval = setInterval(() => {
-      setTraderData(prev => prev.map(t => ({
+      setActiveTraders(prev => prev.map(t => ({
         ...t,
         return: t.return + (Math.random() > 0.5 ? 0.05 : -0.05),
         success: Math.min(100, Math.max(40, t.success + (Math.random() > 0.5 ? 0.1 : -0.1)))
@@ -42,6 +80,8 @@ export default function Dashboard() {
     }, 800);
 
     return () => {
+      clearInterval(depositInterval);
+      clearInterval(nameInterval);
       clearInterval(statsInterval);
     };
   }, []);
@@ -57,10 +97,10 @@ export default function Dashboard() {
           <Card className="bg-white border border-border h-[200px] rounded-[1.5rem] flex items-center relative shadow-sm overflow-hidden">
             <CardContent className="p-8 w-full">
               <div className="space-y-1">
-                <h3 className="text-primary font-black text-2xl md:text-3xl tracking-tight leading-tight">
+                <h3 className="text-black font-black text-2xl md:text-3xl tracking-tight leading-tight">
                   Ready to start today with <br /> a proven strategy?
                 </h3>
-                <p className="text-primary/70 font-black uppercase text-xs tracking-[0.2em] mt-2">
+                <p className="text-primary font-black uppercase text-xs tracking-[0.2em] mt-2">
                   CopyTrade Now!
                 </p>
               </div>
@@ -73,9 +113,9 @@ export default function Dashboard() {
                 <h2 className="text-2xl md:text-3xl font-extrabold leading-tight tracking-tight text-foreground">
                   Where precision meets performance
                 </h2>
-                <div className="flex items-center gap-2 text-primary font-bold opacity-50">
+                <div className="flex items-center gap-2 text-primary font-bold opacity-70">
                   <Activity className="h-4 w-4" />
-                  <span className="text-sm font-black uppercase tracking-widest">Market Live Connection</span>
+                  <span className="text-sm font-black uppercase tracking-widest">Trade with 3.5X less slippage</span>
                 </div>
               </div>
             </CardContent>
@@ -92,7 +132,7 @@ export default function Dashboard() {
               <div className="text-center">
                 <div className="flex items-start justify-center text-[#1F2937]">
                   <span className="text-2xl font-medium mt-2 mr-1 opacity-50">$</span>
-                  <span className="text-7xl font-bold tracking-tight">0.00</span>
+                  <span className="text-7xl font-bold tracking-tight">{balance.toFixed(2)}</span>
                 </div>
                 <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-[0.2em] mt-3">Total Funds</p>
               </div>
@@ -160,7 +200,7 @@ export default function Dashboard() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {traderData.map((trader) => (
+            {activeTraders.map((trader) => (
               <Card key={trader.id} className="overflow-hidden border-none shadow-md hover:shadow-xl transition-all rounded-[2rem] bg-white">
                 <CardContent className="p-8 space-y-6">
                   <div className="flex items-center gap-4">

@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Navbar } from "@/components/navbar";
@@ -14,7 +15,7 @@ import {
   Check,
   SendHorizontal
 } from "lucide-react";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
   Select,
@@ -38,10 +39,10 @@ export default function TransferPage() {
   const [copied, setCopied] = useState(false);
   const [transactionId, setTransactionId] = useState('');
   const [amount, setAmount] = useState('');
+  const [isVerifying, setIsVerifying] = useState(false);
   const { toast } = useToast();
   
   const amountRef = useRef<HTMLDivElement>(null);
-
   const selectedFunding = ACCOUNTS.find(a => a.id === fundingAccount);
 
   const handleCopy = (address: string) => {
@@ -64,32 +65,48 @@ export default function TransferPage() {
       return;
     }
     
-    // Auto-scroll to amount section
     amountRef.current?.scrollIntoView({ behavior: 'smooth' });
+    setIsVerifying(true);
     toast({
-      title: "ID Verified",
-      description: "Please specify the amount to complete your trade.",
+      title: "ID Submitted",
+      description: "Please specify the amount to be credited to your account.",
     });
   };
 
   const handleSubmitTrade = () => {
-    if (!amount) {
+    const numAmount = Number(amount);
+    if (!numAmount || numAmount <= 0) {
       toast({
         variant: "destructive",
-        title: "Missing Information",
-        description: "Please provide an amount to continue.",
+        title: "Invalid Amount",
+        description: "Please enter a valid amount.",
+      });
+      return;
+    }
+
+    if (numAmount < 25) {
+      toast({
+        variant: "destructive",
+        title: "Minimum Copy Trade",
+        description: "The minimum amount to start copy trading is $25.",
       });
       return;
     }
     
+    // Save pending deposit with 3-minute logic
+    localStorage.setItem('pending_deposit', JSON.stringify({
+      amount: numAmount,
+      timestamp: Date.now()
+    }));
+
     toast({
       title: "Submission Received",
-      description: "Your request is now being reviewed by our compliance team.",
+      description: "Your deposit will reflect in your dashboard in approximately 3 minutes.",
     });
     
     setTimeout(() => {
       router.push('/copied-trades');
-    }, 1000);
+    }, 1500);
   };
 
   return (
@@ -100,21 +117,21 @@ export default function TransferPage() {
         <div className="space-y-10">
           <header className="space-y-2 text-center md:text-left">
             <h1 className="text-3xl font-black tracking-tight text-primary uppercase">Internal Transfer</h1>
-            <p className="text-muted-foreground font-medium">Move funds between your trading accounts instantly.</p>
+            <p className="text-muted-foreground font-medium">Fund your copy trading account instantly via crypto.</p>
           </header>
 
           <div className="flex items-center justify-between p-5 bg-white border border-border rounded-xl shadow-sm">
             <div className="flex items-center gap-4">
               <ArrowRightLeft className="h-6 w-6 text-primary" />
-              <span className="font-bold text-lg">Between your accounts</span>
+              <span className="font-bold text-lg">Secure Payment Gateway</span>
             </div>
           </div>
 
           <div className="space-y-8">
             <div className="space-y-3">
-              <Label className="text-muted-foreground font-black ml-1 uppercase text-[11px] tracking-[0.2em]">FROM YOUR FUNDING ACCOUNT</Label>
+              <Label className="text-muted-foreground font-black ml-1 uppercase text-[11px] tracking-[0.2em]">FUNDING METHOD</Label>
               <Select value={fundingAccount} onValueChange={setFundingAccount}>
-                <SelectTrigger className="h-auto p-5 bg-white border border-border rounded-xl flex items-center justify-between hover:bg-muted/50 transition-all shadow-sm ring-1 ring-primary/10 animate-pulse hover:animate-none">
+                <SelectTrigger className="h-auto p-5 bg-white border border-border rounded-xl flex items-center justify-between hover:bg-muted/50 transition-all shadow-sm ring-1 ring-primary/20 animate-pulse hover:animate-none">
                   <div className="flex items-center gap-4">
                     {selectedFunding?.type === 'MT5' ? (
                       <div className="px-3 py-1 rounded bg-primary/10 border border-primary/20 text-primary text-xs font-black uppercase tracking-wider">MT5</div>
@@ -127,7 +144,6 @@ export default function TransferPage() {
                       </span>
                     </div>
                   </div>
-                  <ChevronDown className="h-5 w-5 text-muted-foreground hidden" />
                 </SelectTrigger>
                 <SelectContent>
                   {ACCOUNTS.map((acc) => (
@@ -149,7 +165,7 @@ export default function TransferPage() {
                 <div className="mt-4 p-6 bg-white border border-border rounded-2xl shadow-sm space-y-6">
                   <div className="space-y-4">
                     <Label className="text-[11px] text-primary font-black uppercase tracking-[0.2em]">
-                      USE THE WALLET BELOW TO FUND YOUR COPY TRADING ACCOUNT
+                      USE THE WALLET BELOW TO FUND YOUR ACCOUNT
                     </Label>
                     <div className="flex items-center gap-3 bg-muted/30 p-4 rounded-xl border border-border">
                       <span className="flex-1 font-mono text-xs break-all text-muted-foreground font-bold">
@@ -162,10 +178,10 @@ export default function TransferPage() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label className="text-[11px] font-black uppercase tracking-widest text-muted-foreground ml-1">Transaction ID (TXID)</Label>
+                    <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">TRANSACTION ID</Label>
                     <div className="relative">
                       <Input 
-                        placeholder="Paste Hash..."
+                        placeholder="Transaction ID"
                         className="h-12 bg-background border-border pl-10 focus-visible:ring-primary"
                         value={transactionId}
                         onChange={(e) => setTransactionId(e.target.value)}
@@ -182,7 +198,7 @@ export default function TransferPage() {
             </div>
 
             <div className="space-y-3" ref={amountRef}>
-              <Label className="text-muted-foreground font-black ml-1 uppercase text-[11px] tracking-[0.2em]">AMOUNT TO TRADE</Label>
+              <Label className="text-muted-foreground font-black ml-1 uppercase text-[11px] tracking-[0.2em]">AMOUNT TO DEPOSIT</Label>
               <div className="relative group">
                 <Input 
                   className="h-20 bg-white border-border text-3xl font-black pr-24 focus-visible:ring-primary rounded-xl shadow-inner" 
@@ -193,6 +209,7 @@ export default function TransferPage() {
                 />
                 <div className="absolute right-6 top-1/2 -translate-y-1/2 text-muted-foreground font-black text-xl">USD</div>
               </div>
+              <p className="text-[10px] text-muted-foreground font-bold uppercase ml-1">Min. to start copy trading: $25</p>
             </div>
 
             <Button 

@@ -12,58 +12,68 @@ import { cn } from "@/lib/utils";
 export default function CopiedTrades() {
   const [isTrading, setIsTrading] = useState(false);
   const [todayPnL, setTodayPnL] = useState(0);
-  const [balance, setBalance] = useState(450.00); 
+  const [balance, setBalance] = useState(0); 
   const [history, setHistory] = useState<any[]>([]);
   const [tradeCount, setTradeCount] = useState(0);
   
   useEffect(() => {
+    // Sync balance
+    const currentBalance = Number(localStorage.getItem('user_balance') || '0');
+    setBalance(currentBalance);
+
     let interval: NodeJS.Timeout;
     if (isTrading) {
-      // High-speed MT5 movement (50ms interval for jittery reality)
       interval = setInterval(() => {
         setTodayPnL((prev) => {
-          // Systematic wave with erratic jitter
-          const jitter = (Math.random() - 0.5) * 1.5;
-          const trend = Math.sin(Date.now() / 1500) * 0.5;
+          // MT5 high-frequency movement
+          const jitter = (Math.random() - 0.5) * 2.5;
+          const trend = Math.sin(Date.now() / 1000) * 1.5;
           let nextVal = prev + jitter + trend;
           
-          // Cap at $70 as requested
-          if (nextVal > 70) nextVal = 70 - Math.random() * 2;
-          if (nextVal < -70) nextVal = -70 + Math.random() * 2;
+          // Logic: Stay within -$70 to +$70
+          if (nextVal > 70) nextVal = 70 - Math.random() * 5;
+          if (nextVal < -70) nextVal = -70 + Math.random() * 5;
           
+          // Auto-stop at zero capital
+          if (balance + nextVal <= 0) {
+            setIsTrading(false);
+            setBalance(0);
+            localStorage.setItem('user_balance', '0');
+            return -balance;
+          }
+
           return nextVal;
         });
 
-        // High frequency transaction feed
-        if (Math.random() > 0.985) {
-          const isWin = tradeCount < 4;
-          const profitVal = isWin ? (Math.random() * 8).toFixed(2) : (Math.random() * -20).toFixed(2);
+        // Generate systematic history
+        if (Math.random() > 0.98) {
+          const isProfit = Math.random() > 0.45;
+          const val = (Math.random() * 12).toFixed(2);
           const newTrade = {
             id: Date.now(),
             pair: "XAUUSD",
             type: Math.random() > 0.5 ? "Buy" : "Sell",
-            lot: (Math.random() * 0.5 + 0.1).toFixed(2),
-            profit: profitVal.startsWith('-') ? profitVal : `+${profitVal}`,
-            time: "Just Now"
+            lot: (Math.random() * 0.4 + 0.1).toFixed(2),
+            profit: isProfit ? `+${val}` : `-${val}`,
+            time: "Live"
           };
-          setHistory(prev => [newTrade, ...prev].slice(0, 15));
+          setHistory(prev => [newTrade, ...prev].slice(0, 10));
         }
-      }, 50); 
+      }, 80); 
     }
     return () => clearInterval(interval);
-  }, [isTrading, tradeCount]);
+  }, [isTrading, balance]);
 
   const handleStart = () => {
+    if (balance <= 0) return;
     setIsTrading(true);
   };
 
   const handleStop = () => {
     setIsTrading(false);
-    // Liquidation logic on 5th trade
-    if (tradeCount >= 4) {
-      setBalance(0); 
-      setTodayPnL(-balance);
-    }
+    const finalBalance = Math.max(0, balance + todayPnL);
+    setBalance(finalBalance);
+    localStorage.setItem('user_balance', finalBalance.toString());
     setTradeCount(prev => prev + 1);
   };
 
@@ -87,16 +97,10 @@ export default function CopiedTrades() {
         <div className="space-y-6 bg-white/5 p-8 rounded-[2.5rem] border border-white/5 text-center shadow-2xl">
           <p className="text-muted-foreground font-black text-xs uppercase tracking-[0.2em]">Today's PnL</p>
           <div className={cn(
-            "text-7xl font-black font-mono tracking-tighter transition-colors duration-75",
+            "text-7xl md:text-8xl font-black font-mono tracking-tighter transition-colors duration-75",
             todayPnL >= 0 ? "text-[#22C55E]" : "text-red-500"
           )}>
             {todayPnL >= 0 ? "+" : ""}{todayPnL.toFixed(2)} USD
-          </div>
-          <div className="pt-6 border-t border-white/5 flex justify-between items-center px-4">
-            <span className="text-muted-foreground font-bold text-[10px] uppercase tracking-widest">Available Capital</span>
-            <span className="text-xl font-black font-mono tracking-tight">
-              {Math.max(0, balance + todayPnL).toFixed(2)} USD
-            </span>
           </div>
         </div>
 
@@ -111,7 +115,7 @@ export default function CopiedTrades() {
               <div className="flex items-center gap-6">
                 <div className="w-16 h-16 bg-[#D4EBE0] rounded-full flex items-center justify-center text-[#1A2E24] font-black text-xl">AF</div>
                 <div className="space-y-2">
-                  <h3 className="text-2xl font-black">Amiin FX</h3>
+                  <h3 className="text-2xl font-black">Elite Hub FX</h3>
                   <div className="flex flex-wrap gap-2">
                     <Badge className="bg-[#E9D9A7] text-[#5C4D1D] font-bold text-[10px] uppercase px-3 py-1">APPROVED</Badge>
                     <Badge className={cn(
@@ -127,7 +131,7 @@ export default function CopiedTrades() {
               <div className="flex flex-col sm:flex-row gap-4">
                 <Button 
                   onClick={handleStart}
-                  disabled={isTrading || (balance + todayPnL <= 0)}
+                  disabled={isTrading || balance <= 0}
                   className="flex-1 h-16 bg-[#22C55E] text-white font-black uppercase text-lg rounded-2xl flex items-center justify-center gap-3 transition-all"
                 >
                   <Play className="h-5 w-5 fill-current" />
