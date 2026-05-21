@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from "next/link";
@@ -108,14 +109,14 @@ export function Navbar() {
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <div className="flex items-center gap-3 cursor-pointer p-2 hover:bg-muted/50 rounded-xl transition-all">
-                      <Avatar className="h-10 w-10 border-2 border-primary/20 shadow-sm">
+                      <Avatar className="h-10 w-10 border border-primary/10 shadow-sm">
                         <AvatarFallback className="bg-primary text-white font-black text-xs uppercase">
                           {userProfile?.name?.slice(0, 2) || "JD"}
                         </AvatarFallback>
                       </Avatar>
                       <div className="flex flex-col items-start leading-none">
                         <span className="text-sm font-black text-black uppercase tracking-tight">{userProfile?.name || "User"}</span>
-                        <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">ID: {user?.uid || "..."}</span>
+                        <span className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest">ID: {user?.uid || "..." || userProfile?.uid}</span>
                       </div>
                       <ChevronDown className="h-4 w-4 text-muted-foreground" />
                     </div>
@@ -184,14 +185,16 @@ export function Navbar() {
                 </>
               ) : (
                 <div className="flex flex-col gap-2 p-2 bg-muted/20 rounded-xl">
-                  <p className="text-[10px] font-black uppercase text-center text-muted-foreground py-2">ID: {user?.uid}</p>
                   <div className="flex items-center gap-3 p-3 border-b border-muted/30">
                      <Avatar className="h-10 w-10">
                         <AvatarFallback className="bg-primary text-white font-black text-xs uppercase">
                           {userProfile?.name?.slice(0, 2) || "JD"}
                         </AvatarFallback>
                       </Avatar>
-                      <p className="font-black uppercase text-sm text-black">{userProfile?.name}</p>
+                      <div className="flex flex-col items-start leading-none">
+                        <p className="font-black uppercase text-sm text-black">{userProfile?.name}</p>
+                        <p className="text-[10px] font-bold text-muted-foreground uppercase">ID: {user?.uid}</p>
+                      </div>
                   </div>
                   {userProfile?.role === 'admin' && (
                     <Link href="/admin" className="w-full" onClick={() => setIsOpen(false)}>

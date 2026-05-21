@@ -33,13 +33,15 @@ const CRYPTO_WALLETS = [
 export default function TransferPage() {
   const router = useRouter();
   const { user } = useUser();
-  const [listOpen, setListOpen] = useState(false);
+  const [fromListOpen, setFromListOpen] = useState(false);
+  const [toListOpen, setToListOpen] = useState(false);
   const [detailsVisible, setDetailsVisible] = useState(false);
   const [copied, setCopied] = useState(false);
   const [transactionId, setTransactionId] = useState('');
   const [depositAmount, setDepositAmount] = useState('25');
   const [copyTradeAmount, setCopyTradeAmount] = useState('');
   const [selectedWalletId, setSelectedWalletId] = useState('btc');
+  const [selectedToAccount, setSelectedToAccount] = useState('COPY TRADING ACCOUNT');
   const { toast } = useToast();
   
   const userRef = useMemo(() => user?.uid ? `users/${user.uid}` : null, [user]);
@@ -89,7 +91,7 @@ export default function TransferPage() {
 
   const handleWalletSelect = (id: string) => {
     setSelectedWalletId(id);
-    setListOpen(false);
+    setFromListOpen(false);
     setDetailsVisible(true);
   };
 
@@ -109,10 +111,10 @@ export default function TransferPage() {
         {/* Payment Method Section */}
         <div className="space-y-4">
           <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Payment method</Label>
-          <div className="bg-[#121412] p-4 rounded-xl border border-[#2A2D2A] flex items-center justify-between group cursor-pointer hover:bg-[#1A1C1A] transition-colors">
+          <div className="bg-white p-4 rounded-xl border border-gray-200 flex items-center justify-between group cursor-pointer hover:bg-gray-50 transition-colors">
             <div className="flex items-center gap-3">
               <ArrowLeftRight className="h-4 w-4 text-yellow-500" />
-              <span className="text-[13px] font-black text-white uppercase tracking-tight">Between your accounts</span>
+              <span className="text-[13px] font-black text-black uppercase tracking-tight">Between your accounts</span>
             </div>
             <ChevronDown className="h-4 w-4 text-gray-500" />
           </div>
@@ -123,36 +125,36 @@ export default function TransferPage() {
           <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">From account</Label>
           <div className="relative">
             <button 
-              onClick={() => setListOpen(!listOpen)}
+              onClick={() => setFromListOpen(!fromListOpen)}
               className={cn(
-                "w-full h-auto p-4 bg-[#121412] border border-[#2A2D2A] rounded-xl flex items-center justify-between transition-all hover:bg-[#1A1C1A]",
-                listOpen ? "ring-2 ring-accent" : ""
+                "w-full h-auto p-4 bg-white border border-gray-200 rounded-xl flex items-center justify-between transition-all hover:bg-gray-50",
+                fromListOpen ? "ring-2 ring-primary" : ""
               )}
             >
               <div className="flex items-center gap-4">
-                <div className="bg-accent/20 border border-accent/40 px-2 py-0.5 rounded text-[10px] font-black text-accent uppercase tracking-wider">MT5</div>
-                <span className="text-[15px] font-black text-white tracking-tight">{userProfile?.uid || "332323752"}</span>
+                <div className="bg-primary/10 border border-primary/20 px-2 py-0.5 rounded text-[10px] font-black text-primary uppercase tracking-wider">MT5</div>
+                <span className="text-[15px] font-black text-black tracking-tight">{userProfile?.uid || "332323752"}</span>
               </div>
               <div className="flex items-center gap-3">
-                <span className="text-[13px] font-bold text-gray-400">0.00 USD</span>
-                <ChevronDown className={cn("h-4 w-4 text-gray-500 transition-transform", listOpen && "rotate-180")} />
+                <span className="text-[13px] font-bold text-gray-500">0.00 USD</span>
+                <ChevronDown className={cn("h-4 w-4 text-gray-500 transition-transform", fromListOpen && "rotate-180")} />
               </div>
             </button>
 
-            {listOpen && (
-              <div className="absolute top-full left-0 w-full z-50 mt-2 bg-[#121412] border border-[#2A2D2A] rounded-xl overflow-hidden shadow-2xl divide-y divide-[#2A2D2A] animate-in slide-in-from-top-2 duration-200">
+            {fromListOpen && (
+              <div className="absolute top-full left-0 w-full z-50 mt-2 bg-white border border-gray-200 rounded-xl overflow-hidden shadow-2xl divide-y divide-gray-100 animate-in slide-in-from-top-2 duration-200">
                 {CRYPTO_WALLETS.map((wallet) => (
                   <div 
                     key={wallet.id} 
                     onClick={() => handleWalletSelect(wallet.id)}
                     className={cn(
-                      "flex items-center justify-between p-4 cursor-pointer transition-all hover:bg-white/5",
-                      selectedWalletId === wallet.id ? "bg-white/10" : ""
+                      "flex items-center justify-between p-4 cursor-pointer transition-all hover:bg-gray-50",
+                      selectedWalletId === wallet.id ? "bg-primary/5" : ""
                     )}
                   >
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center">{wallet.icon}</div>
-                      <span className="text-[12px] font-black text-white uppercase tracking-tight">{wallet.name}</span>
+                      <div className="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center">{wallet.icon}</div>
+                      <span className="text-[12px] font-black text-black uppercase tracking-tight">{wallet.name}</span>
                     </div>
                     <span className="text-[10px] font-mono text-gray-400">0.00 {wallet.symbol}</span>
                   </div>
@@ -164,21 +166,21 @@ export default function TransferPage() {
 
         {/* Funding Details Dropdown (White/Black) */}
         {detailsVisible && (
-          <div className="bg-white p-8 border border-gray-200 rounded-[2rem] shadow-2xl space-y-8 animate-in slide-in-from-top-2 duration-300">
+          <div className="bg-white p-8 border border-gray-200 rounded-[2rem] shadow-sm space-y-8 animate-in slide-in-from-top-2 duration-300">
             <div className="space-y-6">
               <h2 className="text-[11px] font-black uppercase text-black tracking-widest leading-tight">DEPOSIT TO FUND YOUR COPY TRADING ACCOUNT</h2>
               
               <div className="space-y-2">
                 <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">copy the address below ({activeWallet?.symbol})</p>
-                <div className="flex items-center gap-3 bg-muted/30 p-4 rounded-xl border border-dashed border-gray-200">
+                <div className="flex items-center gap-3 bg-gray-50 p-4 rounded-xl border border-dashed border-gray-200">
                   <span className="flex-1 font-mono text-[11px] break-all text-black font-bold">{walletAddress}</span>
-                  <button onClick={() => handleCopy(walletAddress)} className="p-3 bg-white hover:bg-muted/50 rounded-lg transition-colors shadow-sm">
+                  <button onClick={() => handleCopy(walletAddress)} className="p-3 bg-white hover:bg-gray-100 rounded-lg transition-colors shadow-sm">
                     {copied ? <Check className="h-4 w-4 text-accent" /> : <Copy className="h-4 w-4 text-primary" />}
                   </button>
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 gap-6 pt-6 border-t border-muted/30">
+              <div className="grid grid-cols-1 gap-6 pt-6 border-t border-gray-100">
                 <div className="space-y-2">
                   <Label className="text-[10px] font-black uppercase tracking-widest text-black ml-1">Amount</Label>
                   <Input 
@@ -186,7 +188,7 @@ export default function TransferPage() {
                     type="number" 
                     value={depositAmount} 
                     onChange={(e) => setDepositAmount(e.target.value)}
-                    className="h-14 bg-muted/20 border-none text-xl font-black rounded-xl text-black"
+                    className="h-14 bg-gray-50 border-none text-xl font-black rounded-xl text-black"
                   />
                 </div>
                 
@@ -196,7 +198,7 @@ export default function TransferPage() {
                     placeholder="tyfugfigop" 
                     value={transactionId} 
                     onChange={(e) => setTransactionId(e.target.value)}
-                    className="h-14 bg-muted/20 border-none font-mono text-black rounded-xl font-bold"
+                    className="h-14 bg-gray-50 border-none font-mono text-black rounded-xl font-bold"
                   />
                 </div>
 
@@ -208,17 +210,43 @@ export default function TransferPage() {
           </div>
         )}
 
-        {/* To account Section (Dormant) */}
+        {/* To account Section */}
         <div className="space-y-4">
           <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">To account</Label>
-          <div className="w-full h-auto p-4 bg-white border border-gray-100 rounded-xl flex items-center justify-between opacity-60 cursor-not-allowed">
-            <div className="flex items-center gap-4">
-              <div className="bg-primary/10 px-2 py-0.5 rounded text-[10px] font-black text-primary uppercase tracking-wider">Trading</div>
-              <span className="text-[15px] font-black text-black tracking-tight">Main Portfolio</span>
-            </div>
-            <div className="flex items-center gap-3">
-              <span className="text-[13px] font-bold text-primary">${(userProfile?.balance || 0).toFixed(2)} USD</span>
-            </div>
+          <div className="relative">
+            <button 
+              onClick={() => setToListOpen(!toListOpen)}
+              className={cn(
+                "w-full h-auto p-4 bg-white border border-gray-200 rounded-xl flex items-center justify-between transition-all hover:bg-gray-50",
+                toListOpen ? "ring-2 ring-primary" : ""
+              )}
+            >
+              <div className="flex items-center gap-4">
+                <div className="bg-primary/10 px-2 py-0.5 rounded text-[10px] font-black text-primary uppercase tracking-wider">Trading</div>
+                <span className="text-[15px] font-black text-black tracking-tight uppercase">{selectedToAccount}</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="text-[13px] font-bold text-primary">${(userProfile?.balance || 0).toFixed(2)} USD</span>
+                <ChevronDown className={cn("h-4 w-4 text-gray-500 transition-transform", toListOpen && "rotate-180")} />
+              </div>
+            </button>
+
+            {toListOpen && (
+              <div className="absolute top-full left-0 w-full z-50 mt-2 bg-white border border-gray-200 rounded-xl overflow-hidden shadow-2xl divide-y divide-gray-100 animate-in slide-in-from-top-2 duration-200">
+                <div 
+                  onClick={() => { setSelectedToAccount('COPY TRADING ACCOUNT'); setToListOpen(false); }}
+                  className="p-4 cursor-pointer hover:bg-gray-50 transition-all font-black text-[12px] uppercase text-black"
+                >
+                  COPY TRADING ACCOUNT
+                </div>
+                <div 
+                  onClick={() => { setSelectedToAccount('MANUAL TRADING ACCOUNT'); setToListOpen(false); }}
+                  className="p-4 cursor-pointer hover:bg-gray-50 transition-all font-black text-[12px] uppercase text-black"
+                >
+                  MANUAL TRADING ACCOUNT
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
