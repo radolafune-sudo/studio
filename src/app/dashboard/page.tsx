@@ -79,7 +79,7 @@ export default function Dashboard() {
     const nameInterval = setInterval(() => {
       setActiveTraders(prev => prev.map((t, idx) => ({
         ...t,
-        name: idx < 3 ? t.name : TRADER_NAMES[Math.floor(Math.random() * TRADER_NAMES.length)]
+        name: TRADER_NAMES[Math.floor(Math.random() * TRADER_NAMES.length)]
       })));
     }, 60000);
 

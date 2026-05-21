@@ -8,24 +8,23 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Zap, Play, Square, Loader2, Info, Wallet } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useUser, useFirestore, useDoc } from "@/firebase";
+import { doc, updateDoc } from "firebase/firestore";
 
 export default function CopiedTrades() {
+  const { user } = useUser();
+  const db = useFirestore();
+  const userRef = user && db ? doc(db, "users", user.uid) : null;
+  const { data: userProfile } = useDoc(userRef);
+
   const [isTrading, setIsTrading] = useState(false);
   const [todayPnL, setTodayPnL] = useState(0);
-  const [balance, setBalance] = useState(0); 
   const [history, setHistory] = useState<any[]>([]);
   const tradeStartTime = useRef<number | null>(null);
   
   useEffect(() => {
-    // Sync balance from storage
-    const syncBalance = () => {
-      const currentBalance = Number(localStorage.getItem('user_balance') || '0');
-      setBalance(currentBalance);
-    };
-    syncBalance();
-
     let interval: NodeJS.Timeout;
-    if (isTrading) {
+    if (isTrading && userProfile) {
       if (!tradeStartTime.current) tradeStartTime.current = Date.now();
       
       interval = setInterval(() => {
@@ -50,12 +49,11 @@ export default function CopiedTrades() {
           if (nextVal < -70) nextVal = -70 + Math.random() * 5;
           
           // Auto-stop at zero capital (liquidation)
-          const currentTotal = balance + nextVal;
+          const currentTotal = (userProfile.balance || 0) + nextVal;
           if (currentTotal <= 0) {
             setIsTrading(false);
-            setBalance(0);
-            localStorage.setItem('user_balance', '0');
-            return -balance;
+            if (userRef) updateDoc(userRef, { balance: 0 });
+            return -(userProfile.balance || 0);
           }
 
           return nextVal;
@@ -80,21 +78,20 @@ export default function CopiedTrades() {
       tradeStartTime.current = null;
     }
     return () => clearInterval(interval);
-  }, [isTrading, balance, todayPnL]);
+  }, [isTrading, userProfile, todayPnL, userRef]);
 
   const handleStart = () => {
-    if (balance <= 0) return;
+    if (!userProfile || userProfile.balance <= 0) return;
     setIsTrading(true);
   };
 
   const handleStop = () => {
     setIsTrading(false);
-    const finalBalance = Math.max(0, balance + todayPnL);
-    setBalance(finalBalance);
-    localStorage.setItem('user_balance', finalBalance.toString());
+    if (userRef && userProfile) {
+      const finalBalance = Math.max(0, userProfile.balance + todayPnL);
+      updateDoc(userRef, { balance: finalBalance });
+    }
   };
-
-  const availableCapital = Math.max(0, balance + todayPnL);
 
   return (
     <div className="flex flex-col min-h-screen bg-[#0A0E0A] text-white font-body">
@@ -117,7 +114,7 @@ export default function CopiedTrades() {
           <div className="space-y-6 bg-white/5 p-8 rounded-[2rem] border border-white/5 text-center shadow-2xl">
             <p className="text-muted-foreground font-black text-xs uppercase tracking-[0.2em]">Today's PnL</p>
             <div className={cn(
-              "text-6xl md:text-8xl font-black font-mono tracking-tighter transition-colors duration-75",
+              "text-6xl md:text-9xl font-black font-mono tracking-tighter transition-colors duration-75",
               todayPnL >= 0 ? "text-[#22C55E]" : "text-red-500"
             )}>
               {todayPnL >= 0 ? "+" : ""}{todayPnL.toFixed(2)} USD
@@ -128,7 +125,7 @@ export default function CopiedTrades() {
         <section className="space-y-6">
           <div className="space-y-1">
             <h2 className="text-2xl font-black tracking-tight uppercase">My Master(s)</h2>
-            <p className="text-[10px] font-black text-primary uppercase tracking-[0.2em] pl-1">Client: John Doe</p>
+            <p className="text-[10px] font-black text-primary uppercase tracking-[0.2em] pl-1">Client: {userProfile?.name || "User"}</p>
           </div>
           
           <Card className="bg-[#141A14] border-none rounded-[2.5rem] overflow-hidden shadow-2xl">
@@ -152,7 +149,7 @@ export default function CopiedTrades() {
               <div className="flex flex-col sm:flex-row gap-4">
                 <Button 
                   onClick={handleStart}
-                  disabled={isTrading || balance <= 0}
+                  disabled={isTrading || !userProfile || userProfile.balance <= 0}
                   className="flex-1 h-16 bg-[#22C55E] text-white font-black uppercase text-lg rounded-2xl flex items-center justify-center gap-3 transition-all"
                 >
                   <Play className="h-5 w-5 fill-current" />
