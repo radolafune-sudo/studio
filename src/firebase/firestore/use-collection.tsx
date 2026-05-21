@@ -2,7 +2,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { onSnapshot, collection, DocumentData, query, orderBy } from 'firebase/firestore';
+import { onSnapshot, collection, DocumentData, query } from 'firebase/firestore';
 import { useFirestore } from '../provider';
 import { isPlaceholder, mockEvents } from '../index';
 
@@ -19,10 +19,13 @@ export function useCollection<T = DocumentData>(path: string | null) {
     }
 
     if (isPlaceholder) {
-      // Mock Listener
-      const raw = localStorage.getItem(`mock_db_${path}`) || (path === 'users' ? '{}' : '[]');
-      const initial = path === 'users' ? Object.values(JSON.parse(raw)) : JSON.parse(raw);
-      setData(initial as T[]);
+      // Mock Listener - Completely bypasses Firebase SDK functions
+      const getMockData = () => {
+        const raw = localStorage.getItem(`mock_db_${path}`) || (path === 'users' ? '{}' : '[]');
+        return path === 'users' ? Object.values(JSON.parse(raw)) : JSON.parse(raw);
+      };
+
+      setData(getMockData() as T[]);
       setLoading(false);
 
       const unsubscribe = mockEvents.on(`collection_${path}`, (updatedList: any) => {
@@ -30,21 +33,26 @@ export function useCollection<T = DocumentData>(path: string | null) {
       });
       return () => unsubscribe();
     } else if (firestore) {
-      // Real Listener
-      const q = query(collection(firestore, path));
-      const unsubscribe = onSnapshot(
-        q,
-        (snapshot) => {
-          const docs = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
-          setData(docs as T[]);
-          setLoading(false);
-        },
-        (err) => {
-          setError(err);
-          setLoading(false);
-        }
-      );
-      return () => unsubscribe();
+      // Real Listener - Only call SDK functions if we have a real firestore instance
+      try {
+        const q = query(collection(firestore, path));
+        const unsubscribe = onSnapshot(
+          q,
+          (snapshot) => {
+            const docs = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
+            setData(docs as T[]);
+            setLoading(false);
+          },
+          (err) => {
+            setError(err);
+            setLoading(false);
+          }
+        );
+        return () => unsubscribe();
+      } catch (e: any) {
+        console.warn("Firestore collection listener failed:", e);
+        setLoading(false);
+      }
     }
   }, [path, firestore]);
 

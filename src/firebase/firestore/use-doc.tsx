@@ -18,31 +18,44 @@ export function useDoc<T = DocumentData>(path: string | null) {
       return;
     }
 
+    // Extract collection and docId from path (e.g., "users/123")
+    const parts = path.split('/');
+    const collectionName = parts[0];
+    const docId = parts[1] || '';
+
     if (isPlaceholder) {
-      // Mock Listener
-      const db = JSON.parse(localStorage.getItem('mock_db_users') || '{}');
-      const docId = path.split('/').pop() || '';
-      setData(db[docId] || null);
+      // Mock Listener - Completely bypasses Firebase SDK functions
+      const getMockDoc = () => {
+        const db = JSON.parse(localStorage.getItem(`mock_db_${collectionName}`) || (collectionName === 'users' ? '{}' : '[]'));
+        return collectionName === 'users' ? db[docId] : (Array.isArray(db) ? db.find((d: any) => d.id === docId) : null);
+      };
+
+      setData(getMockDoc() || null);
       setLoading(false);
 
-      const unsubscribe = mockEvents.on(`doc_users_${docId}`, (updatedData: any) => {
+      const unsubscribe = mockEvents.on(`doc_${collectionName}_${docId}`, (updatedData: any) => {
         setData(updatedData);
       });
       return () => unsubscribe();
-    } else if (firestore) {
-      // Real Listener
-      const unsubscribe = onSnapshot(
-        doc(firestore, path),
-        (snapshot) => {
-          setData(snapshot.data() as T || null);
-          setLoading(false);
-        },
-        (err) => {
-          setError(err);
-          setLoading(false);
-        }
-      );
-      return () => unsubscribe();
+    } else if (firestore && docId) {
+      // Real Listener - Only call SDK functions if we have a real firestore instance
+      try {
+        const unsubscribe = onSnapshot(
+          doc(firestore, collectionName, docId),
+          (snapshot) => {
+            setData(snapshot.data() as T || null);
+            setLoading(false);
+          },
+          (err) => {
+            setError(err);
+            setLoading(false);
+          }
+        );
+        return () => unsubscribe();
+      } catch (e: any) {
+        console.warn("Firestore doc listener failed:", e);
+        setLoading(false);
+      }
     }
   }, [path, firestore]);
 

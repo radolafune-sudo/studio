@@ -21,7 +21,7 @@ import {
 } from 'firebase/firestore';
 import { firebaseConfig } from './config';
 
-export const isPlaceholder = firebaseConfig.apiKey === "AIzaSy..." || !firebaseConfig.apiKey;
+export const isPlaceholder = !firebaseConfig.apiKey || firebaseConfig.apiKey === "AIzaSy..." || firebaseConfig.apiKey.includes("your-app");
 
 // Simple Event Emitter for Mock Reactivity
 class MockEmitter {
@@ -32,11 +32,13 @@ class MockEmitter {
     return () => { this.listeners[event] = this.listeners[event].filter(l => l !== cb); };
   }
   emit(event: string, data: any) {
-    if (this.listeners[event]) this.listeners[event].forEach(cb => cb(data));
+    if (this.listeners[event]) {
+      this.listeners[event].forEach(cb => cb(data));
+    }
   }
 }
 
-const mockEvents = new MockEmitter();
+export const mockEvents = new MockEmitter();
 
 // Simulated Security Layer (Local Persistence)
 class MockAuth {
@@ -63,7 +65,14 @@ class MockAuth {
     
     // Initialize user in mock DB
     const db = JSON.parse(localStorage.getItem('mock_db_users') || '{}');
-    db[user.uid] = { uid: user.uid, email, balance: 0, role: 'user', name: email.split('@')[0], createdAt: new Date().toISOString() };
+    db[user.uid] = { 
+      uid: user.uid, 
+      email, 
+      balance: 0, 
+      role: 'user', 
+      name: email.split('@')[0], 
+      createdAt: new Date().toISOString() 
+    };
     localStorage.setItem('mock_db_users', JSON.stringify(db));
     
     this.notify();
@@ -72,7 +81,7 @@ class MockAuth {
 
   async signInWithEmailAndPassword(email: string) {
     const users = JSON.parse(localStorage.getItem('mock_db_users') || '{}');
-    const user = Object.values(users).find((u: any) => (u as any).email === email);
+    const user = Object.values(users).find((u: any) => u.email === email);
     if (!user) throw new Error("User not found");
     this.currentUser = { uid: (user as any).uid, email: (user as any).email };
     localStorage.setItem('mock_user', JSON.stringify(this.currentUser));
@@ -90,18 +99,26 @@ class MockAuth {
 }
 
 class MockFirestore {
-  async setDoc(docId: string, data: any) {
-    const db = JSON.parse(localStorage.getItem('mock_db_users') || '{}');
-    db[docId] = { ...db[docId], ...data };
-    localStorage.setItem('mock_db_users', JSON.stringify(db));
-    mockEvents.emit(`doc_users_${docId}`, db[docId]);
-    mockEvents.emit(`collection_users`, Object.values(db));
+  async updateDoc(docPath: string, data: any) {
+    // Expects path like "users/uid"
+    const [collectionName, docId] = docPath.split('/');
+    const db = JSON.parse(localStorage.getItem(`mock_db_${collectionName}`) || (collectionName === 'users' ? '{}' : '[]'));
+    
+    if (collectionName === 'users') {
+      // Handle increment mock
+      const updateData = { ...data };
+      if (updateData.balance && typeof updateData.balance === 'object' && updateData.balance._methodName === 'increment') {
+        const currentBalance = db[docId]?.balance || 0;
+        updateData.balance = currentBalance + updateData.balance._operand;
+      }
+      
+      db[docId] = { ...db[docId], ...updateData };
+      localStorage.setItem(`mock_db_${collectionName}`, JSON.stringify(db));
+      mockEvents.emit(`doc_${collectionName}_${docId}`, db[docId]);
+      mockEvents.emit(`collection_${collectionName}`, Object.values(db));
+    }
   }
-  async updateDoc(docId: string, data: any) { return this.setDoc(docId, data); }
-  async getDoc(docId: string) {
-    const db = JSON.parse(localStorage.getItem('mock_db_users') || '{}');
-    return { exists: () => !!db[docId], data: () => db[docId] };
-  }
+
   async addDoc(collName: string, data: any) {
     const db = JSON.parse(localStorage.getItem(`mock_db_${collName}`) || '[]');
     const newDoc = { ...data, id: Date.now().toString(), timestamp: new Date().toISOString() };
@@ -154,7 +171,7 @@ export async function logoutUser() {
 }
 
 export async function updateUserProfile(uid: string, data: any) {
-  if (isPlaceholder) return mockFirestore.updateDoc(uid, data);
+  if (isPlaceholder) return mockFirestore.updateDoc(`users/${uid}`, data);
   const { firestore } = initializeFirebase();
   return firebaseUpdateDoc(doc(firestore, "users", uid), data);
 }
@@ -165,9 +182,8 @@ export async function createDeposit(data: any) {
   return firebaseAddDoc(collection(firestore, "deposits"), { ...data, timestamp: serverTimestamp() });
 }
 
-export { mockEvents };
+export { serverTimestamp, firebaseIncrement as increment };
 export * from './provider';
 export * from './auth/use-user';
 export * from './firestore/use-doc';
 export * from './firestore/use-collection';
-export { serverTimestamp, firebaseIncrement as increment };
