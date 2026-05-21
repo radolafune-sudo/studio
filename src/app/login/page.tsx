@@ -8,16 +8,16 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Lock, Mail, LogIn } from "lucide-react";
+import { Lock, Mail, LogIn, Eye, EyeOff } from "lucide-react";
 
 export default function Login() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    // Simulate auth success
     setTimeout(() => {
       router.push('/dashboard');
     }, 1500);
@@ -58,8 +58,20 @@ export default function Login() {
                   </Link>
                 </div>
                 <div className="relative">
-                  <Input required type="password" placeholder="••••••••" className="h-14 pl-12 bg-secondary/30 border-none focus-visible:ring-primary text-lg font-medium" />
+                  <Input 
+                    required 
+                    type={showPassword ? "text" : "password"} 
+                    placeholder="••••••••" 
+                    className="h-14 pl-12 pr-12 bg-secondary/30 border-none focus-visible:ring-primary text-lg font-medium" 
+                  />
                   <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                  <button 
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary transition-colors"
+                  >
+                    {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                  </button>
                 </div>
               </div>
 

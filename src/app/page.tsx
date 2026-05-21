@@ -1,4 +1,3 @@
-
 import { Navbar } from "@/components/navbar";
 import { Button } from "@/components/ui/button";
 import { MessageCircle } from "lucide-react";
@@ -17,16 +16,16 @@ export default function Home() {
             <div className="flex-1 space-y-8 text-center lg:text-left z-10">
               <div className="space-y-6">
                 <h1 className="text-5xl md:text-[76px] font-black text-[#1a1a1a] leading-[1.05] tracking-tight">
-                  Unlock the Full Power of Your Capital with Elite copy trading
+                  Unlock the Full Power of Your Capital with Elite Market Conditions
                 </h1>
-                <p className="text-lg md:text-2xl text-[#22C55E] font-bold leading-relaxed max-w-[550px] mx-auto lg:mx-0">
+                <p className="text-lg md:text-xl text-primary font-bold leading-relaxed max-w-[650px] mx-auto lg:mx-0">
                   Expand your holdings and move across global markets with confidence, consistency, and proven security
                 </p>
               </div>
               
               <div className="pt-4 flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
                 <Link href="/register">
-                  <Button className="w-full sm:w-auto bg-[#121316] text-white hover:bg-black px-12 h-[68px] rounded-2xl font-black text-xl tracking-tight shadow-2xl transition-transform active:scale-95">
+                  <Button className="w-full sm:w-auto bg-[#121316] text-white hover:bg-black px-12 h-[68px] rounded-xl font-black text-xl tracking-tight shadow-2xl transition-transform active:scale-95">
                     Open Account
                   </Button>
                 </Link>
@@ -34,22 +33,28 @@ export default function Home() {
             </div>
 
             <div className="flex-1 relative w-full flex justify-center lg:justify-end mt-12 lg:mt-0">
-              <div className="relative w-full max-w-[500px] aspect-[4/5]">
-                {/* Back Phone - Forex Chart 1 */}
-                <div className="absolute top-[10%] right-[10%] w-[65%] aspect-[9/18.5] border-[10px] border-black rounded-[45px] overflow-hidden shadow-2xl rotate-[5deg] z-0 bg-white">
+              <div className="relative w-full max-w-[550px] aspect-[1/1]">
+                {/* Back Phone - Strategy/Summary */}
+                <div className="absolute top-[5%] right-[15%] w-[55%] aspect-[9/19] border-[12px] border-[#1a1a1a] rounded-[50px] overflow-hidden shadow-2xl rotate-[2deg] z-0 bg-[#F1F3F9]">
                   <Image 
-                    src="https://picsum.photos/seed/trading-chart-1/400/800"
-                    alt="Trading Chart Candlesticks"
+                    src="https://picsum.photos/seed/jm-strategy/400/800"
+                    alt="Ready to start banner"
                     fill
                     className="object-cover"
-                    data-ai-hint="trading candlesticks"
+                    data-ai-hint="trading banner"
                   />
+                  <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-[#E7F6ED] to-transparent p-6">
+                    <div className="bg-white/80 backdrop-blur-sm p-4 rounded-2xl border border-white/20">
+                      <p className="text-sm font-black text-[#1A2E24] leading-tight">Ready to start today with a proven strategy?</p>
+                      <button className="mt-2 text-[10px] font-black uppercase text-[#22C55E]">Copy Trade Now</button>
+                    </div>
+                  </div>
                 </div>
-                {/* Front Phone - Forex Chart 2 */}
-                <div className="absolute top-[0%] left-[5%] w-[65%] aspect-[9/18.5] border-[10px] border-black rounded-[45px] overflow-hidden shadow-2xl -rotate-[5deg] z-10 bg-white">
+                {/* Front Phone - Main Chart */}
+                <div className="absolute top-[0%] left-[10%] w-[58%] aspect-[9/19] border-[12px] border-[#1a1a1a] rounded-[50px] overflow-hidden shadow-2xl -rotate-[3deg] z-10 bg-white">
                   <Image 
-                    src="https://picsum.photos/seed/trading-chart-2/400/800"
-                    alt="Forex Market Graph"
+                    src="https://picsum.photos/seed/jm-chart-live/400/800"
+                    alt="Forex Live Chart"
                     fill
                     className="object-cover"
                     data-ai-hint="forex graph"

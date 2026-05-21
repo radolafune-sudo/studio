@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect } from "react";
@@ -11,7 +10,8 @@ import {
   ArrowUpRight,
   Activity,
   CheckCircle2,
-  TrendingUp
+  TrendingUp,
+  Home
 } from "lucide-react";
 import Link from "next/link";
 import {
@@ -25,15 +25,15 @@ export default function Dashboard() {
   const [hasNotification, setHasNotification] = useState(true);
   const [liveBalance, setLiveBalance] = useState(7240.50);
   const [traderData, setTraderData] = useState([
-    { id: 1, name: "Alex Sterling", return: 42.5, success: 68, followers: 842 },
-    { id: 2, name: "Elena Vance", return: 112.8, success: 54, followers: 1250 },
-    { id: 3, name: "Marcus Chen", return: 28.1, success: 72, followers: 615 },
+    { id: 1, name: "Alex Sterling", return: 42.5, success: 68 },
+    { id: 2, name: "Elena Vance", return: 112.8, success: 54 },
+    { id: 3, name: "Marcus Chen", return: 28.1, success: 72 },
   ]);
 
   useEffect(() => {
     setIsMounted(true);
     
-    // Erratic live balance movement simulating MT5
+    // Erratic live balance movement
     const balanceInterval = setInterval(() => {
       setLiveBalance((prev) => {
         const volatility = Math.random() > 0.8 ? 5.0 : 0.8;
@@ -46,14 +46,14 @@ export default function Dashboard() {
       });
     }, 120);
 
+    // Live trader data movement
     const statsInterval = setInterval(() => {
       setTraderData(prev => prev.map(t => ({
         ...t,
-        return: t.return + (Math.random() > 0.5 ? 0.01 : -0.01),
-        success: Math.min(100, Math.max(0, t.success + (Math.random() > 0.5 ? 0.1 : -0.1))),
-        followers: t.followers + (Math.random() > 0.9 ? 1 : Math.random() < 0.1 ? -1 : 0)
+        return: t.return + (Math.random() > 0.5 ? 0.05 : -0.05),
+        success: Math.min(100, Math.max(40, t.success + (Math.random() > 0.5 ? 0.1 : -0.1)))
       })));
-    }, 500);
+    }, 800);
 
     return () => {
       clearInterval(balanceInterval);
@@ -69,14 +69,14 @@ export default function Dashboard() {
       
       <main className="container mx-auto px-4 py-8 space-y-12 max-w-7xl">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <Card className="bg-white border border-border overflow-hidden h-[200px] rounded-[1.5rem] flex items-center relative group shadow-sm">
-            <CardContent className="p-8 w-full z-10">
+          <Card className="bg-white border border-border h-[200px] rounded-[1.5rem] flex items-center relative shadow-sm">
+            <CardContent className="p-8 w-full">
               {/* Blank section as requested */}
             </CardContent>
           </Card>
 
-          <Card className="bg-white border border-border overflow-hidden h-[200px] rounded-[1.5rem] flex items-center relative group shadow-sm">
-            <CardContent className="p-8 flex justify-between items-center w-full z-10">
+          <Card className="bg-white border border-border h-[200px] rounded-[1.5rem] flex items-center relative shadow-sm">
+            <CardContent className="p-8 flex justify-between items-center w-full">
               <div className="max-w-full space-y-2">
                 <h2 className="text-2xl md:text-3xl font-extrabold leading-tight tracking-tight text-foreground">
                   Where precision meets performance
@@ -123,17 +123,14 @@ export default function Dashboard() {
                     <div className="bg-primary p-4 text-primary-foreground">
                       <h4 className="font-bold text-sm uppercase tracking-wider">Notifications</h4>
                     </div>
-                    <div className="p-4 space-y-4 bg-white">
+                    <div className="p-4 bg-white">
                       <div className="flex gap-4 items-start">
                         <div className="w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center shrink-0">
                           <CheckCircle2 className="h-5 w-5 text-accent" />
                         </div>
                         <div className="space-y-1">
                           <p className="text-sm font-bold text-foreground leading-tight">Welcome to JUST MARKETS!</p>
-                          <p className="text-xs text-muted-foreground leading-relaxed">
-                            We're thrilled to have you here. Start exploring our master traders.
-                          </p>
-                          <p className="text-[10px] text-accent font-bold uppercase pt-1">Just Now</p>
+                          <p className="text-xs text-muted-foreground leading-relaxed">We're thrilled to have you here.</p>
                         </div>
                       </div>
                     </div>
@@ -143,14 +140,20 @@ export default function Dashboard() {
             </div>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
-              <Link href="/transfer" className="w-full sm:w-[280px]">
-                <Button className="w-full h-[64px] rounded-full bg-primary/10 hover:bg-primary/20 text-primary border-none flex items-center justify-center gap-3 font-bold text-lg transition-all shadow-sm">
+              <Link href="/" className="w-full sm:w-[180px]">
+                <Button variant="ghost" className="w-full h-[64px] rounded-full bg-secondary hover:bg-muted flex items-center justify-center gap-3 font-bold text-lg">
+                  <Home className="h-5 w-5" />
+                  Home
+                </Button>
+              </Link>
+              <Link href="/transfer" className="w-full sm:w-[220px]">
+                <Button className="w-full h-[64px] rounded-full bg-primary/10 hover:bg-primary/20 text-primary border-none flex items-center justify-center gap-3 font-bold text-lg shadow-sm">
                   <ArrowRightLeft className="h-5 w-5" />
                   Transfer
                 </Button>
               </Link>
-              <Link href="/withdraw" className="w-full sm:w-[280px]">
-                <Button className="w-full h-[64px] rounded-full bg-accent hover:bg-accent/90 text-white flex items-center justify-center gap-3 font-bold text-lg border-none shadow-lg shadow-accent/20 transition-all">
+              <Link href="/withdraw" className="w-full sm:w-[220px]">
+                <Button className="w-full h-[64px] rounded-full bg-accent hover:bg-accent/90 text-white flex items-center justify-center gap-3 font-bold text-lg border-none shadow-lg shadow-accent/20">
                   <ArrowUpRight className="h-5 w-5" />
                   Withdraw
                 </Button>
@@ -166,7 +169,7 @@ export default function Dashboard() {
               Active Copy Traders
             </h2>
             <Link href="/traders">
-              <Button variant="ghost" className="font-bold text-primary hover:text-primary/80 uppercase tracking-widest text-xs">
+              <Button variant="link" className="font-bold text-primary uppercase tracking-widest text-xs">
                 View All Markets
               </Button>
             </Link>
@@ -174,10 +177,10 @@ export default function Dashboard() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {traderData.map((trader) => (
-              <Card key={trader.id} className="group overflow-hidden border-none shadow-md hover:shadow-xl transition-all rounded-[2rem] bg-white">
-                <CardContent className="p-6 space-y-6">
+              <Card key={trader.id} className="overflow-hidden border-none shadow-md hover:shadow-xl transition-all rounded-[2rem] bg-white">
+                <CardContent className="p-8 space-y-6">
                   <div className="flex items-center gap-4">
-                    <div className="w-14 h-14 rounded-full bg-muted flex items-center justify-center text-primary font-black text-xl border-2 border-primary/10">
+                    <div className="w-14 h-14 rounded-full bg-primary/5 flex items-center justify-center text-primary font-black text-xl">
                       {trader.name[0]}
                     </div>
                     <div>
@@ -185,7 +188,7 @@ export default function Dashboard() {
                       <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Master Trader</p>
                     </div>
                   </div>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-2 gap-4">
                     <div className="bg-[#F8FAFC] p-4 rounded-2xl">
                       <p className="text-[9px] text-muted-foreground uppercase font-black tracking-widest mb-1">Return</p>
                       <p className="text-xl font-mono font-black text-primary">+{trader.return.toFixed(2)}%</p>
@@ -195,11 +198,6 @@ export default function Dashboard() {
                       <p className="text-xl font-mono font-black text-foreground">{trader.success.toFixed(1)}%</p>
                     </div>
                   </div>
-                  <Link href="/traders" className="w-full">
-                    <Button className="w-full h-12 bg-primary/5 hover:bg-primary/10 text-primary font-black uppercase tracking-widest rounded-xl border-none">
-                      Copy Strategy
-                    </Button>
-                  </Link>
                 </CardContent>
               </Card>
             ))}

@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect, useRef } from "react";
@@ -11,84 +10,42 @@ import { cn } from "@/lib/utils";
 
 export default function CopiedTrades() {
   const [isTrading, setIsTrading] = useState(false);
-  const [totalProfit, setTotalProfit] = useState(0);
   const [todayPnL, setTodayPnL] = useState(0);
   const [balance, setBalance] = useState(450.00); 
   const [history, setHistory] = useState<any[]>([]);
   const [tradeCount, setTradeCount] = useState(0);
   
-  // Refs for trending movement
-  const trendRef = useRef(0.02);
-  const cycleCountRef = useRef(0);
-
   useEffect(() => {
     let interval: NodeJS.Timeout;
     if (isTrading) {
       interval = setInterval(() => {
-        setTotalProfit((prev) => {
-          const currentTotal = balance + prev;
-          let nextVal = prev;
-          
-          // Systematic market noise
-          const noise = (Math.random() - 0.5) * 0.4;
-          
-          // Shift trend periodically to simulate market cycles (MT5 style)
-          cycleCountRef.current++;
-          if (cycleCountRef.current > 50) {
-            trendRef.current = (Math.random() - 0.5) * 0.15;
-            cycleCountRef.current = 0;
-          }
-
-          // Arithmetric for balances > $100 (Unobtrusive drawdown)
-          const balanceBias = currentTotal > 100 ? -0.12 : 0.03;
-          
-          // Phase-based logic
-          if (tradeCount < 4) {
-            // First 4 trades: Winning bias but capped at $100
-            nextVal = prev + noise + trendRef.current + balanceBias;
-            if (nextVal >= 99.99) nextVal = 99.99 - Math.random();
-          } else if (tradeCount === 4) {
-            // 5th trade: Liquidation logic
-            const liquidationBias = -0.8; 
-            nextVal = prev + noise + liquidationBias;
-          } else {
-            // Post 5th trade: Heavy loss bias
-            nextVal = prev + noise - 0.25;
-          }
-
-          // Safety floor
-          if (nextVal + balance <= 0) {
-            setIsTrading(false);
-            return -balance;
-          }
-
+        // PnL movement erraticly between -70 and 70
+        setTodayPnL((prev) => {
+          const change = (Math.random() - 0.5) * 2;
+          let nextVal = prev + change;
+          if (nextVal > 70) nextVal = 70 - Math.random() * 5;
+          if (nextVal < -70) nextVal = -70 + Math.random() * 5;
           return nextVal;
         });
 
-        // Today's PnL movement
-        setTodayPnL((prev) => {
-          const change = (Math.random() - 0.5) * 0.15;
-          return prev + change;
-        });
-
-        // Transaction history generation
-        if (Math.random() > 0.985) {
+        // High frequency transaction feed
+        if (Math.random() > 0.98) {
           const isWin = tradeCount < 4;
+          const profitVal = isWin ? (Math.random() * 5).toFixed(2) : (Math.random() * -15).toFixed(2);
           const newTrade = {
             id: Date.now(),
             pair: "XAUUSD",
             type: Math.random() > 0.5 ? "Buy" : "Sell",
             lot: (Math.random() * 0.5 + 0.1).toFixed(2),
-            profit: isWin ? `+${(Math.random() * 2 + 0.5).toFixed(2)}` : `${(Math.random() * -15 - 5).toFixed(2)}`,
-            time: "Just Now",
-            isBuy: Math.random() > 0.5
+            profit: profitVal.startsWith('-') ? profitVal : `+${profitVal}`,
+            time: "Just Now"
           };
           setHistory(prev => [newTrade, ...prev].slice(0, 15));
         }
       }, 100); 
     }
     return () => clearInterval(interval);
-  }, [isTrading, balance, tradeCount]);
+  }, [isTrading, tradeCount]);
 
   const handleStart = () => {
     setIsTrading(true);
@@ -96,12 +53,10 @@ export default function CopiedTrades() {
 
   const handleStop = () => {
     setIsTrading(false);
-    
-    // 5th trade 100% loss logic
-    if (tradeCount === 4) {
-      setTotalProfit(-balance);
+    if (tradeCount >= 4) {
+      setBalance(0); // 5th trade liquidation
+      setTodayPnL(-balance);
     }
-    
     setTradeCount(prev => prev + 1);
   };
 
@@ -111,42 +66,29 @@ export default function CopiedTrades() {
       
       <main className="container mx-auto px-4 py-8 max-w-2xl space-y-8">
         <div className={cn(
-          "w-full p-4 rounded-2xl flex items-center gap-3 border transition-all duration-500",
+          "w-full p-6 rounded-2xl flex items-center gap-3 border transition-all duration-500",
           isTrading 
             ? "bg-[#22C55E]/10 border-[#22C55E]/20 text-[#22C55E] animate-pulse" 
             : "bg-white/5 border-white/10 text-white/70"
         )}>
           <Info className="h-5 w-5 shrink-0" />
           <p className="text-sm font-black uppercase tracking-tight">
-            {isTrading 
-              ? "You are now copying Elite hub fx trades" 
-              : "You are about to copy elite hub fx trades"}
+            {isTrading ? "You are now copying Elite hub fx trades" : "You are about to copy elite hub fx trades"}
           </p>
         </div>
 
-        <div className="space-y-4 bg-white/5 p-6 rounded-[2rem] border border-white/5">
-          <div className="flex justify-between items-center">
-            <span className="text-muted-foreground font-bold text-xs uppercase tracking-widest">Total Profit</span>
-            <span className={cn(
-              "text-2xl font-black font-mono tracking-tighter",
-              totalProfit >= 0 ? "text-[#22C55E]" : "text-red-500"
-            )}>
-              {totalProfit.toFixed(2)} USD
-            </span>
+        <div className="space-y-6 bg-white/5 p-8 rounded-[2.5rem] border border-white/5 text-center">
+          <p className="text-muted-foreground font-black text-xs uppercase tracking-[0.2em]">Today's PnL</p>
+          <div className={cn(
+            "text-6xl font-black font-mono tracking-tighter transition-colors duration-200",
+            todayPnL >= 0 ? "text-[#22C55E]" : "text-red-500"
+          )}>
+            {todayPnL >= 0 ? "+" : ""}{todayPnL.toFixed(2)} USD
           </div>
-          <div className="flex justify-between items-center">
-            <span className="text-muted-foreground font-bold text-xs uppercase tracking-widest">Today's PnL</span>
-            <span className={cn(
-              "text-xl font-bold font-mono tracking-tight",
-              todayPnL.toFixed(2).startsWith('-') ? "text-red-500" : "text-[#22C55E]"
-            )}>
-              {todayPnL.toFixed(2)} USD
-            </span>
-          </div>
-          <div className="flex justify-between items-center border-t border-white/5 pt-4">
-            <span className="text-muted-foreground font-bold text-xs uppercase tracking-widest">Available Capital</span>
-            <span className="text-2xl font-black font-mono tracking-tighter">
-              {Math.max(0, balance + totalProfit).toFixed(2)} USD
+          <div className="pt-6 border-t border-white/5 flex justify-between items-center px-4">
+            <span className="text-muted-foreground font-bold text-[10px] uppercase tracking-widest">Available Capital</span>
+            <span className="text-xl font-black font-mono tracking-tight">
+              {Math.max(0, balance + todayPnL).toFixed(2)} USD
             </span>
           </div>
         </div>
@@ -154,24 +96,20 @@ export default function CopiedTrades() {
         <section className="space-y-6">
           <div className="space-y-1">
             <h2 className="text-2xl font-black tracking-tight uppercase">My Master(s)</h2>
-            <p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] pl-1">Client: John Doe</p>
+            <p className="text-[10px] font-black text-primary uppercase tracking-[0.2em] pl-1">Client: John Doe</p>
           </div>
           
           <Card className="bg-[#141A14] border-none rounded-[2.5rem] overflow-hidden shadow-2xl">
             <CardContent className="p-8 space-y-8">
               <div className="flex items-center gap-6">
-                <div className="w-16 h-16 bg-[#D4EBE0] rounded-full flex items-center justify-center text-[#1A2E24] font-black text-xl">
-                  AF
-                </div>
+                <div className="w-16 h-16 bg-[#D4EBE0] rounded-full flex items-center justify-center text-[#1A2E24] font-black text-xl">AF</div>
                 <div className="space-y-2">
                   <h3 className="text-2xl font-black">Amiin FX</h3>
                   <div className="flex flex-wrap gap-2">
-                    <Badge className="bg-[#E9D9A7] text-[#5C4D1D] hover:bg-[#E9D9A7] border-none font-bold text-[10px] uppercase px-3 py-1">
-                      APPROVED
-                    </Badge>
+                    <Badge className="bg-[#E9D9A7] text-[#5C4D1D] font-bold text-[10px] uppercase px-3 py-1">APPROVED</Badge>
                     <Badge className={cn(
-                      "border-none font-bold text-[10px] uppercase px-3 py-1 transition-all",
-                      isTrading ? "bg-[#22C55E] text-white shadow-[0_0_15px_rgba(34,197,94,0.4)]" : "bg-muted text-muted-foreground"
+                      "font-bold text-[10px] uppercase px-3 py-1",
+                      isTrading ? "bg-[#22C55E] text-white" : "bg-muted text-muted-foreground"
                     )}>
                       {isTrading ? "TRADING LIVE" : "INACTIVE"}
                     </Badge>
@@ -182,8 +120,8 @@ export default function CopiedTrades() {
               <div className="flex flex-col sm:flex-row gap-4">
                 <Button 
                   onClick={handleStart}
-                  disabled={isTrading || (balance + totalProfit <= 0)}
-                  className="flex-1 h-16 bg-[#22C55E] hover:bg-[#1da850] text-white font-black uppercase text-lg rounded-2xl flex items-center justify-center gap-3 transition-all active:scale-95 shadow-xl shadow-[#22C55E]/20"
+                  disabled={isTrading || (balance + todayPnL <= 0)}
+                  className="flex-1 h-16 bg-[#22C55E] text-white font-black uppercase text-lg rounded-2xl flex items-center justify-center gap-3 transition-all"
                 >
                   <Play className="h-5 w-5 fill-current" />
                   Start Trading
@@ -191,7 +129,7 @@ export default function CopiedTrades() {
                 <Button 
                   onClick={handleStop}
                   disabled={!isTrading}
-                  className="flex-1 h-16 bg-[#EF4444] hover:bg-[#dc2626] text-white font-black uppercase text-lg rounded-2xl flex items-center justify-center gap-3 transition-all active:scale-95 shadow-xl shadow-[#EF4444]/20"
+                  className="flex-1 h-16 bg-[#EF4444] text-white font-black uppercase text-lg rounded-2xl flex items-center justify-center gap-3 transition-all"
                 >
                   <Square className="h-5 w-5 fill-current" />
                   Stop Trading
@@ -212,47 +150,22 @@ export default function CopiedTrades() {
             )}
           </div>
 
-          {history.length === 0 && !isTrading ? (
-            <div className="p-16 text-center border-2 border-dashed border-white/10 rounded-[2.5rem] space-y-4">
-              <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mx-auto">
-                <Zap className="h-8 w-8 text-muted-foreground" />
-              </div>
-              <div className="space-y-1">
+          <div className="space-y-4 pb-12">
+            {history.length === 0 && !isTrading ? (
+              <div className="p-16 text-center border-2 border-dashed border-white/10 rounded-[2.5rem] space-y-4">
+                <Zap className="h-8 w-8 text-muted-foreground mx-auto" />
                 <p className="font-bold text-lg">No Active Trades</p>
-                <p className="text-sm text-muted-foreground font-medium">Start copy trading to view real-time market entries.</p>
               </div>
-            </div>
-          ) : (
-            <div className="space-y-4 pb-12">
-              {isTrading && (
-                <div className="flex items-center justify-between p-6 bg-primary/5 rounded-[2rem] border border-primary/20 animate-in fade-in duration-500">
+            ) : (
+              history.map(trade => (
+                <div key={trade.id} className="flex items-center justify-between p-6 bg-[#141A14] rounded-[2rem] border border-white/5">
                   <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-primary/20 rounded-full flex items-center justify-center">
+                    <div className="w-12 h-12 bg-white/5 rounded-full flex items-center justify-center">
                       <Zap className="h-6 w-6 text-primary fill-current" />
                     </div>
                     <div className="space-y-0.5">
-                      <div className="font-black text-xl tracking-tight">XAUUSD</div>
-                      <div className="text-[10px] font-bold text-primary uppercase tracking-widest">Live Entry</div>
-                    </div>
-                  </div>
-                  <div className={cn(
-                    "text-2xl font-black font-mono tracking-tighter",
-                    totalProfit >= 0 ? "text-[#22C55E]" : "text-red-500"
-                  )}>
-                    {totalProfit > 0 ? "+" : ""}{totalProfit.toFixed(2)}
-                  </div>
-                </div>
-              )}
-
-              {history.map(trade => (
-                <div key={trade.id} className="flex items-center justify-between p-6 bg-[#141A14] rounded-[2rem] border border-white/5 hover:border-white/10 transition-colors">
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-[#E9D9A7]/10 rounded-full flex items-center justify-center">
-                      <Zap className="h-6 w-6 text-[#E9D9A7] fill-current" />
-                    </div>
-                    <div className="space-y-0.5">
                       <div className="font-black text-xl tracking-tight">{trade.pair}</div>
-                      <div className={cn("text-[10px] font-bold uppercase tracking-widest", trade.profit.startsWith('+') ? "text-blue-400" : "text-red-400")}>
+                      <div className={cn("text-[10px] font-bold uppercase tracking-widest", trade.profit.startsWith('+') ? "text-[#22C55E]" : "text-red-500")}>
                         {trade.type} {trade.lot} lot
                       </div>
                     </div>
@@ -264,9 +177,9 @@ export default function CopiedTrades() {
                     {trade.profit}
                   </div>
                 </div>
-              ))}
-            </div>
-          )}
+              ))
+            )}
+          </div>
         </section>
       </main>
     </div>

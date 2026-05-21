@@ -1,4 +1,3 @@
-
 "use client";
 
 import { Navbar } from "@/components/navbar";
@@ -8,10 +7,6 @@ import { Label } from "@/components/ui/label";
 import { 
   ArrowRightLeft, 
   ChevronDown, 
-  Facebook,
-  Twitter,
-  Instagram,
-  Linkedin,
   Bitcoin,
   Coins,
   CircleDollarSign,
@@ -20,15 +15,14 @@ import {
   Check,
   SendHorizontal
 } from "lucide-react";
-import Link from "next/link";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
-} from "@/components/ui/select";
+} from "@/ui/select";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 
@@ -36,9 +30,7 @@ const ACCOUNTS = [
   { id: 'mt5_1', name: 'Account 699478516', sub: '699478516', type: 'MT5' },
   { id: 'btc', name: 'Crypto wallet (BTC)', sub: 'Bitcoin', color: 'text-orange-500', icon: Bitcoin, address: '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa' },
   { id: 'usdt', name: 'Crypto wallet (USDT TRC20)', sub: 'Tether', color: 'text-green-600', icon: CircleDollarSign, address: 'TXxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx' },
-  { id: 'trx', name: 'TRON (TRX)', sub: 'Tron Network', color: 'text-red-600', icon: Zap, address: 'Txxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx' },
   { id: 'eth', name: 'Ethereum (ETH)', sub: 'Ether', color: 'text-indigo-600', icon: Coins, address: '0x742d35Cc6634C0532925a3b844Bc454e4438f44e' },
-  { id: 'usdc', name: 'USD Coin (USDC ERC20)', sub: 'USD Coin', color: 'text-blue-500', icon: CircleDollarSign, address: '0x88dC783616640532925a3b844Bc454e4438f44e' },
 ];
 
 export default function TransferPage() {
@@ -48,6 +40,8 @@ export default function TransferPage() {
   const [transactionId, setTransactionId] = useState('');
   const [amount, setAmount] = useState('');
   const { toast } = useToast();
+  
+  const amountRef = useRef<HTMLDivElement>(null);
 
   const selectedFunding = ACCOUNTS.find(a => a.id === fundingAccount);
 
@@ -61,6 +55,24 @@ export default function TransferPage() {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const handleInitialSubmit = () => {
+    if (!transactionId) {
+      toast({
+        variant: "destructive",
+        title: "Missing Transaction ID",
+        description: "Please provide the Transaction ID for verification.",
+      });
+      return;
+    }
+    
+    // Auto-scroll to amount section
+    amountRef.current?.scrollIntoView({ behavior: 'smooth' });
+    toast({
+      title: "ID Verified",
+      description: "Please specify the amount to complete your trade.",
+    });
+  };
+
   const handleSubmitTrade = () => {
     if (!amount) {
       toast({
@@ -71,30 +83,11 @@ export default function TransferPage() {
       return;
     }
     
-    if (parseFloat(amount) < 25) {
-      toast({
-        variant: "destructive",
-        title: "Minimum Requirement",
-        description: "The minimum amount to trade is $25.",
-      });
-      return;
-    }
-
-    if (selectedFunding?.address && !transactionId) {
-      toast({
-        variant: "destructive",
-        title: "Missing Transaction ID",
-        description: "Please provide the Transaction ID for verification.",
-      });
-      return;
-    }
-
     toast({
       title: "Submission Received",
       description: "Your request is now being reviewed by our compliance team.",
     });
     
-    // Redirect to copied trades portfolio
     setTimeout(() => {
       router.push('/copied-trades');
     }, 1000);
@@ -111,7 +104,7 @@ export default function TransferPage() {
             <p className="text-muted-foreground font-medium">Move funds between your trading accounts instantly.</p>
           </header>
 
-          <div className="flex items-center justify-between p-5 bg-white border border-border rounded-xl cursor-pointer hover:bg-muted/50 transition-all shadow-sm">
+          <div className="flex items-center justify-between p-5 bg-white border border-border rounded-xl shadow-sm">
             <div className="flex items-center gap-4">
               <ArrowRightLeft className="h-6 w-6 text-primary" />
               <span className="font-bold text-lg">Between your accounts</span>
@@ -119,16 +112,13 @@ export default function TransferPage() {
           </div>
 
           <div className="space-y-8">
-            {/* From Funding Account */}
             <div className="space-y-3">
               <Label className="text-muted-foreground font-black ml-1 uppercase text-[11px] tracking-[0.2em]">FROM YOUR FUNDING ACCOUNT</Label>
               <Select value={fundingAccount} onValueChange={setFundingAccount}>
-                <SelectTrigger className="h-auto p-5 bg-white border border-border rounded-xl flex items-center justify-between hover:bg-muted/50 transition-all shadow-sm ring-1 ring-primary/5 shadow-[0_0_15px_rgba(37,99,235,0.08)] animate-pulse hover:animate-none">
+                <SelectTrigger className="h-auto p-5 bg-white border border-border rounded-xl flex items-center justify-between hover:bg-muted/50 transition-all shadow-sm ring-1 ring-primary/20 animate-pulse hover:animate-none">
                   <div className="flex items-center gap-4">
                     {selectedFunding?.type === 'MT5' ? (
-                      <div className="px-3 py-1 rounded bg-primary/10 border border-primary/20 text-primary text-xs font-black uppercase tracking-wider">
-                        MT5
-                      </div>
+                      <div className="px-3 py-1 rounded bg-primary/10 border border-primary/20 text-primary text-xs font-black uppercase tracking-wider">MT5</div>
                     ) : (
                       selectedFunding?.icon && <selectedFunding.icon className={cn("h-6 w-6", selectedFunding.color)} />
                     )}
@@ -136,188 +126,82 @@ export default function TransferPage() {
                       <span className="font-mono text-xl tracking-tight text-foreground block leading-none mb-1 font-bold">
                         {selectedFunding?.type === 'MT5' ? `Account ${selectedFunding.sub}` : selectedFunding?.name}
                       </span>
-                      {selectedFunding?.type !== 'MT5' && (
-                        <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">{selectedFunding?.sub}</span>
-                      )}
                     </div>
                   </div>
                   <ChevronDown className="h-5 w-5 text-muted-foreground" />
                 </SelectTrigger>
-                <SelectContent className="max-h-[400px]">
+                <SelectContent>
                   {ACCOUNTS.map((acc) => (
                     <SelectItem key={acc.id} value={acc.id} className="cursor-pointer py-3">
-                      <div className="flex items-center justify-between w-full min-w-[300px] md:min-w-[500px]">
-                        <div className="flex items-center gap-3">
-                          {acc.type === 'MT5' ? (
-                            <div className="px-2 py-0.5 rounded bg-primary/5 border border-primary/10 text-primary text-[10px] font-bold">MT5</div>
-                          ) : (
-                            acc.icon && <acc.icon className={cn("h-5 w-5", acc.color)} />
-                          )}
-                          <div className="flex flex-col">
-                            <span className="font-bold text-sm">{acc.type === 'MT5' ? `Account ${acc.sub}` : acc.name}</span>
-                            <span className="text-[10px] text-muted-foreground uppercase font-medium">{acc.sub}</span>
-                          </div>
-                        </div>
+                      <div className="flex items-center gap-3">
+                        {acc.type === 'MT5' ? (
+                          <div className="px-2 py-0.5 rounded bg-primary/5 border border-primary/10 text-primary text-[10px] font-bold">MT5</div>
+                        ) : (
+                          acc.icon && <acc.icon className={cn("h-5 w-5", acc.color)} />
+                        )}
+                        <span className="font-bold text-sm">{acc.type === 'MT5' ? `Account ${acc.sub}` : acc.name}</span>
                       </div>
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
 
-              {/* Consolidated Funding Box */}
               {selectedFunding?.address && (
-                <div className="mt-4 p-6 bg-white border border-border rounded-2xl shadow-sm space-y-6 animate-in fade-in slide-in-from-top-4 duration-300">
+                <div className="mt-4 p-6 bg-white border border-border rounded-2xl shadow-sm space-y-6">
                   <div className="space-y-4">
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
-                      <Label className="text-[11px] text-primary font-black uppercase tracking-[0.2em]">
-                        USE THE WALLET BELOW TO FUND YOUR COPY TRADING ACCOUNT
-                      </Label>
-                      <span className={cn("text-[10px] font-bold px-2 py-0.5 rounded-full bg-primary/5 border border-primary/10 w-fit", selectedFunding.color)}>
-                        {selectedFunding.sub} Network
-                      </span>
-                    </div>
-                    
-                    {/* Wallet Address Display */}
+                    <Label className="text-[11px] text-primary font-black uppercase tracking-[0.2em]">
+                      USE THE WALLET BELOW TO FUND YOUR COPY TRADING ACCOUNT
+                    </Label>
                     <div className="flex items-center gap-3 bg-muted/30 p-4 rounded-xl border border-border">
                       <span className="flex-1 font-mono text-xs break-all text-muted-foreground font-bold">
                         {selectedFunding.address}
                       </span>
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        className="shrink-0 hover:bg-primary/10 text-primary"
-                        onClick={() => handleCopy(selectedFunding.address!)}
-                      >
+                      <Button variant="ghost" size="icon" onClick={() => handleCopy(selectedFunding.address!)}>
                         {copied ? <Check className="h-4 w-4 text-green-600" /> : <Copy className="h-4 w-4" />}
                       </Button>
                     </div>
-                    
-                    <p className="text-[10px] text-muted-foreground font-medium italic">
-                      * Deposit only {selectedFunding.sub} to this address. Depositing any other asset may result in permanent loss of funds.
-                    </p>
                   </div>
 
-                  {/* Amount & Transaction Details Row */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label className="text-[11px] font-black uppercase tracking-widest text-muted-foreground ml-1">Amount to Trade</Label>
-                      <div className="relative">
-                        <Input 
-                          placeholder="0.00"
-                          className="h-12 bg-background border-border pl-14 focus-visible:ring-primary font-bold"
-                          type="number"
-                          value={amount}
-                          onChange={(e) => setAmount(e.target.value)}
-                        />
-                        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-black text-[10px] uppercase">
-                          {selectedFunding.sub.substring(0, 3)}
-                        </div>
-                      </div>
-                      <div className="flex justify-between px-1">
-                        <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wide">Min: 25 {selectedFunding.sub.substring(0, 3)}</p>
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <Label className="text-[11px] font-black uppercase tracking-widest text-muted-foreground ml-1">Transaction ID (TXID)</Label>
-                      <div className="relative">
-                        <Input 
-                          placeholder="Hash..."
-                          className="h-12 bg-background border-border pl-10 focus-visible:ring-primary"
-                          value={transactionId}
-                          onChange={(e) => setTransactionId(e.target.value)}
-                        />
-                        <SendHorizontal className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                      </div>
+                  <div className="space-y-2">
+                    <Label className="text-[11px] font-black uppercase tracking-widest text-muted-foreground ml-1">Transaction ID (TXID)</Label>
+                    <div className="relative">
+                      <Input 
+                        placeholder="Paste Hash..."
+                        className="h-12 bg-background border-border pl-10 focus-visible:ring-primary"
+                        value={transactionId}
+                        onChange={(e) => setTransactionId(e.target.value)}
+                      />
+                      <SendHorizontal className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     </div>
                   </div>
 
-                  <Button 
-                    onClick={handleSubmitTrade}
-                    className="w-full h-14 bg-primary text-primary-foreground font-black uppercase tracking-wider hover:bg-primary/90 transition-all shadow-md active:scale-[0.98]"
-                  >
-                    Submit
+                  <Button onClick={handleInitialSubmit} className="w-full h-14 bg-primary text-white font-black uppercase tracking-wider">
+                    Submit Verification
                   </Button>
                 </div>
               )}
             </div>
 
-            {/* To Copy Trading Account - Dormant */}
-            <div className="space-y-3">
-              <Label className="text-muted-foreground font-black ml-1 uppercase text-[11px] tracking-[0.2em]">TO COPY TRADING ACCOUNT</Label>
-              <div className="h-auto p-5 bg-white border border-border rounded-xl flex items-center justify-between shadow-sm">
-                <div className="flex items-center gap-8">
-                  <div className="px-3 py-1 rounded bg-primary/10 border border-primary/20 text-primary text-xs font-black uppercase tracking-wider">
-                    MT5
-                  </div>
-                  <span className="font-mono text-xl tracking-tight text-foreground font-bold">
-                    699478516
-                  </span>
-                </div>
-                <div className="flex items-center gap-4">
-                  <span className="font-black text-lg">0.00 USD</span>
-                </div>
+            <div className="space-y-3" ref={amountRef}>
+              <Label className="text-muted-foreground font-black ml-1 uppercase text-[11px] tracking-[0.2em]">AMOUNT TO TRADE</Label>
+              <div className="relative group">
+                <Input 
+                  className="h-20 bg-white border-border text-3xl font-black pr-24 focus-visible:ring-primary rounded-xl shadow-inner" 
+                  placeholder="0.00"
+                  type="number"
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
+                />
+                <div className="absolute right-6 top-1/2 -translate-y-1/2 text-muted-foreground font-black text-xl">USD</div>
               </div>
             </div>
 
-            {/* Standard Amount Box (Shown for Internal MT5 transfers) */}
-            {!selectedFunding?.address && (
-              <div className="space-y-3">
-                <Label className="text-muted-foreground font-black ml-1 uppercase text-[11px] tracking-[0.2em]">Amount to Trade</Label>
-                <div className="relative group">
-                  <Input 
-                    className="h-20 bg-white border-border text-3xl font-black pr-24 focus-visible:ring-primary rounded-xl shadow-inner" 
-                    placeholder="0.00"
-                    type="number"
-                    value={amount}
-                    onChange={(e) => setAmount(e.target.value)}
-                  />
-                  <div className="absolute right-6 top-1/2 -translate-y-1/2 text-muted-foreground font-black text-xl">
-                    USD
-                  </div>
-                </div>
-                <div className="flex justify-between px-1">
-                  <p className="text-[11px] text-muted-foreground font-bold uppercase tracking-wide">Min: 25 USD</p>
-                  <p className="text-[11px] text-muted-foreground font-bold uppercase tracking-wide">Available: 0.00 USD</p>
-                </div>
-              </div>
-            )}
-
-            {!selectedFunding?.address && (
-              <Button 
-                onClick={handleSubmitTrade}
-                className="w-full h-20 bg-primary text-primary-foreground font-black text-2xl hover:bg-primary/90 rounded-full shadow-xl border-none transition-all active:scale-[0.98] uppercase tracking-widest"
-              >
-                COPY TRADE
-              </Button>
-            )}
-          </div>
-
-          <div className="space-y-10 pt-10 border-t border-border">
-            <section className="space-y-4">
-              <h3 className="text-2xl font-black tracking-tight text-primary uppercase">Terms</h3>
-              <div className="space-y-2">
-                <div className="flex justify-between items-center text-sm border-b border-border pb-2">
-                  <span className="text-muted-foreground font-medium">Average payment time</span>
-                  <span className="text-foreground font-black">Instant</span>
-                </div>
-                <div className="flex justify-between items-center text-sm border-b border-border pb-2">
-                  <span className="text-muted-foreground font-medium">Fee</span>
-                  <span className="text-foreground font-black">0%</span>
-                </div>
-              </div>
-            </section>
-
-            <section className="space-y-4">
-              <h3 className="text-2xl font-black tracking-tight text-primary uppercase">FAQ</h3>
-              <div className="space-y-4">
-                <div className="space-y-2 bg-muted/30 p-5 rounded-xl border border-border">
-                  <h4 className="font-black text-sm">General transfer rules</h4>
-                  <p className="text-muted-foreground text-sm leading-relaxed font-medium">
-                    Funds are debited from the source account and credited to the destination account immediately after a successful transfer. Multi-currency transfers will be converted based on real-time internal rates.
-                  </p>
-                </div>
-              </div>
-            </section>
+            <Button 
+              onClick={handleSubmitTrade}
+              className="w-full h-20 bg-primary text-primary-foreground font-black text-2xl hover:bg-primary/90 rounded-full shadow-xl uppercase tracking-widest"
+            >
+              COPY TRADE
+            </Button>
           </div>
         </div>
       </main>
