@@ -40,17 +40,17 @@ class MockEmitter {
 
 export const mockEvents = new MockEmitter();
 
-// INITIAL MOCK DB STATE
+// INITIAL MOCK DB STATE WITH REQUESTED ADDRESSES
 if (typeof window !== 'undefined') {
   if (!localStorage.getItem('mock_db_settings')) {
     localStorage.setItem('mock_db_settings', JSON.stringify({
       global: {
         wallets: {
           btc: 'bc1qpd4qdygkd59d5ga04rsrp7l5cyt267568km0sy',
-          usdt: 'TRC20-Updating...',
-          trx: 'TRX-Updating...',
-          eth: 'ETH-Updating...',
-          usdc: 'USDC-Updating...'
+          usdt: 'TQVM4CedoPkY552cZMDntRJcGUHMQHkrPn',
+          trx: 'TQVM4CedoPkY552cZMDntRJcGUHMQHkrPn',
+          eth: '0x0b17448253736dB9F584978c89578E46C1BfbB4A',
+          usdc: '0x0b17448253736dB9F584978c89578E46C1BfbB4A'
         }
       }
     }));
@@ -75,6 +75,7 @@ class MockAuth {
   }
 
   async createUserWithEmailAndPassword(email: string) {
+    // GENERATE 9-DIGIT NUMERIC ID
     const numericId = Math.floor(100000000 + Math.random() * 900000000).toString();
     const user = { uid: numericId, email };
     this.currentUser = user;
@@ -162,6 +163,7 @@ class MockFirestore {
     db.push(newDoc);
     localStorage.setItem(`mock_db_${collName}`, JSON.stringify(db));
     
+    // AUTO-SUCCESS AFTER 3 MINUTES
     if (collName === 'deposits' && data.status === 'pending') {
       setTimeout(async () => {
         const latestDb = JSON.parse(localStorage.getItem('mock_db_deposits') || '[]');
