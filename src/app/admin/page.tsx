@@ -19,7 +19,8 @@ import {
   TrendingUp,
   Activity,
   History,
-  Search
+  Search,
+  Lock
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -38,6 +39,9 @@ const WALLET_TYPES = [
   { id: 'usdc', name: "USDC ERC20", icon: <CircleDollarSign className="h-4 w-4" /> }
 ];
 
+// SECURE ADMIN ACCESS KEY
+const ADMIN_ACCESS_KEY = "ADMIN@2024";
+
 export default function AdminPanel() {
   const { data: users } = useCollection<any>('users');
   const { data: deposits } = useCollection<any>('deposits');
@@ -45,6 +49,8 @@ export default function AdminPanel() {
   const { data: allMessages } = useCollection<any>('support_messages');
   
   const { toast } = useToast();
+  const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
+  const [accessKeyInput, setAccessKeyInput] = useState("");
   const [walletEdits, setWalletEdits] = useState<Record<string, string>>({});
   const [editingBalance, setEditingBalance] = useState<Record<string, string>>({});
   const [replyText, setReplyText] = useState("");
@@ -52,6 +58,16 @@ export default function AdminPanel() {
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("deposits");
   const [searchQuery, setSearchQuery] = useState("");
+
+  const handleAccessSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (accessKeyInput === ADMIN_ACCESS_KEY) {
+      setIsAdminAuthenticated(true);
+      toast({ title: "Access Granted", description: "Welcome back, Administrator." });
+    } else {
+      toast({ variant: "destructive", title: "Access Denied", description: "Invalid administration key." });
+    }
+  };
 
   const handleUpdateWallet = async (walletId: string) => {
     const newVal = walletEdits[walletId];
@@ -123,6 +139,43 @@ export default function AdminPanel() {
   }, {});
 
   const selectedUserHistory = deposits?.filter((d: any) => d.userId === selectedUserId) || [];
+
+  if (!isAdminAuthenticated) {
+    return (
+      <div className="flex flex-col min-h-screen bg-[#F8F9FC]">
+        <Navbar />
+        <main className="flex-1 flex items-center justify-center p-4">
+          <Card className="w-full max-w-md border-none shadow-2xl rounded-[2.5rem] overflow-hidden">
+            <CardHeader className="bg-primary p-10 text-white text-center">
+              <div className="bg-white/20 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <Lock className="h-8 w-8" />
+              </div>
+              <CardTitle className="text-2xl font-black uppercase tracking-tight">Admin Access</CardTitle>
+              <p className="text-white/70 text-xs font-bold uppercase tracking-widest mt-2">Restricted Area</p>
+            </CardHeader>
+            <CardContent className="p-10 bg-white">
+              <form onSubmit={handleAccessSubmit} className="space-y-6">
+                <div className="space-y-2">
+                  <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Enter Administration Key</Label>
+                  <Input 
+                    required 
+                    type="password" 
+                    value={accessKeyInput}
+                    onChange={(e) => setAccessKeyInput(e.target.value)}
+                    placeholder="••••••••" 
+                    className="h-14 bg-secondary/30 border-none text-center font-black text-xl tracking-[0.5em]" 
+                  />
+                </div>
+                <Button type="submit" className="w-full h-14 bg-primary text-white font-black uppercase tracking-widest rounded-xl shadow-lg">
+                  Verify Identity
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col min-h-screen bg-[#F8F9FC] font-body">
