@@ -1,4 +1,3 @@
-
 'use client';
 
 import { initializeApp, getApps, getApp, FirebaseApp } from 'firebase/app';
@@ -18,8 +17,7 @@ import {
   addDoc as firebaseAddDoc, 
   serverTimestamp, 
   increment as firebaseIncrement,
-  query,
-  onSnapshot
+  setDoc as firebaseSetDoc,
 } from 'firebase/firestore';
 import { firebaseConfig } from './config';
 
@@ -75,6 +73,7 @@ class MockAuth {
     };
     localStorage.setItem('mock_db_users', JSON.stringify(db));
     
+    mockEvents.emit(`collection_users`, Object.values(db));
     this.notify();
     return { user };
   }
@@ -107,14 +106,21 @@ class MockFirestore {
     const db = JSON.parse(localStorage.getItem(`mock_db_${collectionName}`) || (collectionName === 'users' || collectionName === 'settings' ? '{}' : '[]'));
     
     if (collectionName === 'users' || collectionName === 'settings') {
+      const currentDoc = db[docId] || {};
       const updateData = { ...data };
-      if (updateData.balance && typeof updateData.balance === 'object' && updateData.balance._methodName === 'increment') {
-        const currentBalance = db[docId]?.balance || 0;
-        updateData.balance = currentBalance + updateData.balance._operand;
-      }
       
-      db[docId] = { ...db[docId], ...updateData };
+      // Handle increment
+      Object.keys(updateData).forEach(key => {
+        if (updateData[key] && typeof updateData[key] === 'object' && updateData[key]._methodName === 'increment') {
+          const currentVal = currentDoc[key] || 0;
+          updateData[key] = currentVal + updateData[key]._operand;
+        }
+      });
+      
+      db[docId] = { ...currentDoc, ...updateData };
       localStorage.setItem(`mock_db_${collectionName}`, JSON.stringify(db));
+      
+      // Emit events for real-time reactivity
       mockEvents.emit(`doc_${collectionName}_${docId}`, db[docId]);
       mockEvents.emit(`collection_${collectionName}`, collectionName === 'users' ? Object.values(db) : db);
     }

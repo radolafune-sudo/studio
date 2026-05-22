@@ -1,4 +1,3 @@
-
 "use client";
 
 import { Navbar } from "@/components/navbar";
@@ -136,7 +135,7 @@ export default function TransferPage() {
                 <div className="bg-primary/10 border border-primary/20 px-2 py-0.5 rounded text-[10px] font-black text-primary uppercase tracking-wider">
                   <UserIcon className="h-3 w-3" />
                 </div>
-                <span className="text-[15px] font-black text-black tracking-tight uppercase">USER FUNDING ACCOUNT</span>
+                <span className="text-[15px] font-black text-black tracking-tight uppercase">USER FUNDING METHOD</span>
               </div>
               <div className="flex items-center gap-3">
                 <span className="text-[13px] font-bold text-gray-500">0.00 USD</span>
