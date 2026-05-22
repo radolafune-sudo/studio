@@ -184,13 +184,10 @@ export default function TransferPage() {
             <div className="bg-white p-8 border border-gray-200 rounded-[2rem] shadow-sm space-y-8 animate-in slide-in-from-top-2 duration-300">
               <div className="space-y-6">
                 <h2 className="text-[11px] font-black uppercase text-black tracking-widest leading-tight">
-                  DEPOSIT TO FUND YOUR COPY TRADING ACCOUNT
+                  COPY THE ADDRESS BELOW ({activeWallet.symbol})
                 </h2>
                 
                 <div className="space-y-2">
-                  <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">
-                    copy the address below ({activeWallet.symbol})
-                  </p>
                   <div className="flex items-center gap-3 bg-white p-4 rounded-xl border border-dashed border-gray-300">
                     <span className="flex-1 font-mono text-[11px] break-all text-black font-bold">{walletAddress}</span>
                     <button onClick={() => handleCopy(walletAddress)} className="p-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors border">
