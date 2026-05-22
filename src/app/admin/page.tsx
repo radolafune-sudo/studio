@@ -26,7 +26,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { useCollection, useDoc, updateUserProfile, initializeFirebase, increment, sendSupportMessage } from "@/firebase";
+import { useCollection, useDoc, updateUserProfile, increment, sendSupportMessage } from "@/firebase";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 
@@ -75,7 +75,7 @@ export default function AdminPanel() {
     const currentWallets = globalSettings?.wallets || {};
     const updatedWallets = { ...currentWallets, [walletId]: newVal };
     
-    // Always use the helper to ensure real-time mock DB updates work
+    // This updates the global settings which the client listens to in real-time
     await updateUserProfile('global', { wallets: updatedWallets }, 'settings');
 
     toast({ title: "Wallet Updated", description: `${walletId.toUpperCase()} address changed successfully.` });
@@ -88,7 +88,6 @@ export default function AdminPanel() {
 
   const handleApproveDeposit = async (id: string, userId: string, amount: number) => {
     await updateUserProfile(userId, { balance: increment(amount) });
-    // Update the specific deposit status
     await updateUserProfile(id, { status: "approved" }, 'deposits');
     toast({ title: "Approved Fast", description: `$${amount} credited instantly.` });
   };
