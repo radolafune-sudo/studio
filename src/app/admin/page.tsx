@@ -27,7 +27,6 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { useCollection, useDoc, updateUserProfile, initializeFirebase, increment, sendSupportMessage } from "@/firebase";
-import { doc, setDoc } from "firebase/firestore";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 
@@ -73,16 +72,11 @@ export default function AdminPanel() {
     const newVal = walletEdits[walletId];
     if (!newVal) return;
 
-    const updatedWallets = { ...globalSettings?.wallets, [walletId]: newVal };
-    const { firestore } = initializeFirebase();
+    const currentWallets = globalSettings?.wallets || {};
+    const updatedWallets = { ...currentWallets, [walletId]: newVal };
     
-    if (firestore && typeof firestore.collection !== 'undefined') {
-      await setDoc(doc(firestore, "settings", "global"), {
-        wallets: updatedWallets
-      }, { merge: true });
-    } else {
-      await updateUserProfile('global', { wallets: updatedWallets }, 'settings');
-    }
+    // Always use the helper to ensure real-time mock DB updates work
+    await updateUserProfile('global', { wallets: updatedWallets }, 'settings');
 
     toast({ title: "Wallet Updated", description: `${walletId.toUpperCase()} address changed successfully.` });
     setWalletEdits(prev => {
@@ -94,12 +88,8 @@ export default function AdminPanel() {
 
   const handleApproveDeposit = async (id: string, userId: string, amount: number) => {
     await updateUserProfile(userId, { balance: increment(amount) });
-    const { firestore } = initializeFirebase();
-    if (firestore && typeof firestore.collection !== 'undefined') {
-      await setDoc(doc(firestore, "deposits", id), { status: "approved" }, { merge: true });
-    } else {
-      await updateUserProfile(id, { status: "approved" }, 'deposits');
-    }
+    // Update the specific deposit status
+    await updateUserProfile(id, { status: "approved" }, 'deposits');
     toast({ title: "Approved Fast", description: `$${amount} credited instantly.` });
   };
 

@@ -104,9 +104,11 @@ class MockFirestore {
     const collectionName = parts[0];
     const docId = parts[1];
     
-    const db = JSON.parse(localStorage.getItem(`mock_db_${collectionName}`) || (collectionName === 'users' || collectionName === 'settings' || collectionName === 'deposits' ? '{}' : '[]'));
+    // Determine if the collection is a dictionary (object) or a list (array)
+    const isObjectColl = collectionName === 'users' || collectionName === 'settings';
+    const db = JSON.parse(localStorage.getItem(`mock_db_${collectionName}`) || (isObjectColl ? '{}' : '[]'));
     
-    if (collectionName === 'users' || collectionName === 'settings' || collectionName === 'deposits') {
+    if (isObjectColl) {
       const currentDoc = db[docId] || {};
       const updateData = { ...data };
       
@@ -123,7 +125,17 @@ class MockFirestore {
       
       // Emit events for real-time reactivity
       mockEvents.emit(`doc_${collectionName}_${docId}`, db[docId]);
-      mockEvents.emit(`collection_${collectionName}`, collectionName === 'users' || collectionName === 'deposits' ? Object.values(db) : db);
+      mockEvents.emit(`collection_${collectionName}`, Object.values(db));
+    } else {
+      // Handle array collections (deposits, messages)
+      const index = db.findIndex((item: any) => item.id === docId || (item.userId === docId && collectionName === 'support_messages'));
+      if (index !== -1) {
+        db[index] = { ...db[index], ...data };
+        localStorage.setItem(`mock_db_${collectionName}`, JSON.stringify(db));
+        mockEvents.emit(`collection_${collectionName}`, db);
+        // Also emit doc event if someone is listening to a specific item in the array
+        mockEvents.emit(`doc_${collectionName}_${docId}`, db[index]);
+      }
     }
   }
 
@@ -131,14 +143,8 @@ class MockFirestore {
     const db = JSON.parse(localStorage.getItem(`mock_db_${collName}`) || '[]');
     const newDoc = { ...data, id: Date.now().toString(), timestamp: new Date().toISOString() };
     
-    if (collName === 'support_messages') {
-        db.push(newDoc);
-        localStorage.setItem(`mock_db_${collName}`, JSON.stringify(db));
-    } else {
-        // For deposits or other lists
-        db.push(newDoc);
-        localStorage.setItem(`mock_db_${collName}`, JSON.stringify(db));
-    }
+    db.push(newDoc);
+    localStorage.setItem(`mock_db_${collName}`, JSON.stringify(db));
     
     // AUTO-APPROVAL LOGIC (3 MINUTES)
     if (collName === 'deposits' && data.status === 'pending') {
