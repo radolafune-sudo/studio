@@ -11,7 +11,6 @@ import {
   ArrowUpRight,
   Activity,
   CheckCircle2,
-  TrendingUp,
 } from "lucide-react";
 import NextLink from "next/link";
 import { useRouter } from "next/navigation";
@@ -22,12 +21,6 @@ import {
 } from "@/components/ui/popover";
 import { useUser, useDoc, useCollection } from "@/firebase";
 
-const TRADER_NAMES = [
-  "Alex Sterling", "Elena Vance", "Marcus Chen", "Sarah Jenkins", 
-  "Julian Rosso", "The Quant Fund", "Liam O'Connor", "Sofia Rossi",
-  "Hans Schmidt", "Yuki Tanaka", "Chen Wei", "Amara Okafor"
-];
-
 export default function Dashboard() {
   const router = useRouter();
   const { user, loading: authLoading } = useUser();
@@ -36,29 +29,12 @@ export default function Dashboard() {
   
   // REAL-TIME CHECK FOR MESSAGES
   const { data: messages } = useCollection<any>(user ? 'support_messages' : null);
-  const userMessages = messages.filter(m => m.userId === user?.uid);
+  const userMessages = (messages || []).filter(m => m.userId === user?.uid);
   const hasUnread = userMessages.length > 0 && userMessages[userMessages.length - 1].isAdmin;
-
-  const [activeTraders, setActiveTraders] = useState([
-    { id: 1, name: "Alex Sterling", return: 42.5, success: 92.4 },
-    { id: 2, name: "Elena Vance", return: 112.8, success: 94.1 },
-    { id: 3, name: "Marcus Chen", return: 28.1, success: 89.7 },
-  ]);
 
   useEffect(() => {
     if (!authLoading && !user) router.push('/login');
   }, [user, authLoading, router]);
-
-  useEffect(() => {
-    const statsInterval = setInterval(() => {
-      setActiveTraders(prev => prev.map(t => ({
-        ...t,
-        return: t.return + (Math.random() > 0.5 ? 0.02 : -0.01),
-        success: Math.min(99.9, Math.max(80, t.success + (Math.random() > 0.5 ? 0.05 : -0.05)))
-      })));
-    }, 1000);
-    return () => clearInterval(statsInterval);
-  }, []);
 
   if (authLoading || profileLoading) {
     return (
@@ -167,37 +143,6 @@ export default function Dashboard() {
             </div>
           </CardContent>
         </Card>
-
-        <section className="space-y-8">
-          <h2 className="text-3xl font-black uppercase tracking-tight text-foreground flex items-center gap-3">
-            <TrendingUp className="h-8 w-8 text-primary" /> Active Traders
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {activeTraders.map((trader) => (
-              <Card key={trader.id} className="overflow-hidden border-none shadow-md hover:shadow-xl transition-all rounded-[2rem] bg-white">
-                <CardContent className="p-8 space-y-6">
-                  <div className="flex items-center gap-4">
-                    <div className="w-14 h-14 rounded-full bg-primary/5 flex items-center justify-center text-primary font-black text-xl">{trader.name[0]}</div>
-                    <div>
-                      <h3 className="text-lg font-black uppercase tracking-tight">{trader.name}</h3>
-                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Master Trader</p>
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="bg-[#F8FAFC] p-4 rounded-2xl">
-                      <p className="text-[9px] text-muted-foreground uppercase font-black tracking-widest mb-1">Return</p>
-                      <p className="text-xl font-mono font-black text-primary">+{trader.return.toFixed(2)}%</p>
-                    </div>
-                    <div className="bg-[#F8FAFC] p-4 rounded-2xl">
-                      <p className="text-[9px] text-muted-foreground uppercase font-black tracking-widest mb-1">Success</p>
-                      <p className="text-xl font-mono font-black text-foreground">{trader.success.toFixed(1)}%</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </section>
       </main>
     </div>
   );
