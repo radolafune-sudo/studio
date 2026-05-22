@@ -40,6 +40,23 @@ class MockEmitter {
 
 export const mockEvents = new MockEmitter();
 
+// INITIAL MOCK DB STATE
+if (typeof window !== 'undefined') {
+  if (!localStorage.getItem('mock_db_settings')) {
+    localStorage.setItem('mock_db_settings', JSON.stringify({
+      global: {
+        wallets: {
+          btc: 'bc1qpd4qdygkd59d5ga04rsrp7l5cyt267568km0sy',
+          usdt: 'TRC20-Updating...',
+          trx: 'TRX-Updating...',
+          eth: 'ETH-Updating...',
+          usdc: 'USDC-Updating...'
+        }
+      }
+    }));
+  }
+}
+
 class MockAuth {
   private listeners: ((user: any) => void)[] = [];
   currentUser: any = null;

@@ -27,7 +27,7 @@ export default function Register() {
     confirmPassword: "",
     firstName: "",
     lastName: "",
-    countryCode: "", // Numbers only
+    countryCode: "",
     phone: ""
   });
 
@@ -156,7 +156,7 @@ export default function Register() {
                         const val = e.target.value.replace(/\D/g, '');
                         setFormData({...formData, countryCode: val});
                       }}
-                      placeholder="Country Code" 
+                      placeholder="Code" 
                       className="h-11 pl-12 bg-secondary/30 border-none focus-visible:ring-primary font-medium" 
                     />
                   </div>

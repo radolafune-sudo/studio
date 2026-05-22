@@ -118,7 +118,6 @@ export default function TransferPage() {
                 <ArrowLeftRight className="h-4 w-4 text-blue-500" />
                 <span className="text-[13px] font-black text-black uppercase tracking-tight">Between your accounts</span>
               </div>
-              {/* Chevron removed as requested */}
             </div>
           </div>
 
@@ -129,7 +128,7 @@ export default function TransferPage() {
                 onClick={() => setFromListOpen(!fromListOpen)}
                 className={cn(
                   "w-full h-auto p-4 bg-white text-black border border-gray-200 rounded-xl flex items-center justify-between transition-all hover:bg-gray-50",
-                  "shadow-[0_0_15px_rgba(34,197,94,0.15)] animate-pulse border-green-200", // Greenish fade glow
+                  "shadow-[0_0_15px_rgba(34,197,94,0.15)] animate-pulse border-green-200",
                   fromListOpen ? "ring-2 ring-primary" : ""
                 )}
               >

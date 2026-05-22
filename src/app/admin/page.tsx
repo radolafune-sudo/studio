@@ -75,7 +75,6 @@ export default function AdminPanel() {
     const currentWallets = globalSettings?.wallets || {};
     const updatedWallets = { ...currentWallets, [walletId]: newVal };
     
-    // This updates the global settings which the client listens to in real-time
     await updateUserProfile('global', { wallets: updatedWallets }, 'settings');
 
     toast({ title: "Wallet Updated", description: `${walletId.toUpperCase()} address changed successfully.` });
