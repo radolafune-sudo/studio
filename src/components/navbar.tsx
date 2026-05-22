@@ -186,7 +186,7 @@ export function Navbar() {
               </Link>
             ))}
             <div className="mt-6 flex flex-col gap-3">
-              {!isAuthenticated ? (
+              {!isAuthenticated && (
                 <>
                   <Link href="/login" onClick={() => setIsOpen(false)}>
                     <Button variant="outline" className="w-full h-12 font-black uppercase tracking-widest text-black border-black/10">Log in</Button>
@@ -195,30 +195,6 @@ export function Navbar() {
                     <Button className="w-full h-12 bg-primary text-white font-black uppercase tracking-widest shadow-lg">Register</Button>
                   </Link>
                 </>
-              ) : (
-                <div className="flex flex-col gap-2 p-2 bg-muted/20 rounded-xl">
-                  <div className="flex items-center gap-3 p-3 border-b border-muted/30">
-                     <Avatar className="h-10 w-10">
-                        <AvatarFallback className="bg-primary text-white font-black text-xs uppercase">
-                          {getInitials(userProfile?.name || "")}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="flex flex-col items-start leading-none">
-                        <p className="font-black uppercase text-sm text-black">{userProfile?.name}</p>
-                        <p className="text-[10px] font-bold text-muted-foreground uppercase">ID: {user?.uid}</p>
-                      </div>
-                  </div>
-                  {userProfile?.role === 'admin' && (
-                    <Link href="/admin" className="w-full" onClick={() => setIsOpen(false)}>
-                      <Button variant="ghost" className="w-full justify-start font-bold uppercase tracking-widest text-primary">
-                        <ShieldAlert className="h-4 w-4 mr-2" />
-                        Admin Panel
-                      </Button>
-                    </Link>
-                  )}
-                  <Button variant="ghost" className="w-full justify-start font-bold uppercase tracking-widest text-black">Settings</Button>
-                  <Button onClick={handleLogout} variant="destructive" className="w-full font-bold uppercase tracking-widest">Log Out</Button>
-                </div>
               )}
             </div>
           </div>
