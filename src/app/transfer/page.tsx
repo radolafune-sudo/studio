@@ -113,12 +113,12 @@ export default function TransferPage() {
         <div className="max-w-xl mx-auto space-y-8">
           <div className="space-y-4">
             <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Payment method</Label>
-            <div className="bg-white p-4 rounded-xl border border-gray-200 flex items-center justify-between group cursor-pointer hover:bg-gray-50 transition-colors">
+            <div className="bg-white p-4 rounded-xl border border-gray-200 flex items-center justify-between group cursor-default transition-colors">
               <div className="flex items-center gap-3">
                 <ArrowLeftRight className="h-4 w-4 text-blue-500" />
                 <span className="text-[13px] font-black text-black uppercase tracking-tight">Between your accounts</span>
               </div>
-              <ChevronDown className="h-4 w-4 text-gray-500" />
+              {/* Chevron removed as requested */}
             </div>
           </div>
 
@@ -129,6 +129,7 @@ export default function TransferPage() {
                 onClick={() => setFromListOpen(!fromListOpen)}
                 className={cn(
                   "w-full h-auto p-4 bg-white text-black border border-gray-200 rounded-xl flex items-center justify-between transition-all hover:bg-gray-50",
+                  "shadow-[0_0_15px_rgba(34,197,94,0.15)] animate-pulse border-green-200", // Greenish fade glow
                   fromListOpen ? "ring-2 ring-primary" : ""
                 )}
               >
@@ -172,7 +173,9 @@ export default function TransferPage() {
           {detailsVisible && activeWallet && (
             <div className="bg-white p-8 border border-gray-200 rounded-[2rem] shadow-sm space-y-8 animate-in slide-in-from-top-2 duration-300">
               <div className="space-y-6">
-                <h2 className="text-[11px] font-black uppercase text-black tracking-widest leading-tight">DEPOSIT TO FUND YOUR COPY TRADING ACCOUNT</h2>
+                <h2 className="text-[11px] font-black uppercase text-black tracking-widest leading-tight">
+                  DEPOSIT TO FUND YOUR COPY TRADING ACCOUNT
+                </h2>
                 
                 <div className="space-y-2">
                   <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">
