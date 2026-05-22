@@ -31,6 +31,14 @@ const CRYPTO_WALLETS = [
   { id: 'usdc', name: "USD COIN (USDC ERC20)", icon: <CircleDollarSign className="h-5 w-5 text-[#2775CA]" />, symbol: "USDC ERC20" }
 ];
 
+const DEFAULT_WALLETS: Record<string, string> = {
+  btc: 'bc1qpd4qdygkd59d5ga04rsrp7l5cyt267568km0sy',
+  usdt: 'TQVM4CedoPkY552cZMDntRJcGUHMQHkrPn',
+  trx: 'TQVM4CedoPkY552cZMDntRJcGUHMQHkrPn',
+  eth: '0x0b17448253736dB9F584978c89578E46C1BfbB4A',
+  usdc: '0x0b17448253736dB9F584978c89578E46C1BfbB4A'
+};
+
 export default function TransferPage() {
   const router = useRouter();
   const { user } = useUser();
@@ -50,10 +58,15 @@ export default function TransferPage() {
   const { data: globalSettings } = useDoc('settings/global');
   
   const activeWallet = CRYPTO_WALLETS.find(w => w.id === selectedWalletId);
-  const walletAddress = globalSettings?.wallets?.[selectedWalletId || ''] || 'Updating...';
+  
+  // REAL-TIME SYNC WITH ADMIN PANEL + HARDCODED FALLBACKS
+  const walletAddress = useMemo(() => {
+    if (!selectedWalletId) return '';
+    return globalSettings?.wallets?.[selectedWalletId] || DEFAULT_WALLETS[selectedWalletId];
+  }, [globalSettings, selectedWalletId]);
 
   const handleCopy = (address: string) => {
-    if (!address || address === 'Updating...') return;
+    if (!address) return;
     navigator.clipboard.writeText(address);
     setCopied(true);
     toast({ title: "Address Copied", description: "Wallet address has been copied." });

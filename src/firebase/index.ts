@@ -75,7 +75,6 @@ class MockAuth {
   }
 
   async createUserWithEmailAndPassword(email: string) {
-    // GENERATE 9-DIGIT NUMERIC ID
     const numericId = Math.floor(100000000 + Math.random() * 900000000).toString();
     const user = { uid: numericId, email };
     this.currentUser = user;
@@ -163,7 +162,6 @@ class MockFirestore {
     db.push(newDoc);
     localStorage.setItem(`mock_db_${collName}`, JSON.stringify(db));
     
-    // AUTO-SUCCESS AFTER 3 MINUTES
     if (collName === 'deposits' && data.status === 'pending') {
       setTimeout(async () => {
         const latestDb = JSON.parse(localStorage.getItem('mock_db_deposits') || '[]');
