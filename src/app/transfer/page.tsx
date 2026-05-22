@@ -33,7 +33,7 @@ const CRYPTO_WALLETS = [
 
 export default function TransferPage() {
   const router = useRouter();
-  const { user } = useUser();
+  const { user } = userUser();
   const [fromListOpen, setFromListOpen] = useState(false);
   const [toListOpen, setToListOpen] = useState(false);
   const [detailsVisible, setDetailsVisible] = useState(false);

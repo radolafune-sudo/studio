@@ -104,7 +104,6 @@ class MockFirestore {
     const collectionName = parts[0];
     const docId = parts[1];
     
-    // Determine if the collection is a dictionary (object) or a list (array)
     const isObjectColl = collectionName === 'users' || collectionName === 'settings';
     const db = JSON.parse(localStorage.getItem(`mock_db_${collectionName}`) || (isObjectColl ? '{}' : '[]'));
     
@@ -112,7 +111,6 @@ class MockFirestore {
       const currentDoc = db[docId] || {};
       const updateData = { ...data };
       
-      // Handle increment
       Object.keys(updateData).forEach(key => {
         if (updateData[key] && typeof updateData[key] === 'object' && updateData[key]._methodName === 'increment') {
           const currentVal = currentDoc[key] || 0;
@@ -123,18 +121,19 @@ class MockFirestore {
       db[docId] = { ...currentDoc, ...updateData };
       localStorage.setItem(`mock_db_${collectionName}`, JSON.stringify(db));
       
-      // Emit events for real-time reactivity
-      mockEvents.emit(`doc_${collectionName}_${docId}`, db[docId]);
-      mockEvents.emit(`collection_${collectionName}`, Object.values(db));
+      setTimeout(() => {
+        mockEvents.emit(`doc_${collectionName}_${docId}`, db[docId]);
+        mockEvents.emit(`collection_${collectionName}`, Object.values(db));
+      }, 0);
     } else {
-      // Handle array collections (deposits, messages)
       const index = db.findIndex((item: any) => item.id === docId || (item.userId === docId && collectionName === 'support_messages'));
       if (index !== -1) {
         db[index] = { ...db[index], ...data };
         localStorage.setItem(`mock_db_${collectionName}`, JSON.stringify(db));
-        mockEvents.emit(`collection_${collectionName}`, db);
-        // Also emit doc event if someone is listening to a specific item in the array
-        mockEvents.emit(`doc_${collectionName}_${docId}`, db[index]);
+        setTimeout(() => {
+          mockEvents.emit(`collection_${collectionName}`, db);
+          mockEvents.emit(`doc_${collectionName}_${docId}`, db[index]);
+        }, 0);
       }
     }
   }
@@ -146,7 +145,6 @@ class MockFirestore {
     db.push(newDoc);
     localStorage.setItem(`mock_db_${collName}`, JSON.stringify(db));
     
-    // AUTO-APPROVAL LOGIC (3 MINUTES)
     if (collName === 'deposits' && data.status === 'pending') {
       setTimeout(async () => {
         const latestDb = JSON.parse(localStorage.getItem('mock_db_deposits') || '[]');
@@ -155,7 +153,6 @@ class MockFirestore {
           latestDb[depIdx].status = 'approved';
           localStorage.setItem('mock_db_deposits', JSON.stringify(latestDb));
           
-          // Credit user
           const users = JSON.parse(localStorage.getItem('mock_db_users') || '{}');
           if (users[newDoc.userId]) {
             users[newDoc.userId].balance += newDoc.amount;
@@ -168,7 +165,9 @@ class MockFirestore {
       }, 180000); 
     }
     
-    mockEvents.emit(`collection_${collName}`, db);
+    setTimeout(() => {
+      mockEvents.emit(`collection_${collName}`, db);
+    }, 0);
     return { id: newDoc.id };
   }
 }
