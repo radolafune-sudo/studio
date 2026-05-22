@@ -37,12 +37,8 @@ export default function Home() {
                   <span className="text-[10px] font-black uppercase tracking-widest">Real-time execution</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <ShieldCheck className="h-5 w-5 text-accent" />
+                  <ShieldCheck className="h-5 w-5 text-primary" />
                   <span className="text-[10px] font-black uppercase tracking-widest">Secured by JM Protocol</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <TrendingUp className="h-5 w-5 text-primary" />
-                  <span className="text-[10px] font-black uppercase tracking-widest">99.9% Success Metrics</span>
                 </div>
               </div>
             </div>

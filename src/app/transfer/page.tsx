@@ -1,5 +1,5 @@
 
-"use client";
+'use client';
 
 import { Navbar } from "@/components/navbar";
 import { Button } from "@/components/ui/button";
@@ -61,7 +61,7 @@ export default function TransferPage() {
   
   const walletAddress = useMemo(() => {
     if (!selectedWalletId) return '';
-    return globalSettings?.wallets?.[selectedWalletId] || DEFAULT_WALLETS[selectedWalletId];
+    return globalSettings?.wallets?.[selectedWalletId] || DEFAULT_WALLETS[selectedWalletId] || '';
   }, [globalSettings, selectedWalletId]);
 
   const handleCopy = (address: string) => {
@@ -191,9 +191,9 @@ export default function TransferPage() {
                   <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">
                     copy the address below ({activeWallet.symbol})
                   </p>
-                  <div className="flex items-center gap-3 bg-gray-50 p-4 rounded-xl border border-dashed border-gray-200">
+                  <div className="flex items-center gap-3 bg-white p-4 rounded-xl border border-dashed border-gray-300">
                     <span className="flex-1 font-mono text-[11px] break-all text-black font-bold">{walletAddress}</span>
-                    <button onClick={() => handleCopy(walletAddress)} className="p-3 bg-white hover:bg-gray-100 rounded-lg transition-colors shadow-sm">
+                    <button onClick={() => handleCopy(walletAddress)} className="p-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors border">
                       {copied ? <Check className="h-4 w-4 text-accent" /> : <Copy className="h-4 w-4 text-primary" />}
                     </button>
                   </div>
@@ -207,7 +207,7 @@ export default function TransferPage() {
                       type="number" 
                       value={depositAmount} 
                       onChange={(e) => setDepositAmount(e.target.value)}
-                      className="h-14 bg-gray-50 border-none text-xl font-black rounded-xl text-black"
+                      className="h-14 bg-white border-gray-300 text-xl font-black rounded-xl text-black"
                     />
                   </div>
                   
@@ -217,7 +217,7 @@ export default function TransferPage() {
                       placeholder="Transaction ID" 
                       value={transactionId} 
                       onChange={(e) => setTransactionId(e.target.value)}
-                      className="h-14 bg-gray-50 border-none font-mono text-black rounded-xl font-bold"
+                      className="h-14 bg-white border-gray-300 font-mono text-black rounded-xl font-bold"
                     />
                   </div>
 
