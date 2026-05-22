@@ -84,7 +84,7 @@ export default function TransferPage() {
     const balance = userProfile?.balance || 0;
     const amount = Number(copyTradeAmount);
     if (!amount || amount <= 0 || balance < amount) {
-      toast({ variant: "destructive", title: "Error", description: "Insufficient capital." });
+      toast({ variant: "destructive", title: "Insufficient Capital", description: "Please fund your account to proceed." });
       return;
     }
     router.push('/copied-trades');
@@ -136,7 +136,7 @@ export default function TransferPage() {
                 <div className="bg-primary/10 border border-primary/20 px-2 py-0.5 rounded text-[10px] font-black text-primary uppercase tracking-wider">
                   <UserIcon className="h-3 w-3" />
                 </div>
-                <span className="text-[15px] font-black text-black tracking-tight">{userProfile?.uid || "332323752"}</span>
+                <span className="text-[15px] font-black text-black tracking-tight uppercase">USER FUNDING ACCOUNT</span>
               </div>
               <div className="flex items-center gap-3">
                 <span className="text-[13px] font-bold text-gray-500">0.00 USD</span>
@@ -167,7 +167,6 @@ export default function TransferPage() {
           </div>
         </div>
 
-        {/* Funding Details Dropdown (White/Black) */}
         {detailsVisible && (
           <div className="bg-white p-8 border border-gray-200 rounded-[2rem] shadow-sm space-y-8 animate-in slide-in-from-top-2 duration-300">
             <div className="space-y-6">
@@ -257,7 +256,6 @@ export default function TransferPage() {
           </div>
         </div>
 
-        {/* Custom Trade Amount Section */}
         <div className="pt-8 space-y-4">
           <div className="space-y-2">
             <Label className="text-[11px] font-black uppercase tracking-widest text-primary ml-1">Enter amount of your choice to trade</Label>

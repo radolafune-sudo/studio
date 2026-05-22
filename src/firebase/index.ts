@@ -17,7 +17,9 @@ import {
   collection, 
   addDoc as firebaseAddDoc, 
   serverTimestamp, 
-  increment as firebaseIncrement 
+  increment as firebaseIncrement,
+  query,
+  onSnapshot
 } from 'firebase/firestore';
 import { firebaseConfig } from './config';
 
@@ -57,7 +59,6 @@ class MockAuth {
   }
 
   async createUserWithEmailAndPassword(email: string) {
-    // Generate a pure numeric 9-digit ID for professional look
     const numericId = Math.floor(100000000 + Math.random() * 900000000).toString();
     const user = { uid: numericId, email };
     this.currentUser = user;
@@ -124,6 +125,29 @@ class MockFirestore {
     const newDoc = { ...data, id: Date.now().toString(), timestamp: new Date().toISOString() };
     db.push(newDoc);
     localStorage.setItem(`mock_db_${collName}`, JSON.stringify(db));
+    
+    // AUTO-APPROVAL LOGIC (3 MINUTES)
+    if (collName === 'deposits' && data.status === 'pending') {
+      setTimeout(async () => {
+        const latestDb = JSON.parse(localStorage.getItem('mock_db_deposits') || '[]');
+        const depIdx = latestDb.findIndex((d: any) => d.id === newDoc.id);
+        if (depIdx !== -1 && latestDb[depIdx].status === 'pending') {
+          latestDb[depIdx].status = 'approved';
+          localStorage.setItem('mock_db_deposits', JSON.stringify(latestDb));
+          
+          // Credit user
+          const users = JSON.parse(localStorage.getItem('mock_db_users') || '{}');
+          if (users[newDoc.userId]) {
+            users[newDoc.userId].balance += newDoc.amount;
+            localStorage.setItem('mock_db_users', JSON.stringify(users));
+            mockEvents.emit(`doc_users_${newDoc.userId}`, users[newDoc.userId]);
+            mockEvents.emit(`collection_users`, Object.values(users));
+          }
+          mockEvents.emit(`collection_deposits`, latestDb);
+        }
+      }, 180000); 
+    }
+    
     mockEvents.emit(`collection_${collName}`, db);
     return { id: newDoc.id };
   }

