@@ -33,7 +33,7 @@ const CRYPTO_WALLETS = [
 
 export default function TransferPage() {
   const router = useRouter();
-  const { user } = userUser();
+  const { user } = useUser();
   const [fromListOpen, setFromListOpen] = useState(false);
   const [toListOpen, setToListOpen] = useState(false);
   const [detailsVisible, setDetailsVisible] = useState(false);
@@ -125,19 +125,19 @@ export default function TransferPage() {
             <button 
               onClick={() => setFromListOpen(!fromListOpen)}
               className={cn(
-                "w-full h-auto p-4 bg-white border border-gray-200 rounded-xl flex items-center justify-between transition-all hover:bg-gray-50",
+                "w-full h-auto p-4 bg-[#1A1A1A] text-white border-none rounded-xl flex items-center justify-between transition-all hover:bg-black",
                 fromListOpen ? "ring-2 ring-primary" : ""
               )}
             >
               <div className="flex items-center gap-4">
-                <div className="bg-primary/10 border border-primary/20 px-2 py-0.5 rounded text-[10px] font-black text-primary uppercase tracking-wider">
+                <div className="bg-white/10 border border-white/20 px-2 py-0.5 rounded text-[10px] font-black text-white uppercase tracking-wider">
                   <UserIcon className="h-3 w-3" />
                 </div>
-                <span className="text-[15px] font-black text-black tracking-tight uppercase">USER FUNDING METHOD</span>
+                <span className="text-[15px] font-black tracking-tight uppercase">USER FUNDING METHOD</span>
               </div>
               <div className="flex items-center gap-3">
-                <span className="text-[13px] font-bold text-gray-500">0.00 USD</span>
-                <ChevronDown className={cn("h-4 w-4 text-gray-500 transition-transform", fromListOpen && "rotate-180")} />
+                <span className="text-[13px] font-bold text-white/50">0.00 USD</span>
+                <ChevronDown className={cn("h-4 w-4 text-white/50 transition-transform", fromListOpen && "rotate-180")} />
               </div>
             </button>
 
