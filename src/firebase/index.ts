@@ -40,7 +40,6 @@ class MockEmitter {
 
 export const mockEvents = new MockEmitter();
 
-// INITIAL MOCK DB STATE WITH REQUESTED ADDRESSES
 if (typeof window !== 'undefined') {
   if (!localStorage.getItem('mock_db_settings')) {
     localStorage.setItem('mock_db_settings', JSON.stringify({
@@ -143,7 +142,7 @@ class MockFirestore {
         mockEvents.emit(`collection_${collectionName}`, Object.values(db));
       }, 0);
     } else {
-      const index = db.findIndex((item: any) => item.id === docId || (item.userId === docId && collectionName === 'support_messages'));
+      const index = db.findIndex((item: any) => item.id === docId);
       if (index !== -1) {
         db[index] = { ...db[index], ...data };
         localStorage.setItem(`mock_db_${collectionName}`, JSON.stringify(db));

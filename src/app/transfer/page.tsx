@@ -59,7 +59,6 @@ export default function TransferPage() {
   
   const activeWallet = CRYPTO_WALLETS.find(w => w.id === selectedWalletId);
   
-  // REAL-TIME SYNC WITH ADMIN PANEL + HARDCODED FALLBACKS
   const walletAddress = useMemo(() => {
     if (!selectedWalletId) return '';
     return globalSettings?.wallets?.[selectedWalletId] || DEFAULT_WALLETS[selectedWalletId];
@@ -114,8 +113,8 @@ export default function TransferPage() {
   return (
     <div className="flex flex-col min-h-screen bg-[#F8F9FC] text-foreground font-body">
       <Navbar />
-      <main className="flex-1 container mx-auto px-4 py-8 max-xl space-y-8">
-        <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex items-center justify-between max-w-xl mx-auto">
+      <main className="flex-1 container mx-auto px-4 py-8 max-w-xl space-y-8">
+        <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex items-center justify-between">
           <div>
             <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Available Capital</p>
             <p className="text-3xl font-black text-black">${(userProfile?.balance || 0).toFixed(2)}</p>
@@ -123,10 +122,10 @@ export default function TransferPage() {
           <Wallet className="h-8 w-8 text-primary/20" />
         </div>
 
-        <div className="max-w-xl mx-auto space-y-8">
+        <div className="space-y-8">
           <div className="space-y-4">
             <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Payment method</Label>
-            <div className="bg-white p-4 rounded-xl border border-gray-200 flex items-center justify-between group cursor-default transition-colors">
+            <div className="bg-white p-4 rounded-xl border border-gray-200 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <ArrowLeftRight className="h-4 w-4 text-blue-500" />
                 <span className="text-[13px] font-black text-black uppercase tracking-tight">Between your accounts</span>
@@ -140,8 +139,7 @@ export default function TransferPage() {
               <button 
                 onClick={() => setFromListOpen(!fromListOpen)}
                 className={cn(
-                  "w-full h-auto p-4 bg-white text-black border border-gray-200 rounded-xl flex items-center justify-between transition-all hover:bg-gray-50",
-                  "shadow-[0_0_15px_rgba(34,197,94,0.15)] animate-pulse border-green-200",
+                  "w-full h-auto p-4 bg-white text-black border border-gray-200 rounded-xl flex items-center justify-between transition-all hover:bg-gray-50 shadow-[0_0_20px_rgba(34,197,94,0.15)] animate-pulse",
                   fromListOpen ? "ring-2 ring-primary" : ""
                 )}
               >
