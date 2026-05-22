@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from "react";
@@ -26,7 +27,7 @@ export default function Register() {
     confirmPassword: "",
     firstName: "",
     lastName: "",
-    countryCode: "254", // Numbers only, default to 254 or empty
+    countryCode: "", // Numbers only
     phone: ""
   });
 
@@ -155,7 +156,7 @@ export default function Register() {
                         const val = e.target.value.replace(/\D/g, '');
                         setFormData({...formData, countryCode: val});
                       }}
-                      placeholder="254" 
+                      placeholder="Country Code" 
                       className="h-11 pl-12 bg-secondary/30 border-none focus-visible:ring-primary font-medium" 
                     />
                   </div>

@@ -62,11 +62,8 @@ export default function Home() {
       </section>
 
       <div className="fixed bottom-6 right-6 md:bottom-10 md:right-10 z-50">
-        <button className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-[#22C55E] shadow-2xl flex items-center justify-center hover:scale-110 transition-transform active:scale-95">
+        <button className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-primary shadow-2xl flex items-center justify-center hover:scale-110 transition-transform active:scale-95">
           <MessageCircle className="h-8 w-8 md:h-10 md:w-10 text-white fill-current" />
-          <div className="absolute -top-1 -right-1 bg-[#EF4444] text-white w-6 h-6 md:w-7 md:h-7 rounded-full flex items-center justify-center text-xs md:text-sm font-black border-[3px] border-white shadow-lg">
-            1
-          </div>
         </button>
       </div>
 
