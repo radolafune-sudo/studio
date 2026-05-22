@@ -24,11 +24,11 @@ import { useUser, useDoc, createDeposit } from "@/firebase";
 import { cn } from "@/lib/utils";
 
 const CRYPTO_WALLETS = [
-  { id: 'btc', name: "Crypto wallet (BTC)", icon: <Bitcoin className="h-5 w-5 text-[#F7931A]" />, symbol: "BTC" },
-  { id: 'usdt', name: "Crypto wallet (USDT TRC20)", icon: <CircleDollarSign className="h-5 w-5 text-[#26A17B]" />, symbol: "TRC20" },
+  { id: 'btc', name: "CRYPTO WALLET (BTC)", icon: <Bitcoin className="h-5 w-5 text-[#F7931A]" />, symbol: "BTC" },
+  { id: 'usdt', name: "CRYPTO WALLET (USDT TRC20)", icon: <CircleDollarSign className="h-5 w-5 text-[#26A17B]" />, symbol: "TRC20" },
   { id: 'trx', name: "TRON (TRX)", icon: <TrendingUp className="h-5 w-5 text-[#FF0013]" />, symbol: "TRX" },
-  { id: 'eth', name: "Ethereum (ETH)", icon: <Activity className="h-5 w-5 text-[#627EEA]" />, symbol: "ETH" },
-  { id: 'usdc', name: "USD Coin (USDC ERC20)", icon: <CircleDollarSign className="h-5 w-5 text-[#2775CA]" />, symbol: "USDC ERC20" }
+  { id: 'eth', name: "ETHEREUM (ETH)", icon: <Activity className="h-5 w-5 text-[#627EEA]" />, symbol: "ETH" },
+  { id: 'usdc', name: "USD COIN (USDC ERC20)", icon: <CircleDollarSign className="h-5 w-5 text-[#2775CA]" />, symbol: "USDC ERC20" }
 ];
 
 export default function TransferPage() {
@@ -41,7 +41,7 @@ export default function TransferPage() {
   const [transactionId, setTransactionId] = useState('');
   const [depositAmount, setDepositAmount] = useState('25');
   const [copyTradeAmount, setCopyTradeAmount] = useState('');
-  const [selectedWalletId, setSelectedWalletId] = useState('btc');
+  const [selectedWalletId, setSelectedWalletId] = useState<string | null>(null);
   const [selectedToAccount, setSelectedToAccount] = useState('COPY TRADING ACCOUNT');
   const { toast } = useToast();
   
@@ -50,12 +50,12 @@ export default function TransferPage() {
   const { data: globalSettings } = useDoc('settings/global');
   
   const activeWallet = CRYPTO_WALLETS.find(w => w.id === selectedWalletId);
-  const walletAddress = globalSettings?.wallets?.[selectedWalletId] || '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa';
+  const walletAddress = globalSettings?.wallets?.[selectedWalletId || ''] || '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa';
 
   const handleCopy = (address: string) => {
     navigator.clipboard.writeText(address);
     setCopied(true);
-    toast({ title: "Address Copied", description: "Wallet address has been copied to your clipboard." });
+    toast({ title: "Address Copied", description: "Wallet address has been copied." });
     setTimeout(() => setCopied(false), 2000);
   };
 
@@ -76,15 +76,16 @@ export default function TransferPage() {
       walletType: activeWallet?.name
     });
 
-    toast({ title: "Submission Received", description: "Admin will review and approve your deposit shortly." });
+    toast({ title: "Submission Received", description: "Success. Admin will approve shortly." });
     setDetailsVisible(false);
+    setSelectedWalletId(null);
   };
 
   const handleCopyTradeRedirect = () => {
     const balance = userProfile?.balance || 0;
     const amount = Number(copyTradeAmount);
     if (!amount || amount <= 0 || balance < amount) {
-      toast({ variant: "destructive", title: "Insufficient Capital", description: "Please fund your account to proceed." });
+      toast({ variant: "destructive", title: "Insufficient Capital", description: "Deposit funds to proceed." });
       return;
     }
     router.push('/copied-trades');
@@ -125,19 +126,21 @@ export default function TransferPage() {
             <button 
               onClick={() => setFromListOpen(!fromListOpen)}
               className={cn(
-                "w-full h-auto p-4 bg-[#1A1A1A] text-white border-none rounded-xl flex items-center justify-between transition-all hover:bg-black",
+                "w-full h-auto p-4 bg-white text-black border border-gray-200 rounded-xl flex items-center justify-between transition-all hover:bg-gray-50",
                 fromListOpen ? "ring-2 ring-primary" : ""
               )}
             >
               <div className="flex items-center gap-4">
-                <div className="bg-white/10 border border-white/20 px-2 py-0.5 rounded text-[10px] font-black text-white uppercase tracking-wider">
+                <div className="bg-primary/5 border border-primary/10 px-2 py-0.5 rounded text-[10px] font-black text-primary uppercase tracking-wider">
                   <UserIcon className="h-3 w-3" />
                 </div>
-                <span className="text-[15px] font-black tracking-tight uppercase">USER FUNDING METHOD</span>
+                <span className="text-[15px] font-black tracking-tight uppercase">
+                  {activeWallet ? activeWallet.name : "USER FUNDING METHOD"}
+                </span>
               </div>
               <div className="flex items-center gap-3">
-                <span className="text-[13px] font-bold text-white/50">0.00 USD</span>
-                <ChevronDown className={cn("h-4 w-4 text-white/50 transition-transform", fromListOpen && "rotate-180")} />
+                <span className="text-[13px] font-bold text-muted-foreground">0.00 USD</span>
+                <ChevronDown className={cn("h-4 w-4 text-muted-foreground transition-transform", fromListOpen && "rotate-180")} />
               </div>
             </button>
 
@@ -164,13 +167,15 @@ export default function TransferPage() {
           </div>
         </div>
 
-        {detailsVisible && (
+        {detailsVisible && activeWallet && (
           <div className="bg-white p-8 border border-gray-200 rounded-[2rem] shadow-sm space-y-8 animate-in slide-in-from-top-2 duration-300">
             <div className="space-y-6">
               <h2 className="text-[11px] font-black uppercase text-black tracking-widest leading-tight">DEPOSIT TO FUND YOUR COPY TRADING ACCOUNT</h2>
               
               <div className="space-y-2">
-                <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">copy the address below ({activeWallet?.symbol || 'USD'})</p>
+                <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">
+                  copy the address below ({activeWallet.symbol})
+                </p>
                 <div className="flex items-center gap-3 bg-gray-50 p-4 rounded-xl border border-dashed border-gray-200">
                   <span className="flex-1 font-mono text-[11px] break-all text-black font-bold">{walletAddress}</span>
                   <button onClick={() => handleCopy(walletAddress)} className="p-3 bg-white hover:bg-gray-100 rounded-lg transition-colors shadow-sm">
