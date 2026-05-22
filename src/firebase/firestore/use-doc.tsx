@@ -32,7 +32,10 @@ export function useDoc<T = DocumentData>(path: string | null) {
       setLoading(false);
 
       const unsubscribe = mockEvents.on(`doc_${collectionName}_${docId}`, (updatedData: any) => {
-        setData(updatedData);
+        // Wrap in setTimeout to prevent "Cannot update a component while rendering a different component"
+        setTimeout(() => {
+          setData(updatedData);
+        }, 0);
       });
       return () => unsubscribe();
     } else if (firestore && docId && !isPlaceholder) {

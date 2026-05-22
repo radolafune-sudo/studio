@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Navbar } from "@/components/navbar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -18,7 +18,8 @@ import {
   CircleDollarSign,
   TrendingUp,
   Activity,
-  History
+  History,
+  Search
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -27,6 +28,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useCollection, useDoc, updateUserProfile, initializeFirebase, increment, sendSupportMessage } from "@/firebase";
 import { doc, setDoc } from "firebase/firestore";
 import { cn } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
 
 const WALLET_TYPES = [
   { id: 'btc', name: "Bitcoin (BTC)", icon: <Bitcoin className="h-4 w-4" /> },
@@ -49,6 +51,7 @@ export default function AdminPanel() {
   const [activeChatId, setActiveChatId] = useState<string | null>(null);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("deposits");
+  const [searchQuery, setSearchQuery] = useState("");
 
   const handleUpdateWallet = async (walletId: string) => {
     const newVal = walletEdits[walletId];
@@ -101,6 +104,17 @@ export default function AdminPanel() {
     setActiveChatId(userId);
     setActiveTab("support");
   };
+
+  const sortedUsers = useMemo(() => {
+    if (!users) return [];
+    return [...users]
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+      .filter(u => 
+        u.name?.toLowerCase().includes(searchQuery.toLowerCase()) || 
+        u.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        u.uid?.includes(searchQuery)
+      );
+  }, [users, searchQuery]);
 
   const chatGroups = (allMessages || []).reduce((acc: any, msg: any) => {
     if (!acc[msg.userId]) acc[msg.userId] = [];
@@ -210,6 +224,16 @@ export default function AdminPanel() {
           </TabsContent>
 
           <TabsContent value="users" className="space-y-6">
+            <div className="relative">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+              <Input 
+                placeholder="Search users by name, email or ID..." 
+                className="pl-12 h-14 rounded-2xl bg-white border-none shadow-sm font-medium"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
+            
             <div className="bg-white rounded-[2rem] border overflow-hidden">
               <table className="w-full text-left">
                 <thead className="bg-muted/30 border-b">
@@ -221,7 +245,7 @@ export default function AdminPanel() {
                   </tr>
                 </thead>
                 <tbody>
-                  {users?.map((user: any) => (
+                  {sortedUsers.map((user: any) => (
                     <tr key={user.uid} className={cn("border-b transition-colors cursor-pointer hover:bg-muted/5", selectedUserId === user.uid && "bg-primary/5")}>
                       <td className="p-6" onClick={() => setSelectedUserId(user.uid)}>
                         <p className="font-bold">{user.name || user.email}</p>
@@ -313,7 +337,7 @@ export default function AdminPanel() {
                   Object.entries(chatGroups).map(([userId, msgs]: any) => (
                     <div key={userId} onClick={() => setActiveChatId(userId)} className={cn("p-6 border-b cursor-pointer transition-all", activeChatId === userId ? "bg-primary/5 border-l-4 border-l-primary" : "hover:bg-muted/5")}>
                       <div className="flex justify-between items-start mb-1">
-                        <p className="font-black text-xs uppercase truncate w-32">{userId.slice(0, 10)}...</p>
+                        <p className="font-black text-xs uppercase truncate w-32">{userId}</p>
                         <p className="text-[8px] font-bold text-muted-foreground">{new Date(msgs[msgs.length-1].timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</p>
                       </div>
                       <p className="text-[10px] text-muted-foreground truncate">{msgs[msgs.length-1].text}</p>

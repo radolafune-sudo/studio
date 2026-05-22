@@ -12,7 +12,8 @@ import {
   LogOut,
   Settings,
   ChevronDown,
-  ShieldAlert
+  ShieldAlert,
+  User as UserIcon
 } from "lucide-react";
 import { useState, useMemo } from "react";
 import { cn } from "@/lib/utils";
@@ -48,6 +49,13 @@ export function Navbar() {
     { name: "MARKETS", href: "/traders" },
     { name: "COMPANY", href: "#" },
   ];
+
+  const getInitials = (name: string) => {
+    if (!name) return "JD";
+    const parts = name.split(' ');
+    if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+    return parts[0].slice(0, 2).toUpperCase();
+  };
 
   const Logo = () => (
     <div className="flex flex-col items-start leading-none group cursor-pointer">
@@ -111,12 +119,16 @@ export function Navbar() {
                     <div className="flex items-center gap-3 cursor-pointer p-2 hover:bg-muted/50 rounded-xl transition-all">
                       <Avatar className="h-10 w-10 border border-primary/10 shadow-sm">
                         <AvatarFallback className="bg-primary text-white font-black text-xs uppercase">
-                          {userProfile?.name?.slice(0, 2) || "JD"}
+                          {getInitials(userProfile?.name || "")}
                         </AvatarFallback>
                       </Avatar>
                       <div className="flex flex-col items-start leading-none">
-                        <span className="text-sm font-black text-black uppercase tracking-tight">{userProfile?.name || "User"}</span>
-                        <span className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest">ID: {user?.uid || "..." || userProfile?.uid}</span>
+                        <span className="text-sm font-black text-black uppercase tracking-tight truncate max-w-[120px]">
+                          {userProfile?.name || "User"}
+                        </span>
+                        <span className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest">
+                          ID: {user?.uid}
+                        </span>
                       </div>
                       <ChevronDown className="h-4 w-4 text-muted-foreground" />
                     </div>
@@ -188,7 +200,7 @@ export function Navbar() {
                   <div className="flex items-center gap-3 p-3 border-b border-muted/30">
                      <Avatar className="h-10 w-10">
                         <AvatarFallback className="bg-primary text-white font-black text-xs uppercase">
-                          {userProfile?.name?.slice(0, 2) || "JD"}
+                          {getInitials(userProfile?.name || "")}
                         </AvatarFallback>
                       </Avatar>
                       <div className="flex flex-col items-start leading-none">

@@ -33,6 +33,7 @@ export function SupportChat() {
     setMessage("");
   };
 
+  // Chat only available after sign up
   if (!user) return null;
 
   const hasUnread = filteredMessages.length > 0 && filteredMessages[filteredMessages.length - 1].isAdmin;
@@ -42,11 +43,11 @@ export function SupportChat() {
       {!isOpen ? (
         <button
           onClick={() => setIsOpen(true)}
-          className="w-16 h-16 rounded-full bg-primary shadow-[0_0_20px_rgba(34,197,94,0.4)] flex items-center justify-center transition-all animate-pulse group"
+          className="w-16 h-16 rounded-full bg-primary shadow-[0_0_20px_rgba(37,99,235,0.4)] flex items-center justify-center transition-all animate-pulse group"
         >
           <MessageCircle className="h-8 w-8 text-white fill-current" />
           {hasUnread && (
-            <div className="absolute -top-1 -right-1 bg-red-500 w-6 h-6 rounded-full border-2 border-white flex items-center justify-center text-[10px] font-black text-white">1</div>
+            <div className="absolute -top-1 -right-1 bg-[#EF4444] w-6 h-6 rounded-full border-2 border-white flex items-center justify-center text-[10px] font-black text-white">1</div>
           )}
         </button>
       ) : (

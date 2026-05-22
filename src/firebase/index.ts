@@ -1,3 +1,4 @@
+
 'use client';
 
 import { initializeApp, getApps, getApp, FirebaseApp } from 'firebase/app';
@@ -56,7 +57,7 @@ class MockAuth {
   }
 
   async createUserWithEmailAndPassword(email: string) {
-    // Generate a numeric ID as requested (digits only)
+    // Generate a pure numeric 9-digit ID for professional look
     const numericId = Math.floor(100000000 + Math.random() * 900000000).toString();
     const user = { uid: numericId, email };
     this.currentUser = user;

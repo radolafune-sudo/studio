@@ -14,7 +14,8 @@ import {
   CircleDollarSign,
   TrendingUp,
   Activity,
-  ArrowLeftRight
+  ArrowLeftRight,
+  User as UserIcon
 } from "lucide-react";
 import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
@@ -132,7 +133,9 @@ export default function TransferPage() {
               )}
             >
               <div className="flex items-center gap-4">
-                <div className="bg-primary/10 border border-primary/20 px-2 py-0.5 rounded text-[10px] font-black text-primary uppercase tracking-wider">MT5</div>
+                <div className="bg-primary/10 border border-primary/20 px-2 py-0.5 rounded text-[10px] font-black text-primary uppercase tracking-wider">
+                  <UserIcon className="h-3 w-3" />
+                </div>
                 <span className="text-[15px] font-black text-black tracking-tight">{userProfile?.uid || "332323752"}</span>
               </div>
               <div className="flex items-center gap-3">
@@ -171,7 +174,7 @@ export default function TransferPage() {
               <h2 className="text-[11px] font-black uppercase text-black tracking-widest leading-tight">DEPOSIT TO FUND YOUR COPY TRADING ACCOUNT</h2>
               
               <div className="space-y-2">
-                <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">copy the address below ({activeWallet?.symbol})</p>
+                <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">copy the address below (USD)</p>
                 <div className="flex items-center gap-3 bg-gray-50 p-4 rounded-xl border border-dashed border-gray-200">
                   <span className="flex-1 font-mono text-[11px] break-all text-black font-bold">{walletAddress}</span>
                   <button onClick={() => handleCopy(walletAddress)} className="p-3 bg-white hover:bg-gray-100 rounded-lg transition-colors shadow-sm">
@@ -195,7 +198,7 @@ export default function TransferPage() {
                 <div className="space-y-2">
                   <Label className="text-[10px] font-black uppercase tracking-widest text-black ml-1">Transaction ID</Label>
                   <Input 
-                    placeholder="tyfugfigop" 
+                    placeholder="Transaction ID" 
                     value={transactionId} 
                     onChange={(e) => setTransactionId(e.target.value)}
                     className="h-14 bg-gray-50 border-none font-mono text-black rounded-xl font-bold"
@@ -222,11 +225,13 @@ export default function TransferPage() {
               )}
             >
               <div className="flex items-center gap-4">
-                <div className="bg-primary/10 px-2 py-0.5 rounded text-[10px] font-black text-primary uppercase tracking-wider">Trading</div>
+                <div className="bg-primary/10 px-2 py-0.5 rounded text-[10px] font-black text-primary uppercase tracking-wider">MT5</div>
                 <span className="text-[15px] font-black text-black tracking-tight uppercase">{selectedToAccount}</span>
               </div>
               <div className="flex items-center gap-3">
-                <span className="text-[13px] font-bold text-primary">${(userProfile?.balance || 0).toFixed(2)} USD</span>
+                <span className="text-[13px] font-bold text-primary">
+                  {selectedToAccount === 'MANUAL TRADING ACCOUNT' ? '0.00' : (userProfile?.balance || 0).toFixed(2)} USD
+                </span>
                 <ChevronDown className={cn("h-4 w-4 text-gray-500 transition-transform", toListOpen && "rotate-180")} />
               </div>
             </button>
@@ -235,15 +240,17 @@ export default function TransferPage() {
               <div className="absolute top-full left-0 w-full z-50 mt-2 bg-white border border-gray-200 rounded-xl overflow-hidden shadow-2xl divide-y divide-gray-100 animate-in slide-in-from-top-2 duration-200">
                 <div 
                   onClick={() => { setSelectedToAccount('COPY TRADING ACCOUNT'); setToListOpen(false); }}
-                  className="p-4 cursor-pointer hover:bg-gray-50 transition-all font-black text-[12px] uppercase text-black"
+                  className="p-4 flex justify-between items-center cursor-pointer hover:bg-gray-50 transition-all font-black text-[12px] uppercase text-black"
                 >
-                  COPY TRADING ACCOUNT
+                  <span>COPY TRADING ACCOUNT</span>
+                  <span className="text-primary">${(userProfile?.balance || 0).toFixed(2)}</span>
                 </div>
                 <div 
                   onClick={() => { setSelectedToAccount('MANUAL TRADING ACCOUNT'); setToListOpen(false); }}
-                  className="p-4 cursor-pointer hover:bg-gray-50 transition-all font-black text-[12px] uppercase text-black"
+                  className="p-4 flex justify-between items-center cursor-pointer hover:bg-gray-50 transition-all font-black text-[12px] uppercase text-black"
                 >
-                  MANUAL TRADING ACCOUNT
+                  <span>MANUAL TRADING ACCOUNT</span>
+                  <span className="text-muted-foreground">$0.00</span>
                 </div>
               </div>
             )}
