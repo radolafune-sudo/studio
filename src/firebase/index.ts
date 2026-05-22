@@ -1,3 +1,4 @@
+
 'use client';
 
 import { initializeApp, getApps, getApp, FirebaseApp } from 'firebase/app';
@@ -103,9 +104,9 @@ class MockFirestore {
     const collectionName = parts[0];
     const docId = parts[1];
     
-    const db = JSON.parse(localStorage.getItem(`mock_db_${collectionName}`) || (collectionName === 'users' || collectionName === 'settings' ? '{}' : '[]'));
+    const db = JSON.parse(localStorage.getItem(`mock_db_${collectionName}`) || (collectionName === 'users' || collectionName === 'settings' || collectionName === 'deposits' ? '{}' : '[]'));
     
-    if (collectionName === 'users' || collectionName === 'settings') {
+    if (collectionName === 'users' || collectionName === 'settings' || collectionName === 'deposits') {
       const currentDoc = db[docId] || {};
       const updateData = { ...data };
       
@@ -122,15 +123,22 @@ class MockFirestore {
       
       // Emit events for real-time reactivity
       mockEvents.emit(`doc_${collectionName}_${docId}`, db[docId]);
-      mockEvents.emit(`collection_${collectionName}`, collectionName === 'users' ? Object.values(db) : db);
+      mockEvents.emit(`collection_${collectionName}`, collectionName === 'users' || collectionName === 'deposits' ? Object.values(db) : db);
     }
   }
 
   async addDoc(collName: string, data: any) {
     const db = JSON.parse(localStorage.getItem(`mock_db_${collName}`) || '[]');
     const newDoc = { ...data, id: Date.now().toString(), timestamp: new Date().toISOString() };
-    db.push(newDoc);
-    localStorage.setItem(`mock_db_${collName}`, JSON.stringify(db));
+    
+    if (collName === 'support_messages') {
+        db.push(newDoc);
+        localStorage.setItem(`mock_db_${collName}`, JSON.stringify(db));
+    } else {
+        // For deposits or other lists
+        db.push(newDoc);
+        localStorage.setItem(`mock_db_${collName}`, JSON.stringify(db));
+    }
     
     // AUTO-APPROVAL LOGIC (3 MINUTES)
     if (collName === 'deposits' && data.status === 'pending') {

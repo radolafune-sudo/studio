@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Navbar } from "@/components/navbar";
@@ -24,10 +25,10 @@ import { cn } from "@/lib/utils";
 
 const CRYPTO_WALLETS = [
   { id: 'btc', name: "Crypto wallet (BTC)", icon: <Bitcoin className="h-5 w-5 text-[#F7931A]" />, symbol: "BTC" },
-  { id: 'usdt', name: "Crypto wallet (USDT TRC20)", icon: <CircleDollarSign className="h-5 w-5 text-[#26A17B]" />, symbol: "USDT" },
+  { id: 'usdt', name: "Crypto wallet (USDT TRC20)", icon: <CircleDollarSign className="h-5 w-5 text-[#26A17B]" />, symbol: "TRC20" },
   { id: 'trx', name: "TRON (TRX)", icon: <TrendingUp className="h-5 w-5 text-[#FF0013]" />, symbol: "TRX" },
   { id: 'eth', name: "Ethereum (ETH)", icon: <Activity className="h-5 w-5 text-[#627EEA]" />, symbol: "ETH" },
-  { id: 'usdc', name: "USD Coin (USDC ERC20)", icon: <CircleDollarSign className="h-5 w-5 text-[#2775CA]" />, symbol: "USDC" }
+  { id: 'usdc', name: "USD Coin (USDC ERC20)", icon: <CircleDollarSign className="h-5 w-5 text-[#2775CA]" />, symbol: "USDC ERC20" }
 ];
 
 export default function TransferPage() {
@@ -99,7 +100,6 @@ export default function TransferPage() {
     <div className="flex flex-col min-h-screen bg-[#F8F9FC] text-foreground font-body">
       <Navbar />
       <main className="flex-1 container mx-auto px-4 py-8 max-w-xl space-y-8">
-        {/* Available Capital */}
         <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex items-center justify-between">
           <div>
             <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Available Capital</p>
@@ -108,19 +108,17 @@ export default function TransferPage() {
           <Wallet className="h-8 w-8 text-primary/20" />
         </div>
 
-        {/* Payment Method Section */}
         <div className="space-y-4">
           <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Payment method</Label>
           <div className="bg-white p-4 rounded-xl border border-gray-200 flex items-center justify-between group cursor-pointer hover:bg-gray-50 transition-colors">
             <div className="flex items-center gap-3">
-              <ArrowLeftRight className="h-4 w-4 text-yellow-500" />
+              <ArrowLeftRight className="h-4 w-4 text-blue-500" />
               <span className="text-[13px] font-black text-black uppercase tracking-tight">Between your accounts</span>
             </div>
             <ChevronDown className="h-4 w-4 text-gray-500" />
           </div>
         </div>
 
-        {/* From account Section */}
         <div className="space-y-4">
           <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">From account</Label>
           <div className="relative">
@@ -172,7 +170,7 @@ export default function TransferPage() {
               <h2 className="text-[11px] font-black uppercase text-black tracking-widest leading-tight">DEPOSIT TO FUND YOUR COPY TRADING ACCOUNT</h2>
               
               <div className="space-y-2">
-                <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">copy the address below (USD)</p>
+                <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">copy the address below ({activeWallet?.symbol || 'USD'})</p>
                 <div className="flex items-center gap-3 bg-gray-50 p-4 rounded-xl border border-dashed border-gray-200">
                   <span className="flex-1 font-mono text-[11px] break-all text-black font-bold">{walletAddress}</span>
                   <button onClick={() => handleCopy(walletAddress)} className="p-3 bg-white hover:bg-gray-100 rounded-lg transition-colors shadow-sm">
@@ -211,7 +209,6 @@ export default function TransferPage() {
           </div>
         )}
 
-        {/* To account Section */}
         <div className="space-y-4">
           <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">To account</Label>
           <div className="relative">
