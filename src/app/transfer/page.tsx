@@ -297,7 +297,7 @@ export default function TransferPage() {
 
           <div className="pt-8 space-y-4">
             <div className="space-y-2">
-              <Label className="text-[11px] font-black uppercase tracking-widest text-primary ml-1">Enter amount of your choice to trade</Label>
+              <Label className="text-[11px] font-black uppercase tracking-widest text-primary ml-1">ENTER AMOUNT OF YOUR CHOICE TO TRADE</Label>
               <div className="relative">
                 <Input 
                   placeholder="Enter Amount" 
@@ -314,7 +314,7 @@ export default function TransferPage() {
               onClick={handleCopyTradeRedirect}
               className="w-full h-16 bg-accent text-white font-black uppercase text-xl rounded-full shadow-2xl hover:scale-[1.02] active:scale-[0.98] transition-all glow-green"
             >
-              Transfer to MT5
+              COPY TRADE
             </Button>
           </div>
         </div>
