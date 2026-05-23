@@ -151,13 +151,9 @@ export default function TransferPage() {
 
         <div className="space-y-8">
           {/* Section: Move funds between your accounts */}
-          <div className="space-y-4">
-            <div className="bg-white p-4 rounded-xl border border-gray-200 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <ArrowLeftRight className="h-4 w-4 text-blue-500" />
-                <span className="text-[13px] font-black text-black uppercase tracking-tight">Move funds between your accounts</span>
-              </div>
-            </div>
+          <div className="flex items-center gap-3 px-1">
+            <ArrowLeftRight className="h-4 w-4 text-blue-500" />
+            <span className="text-[13px] font-black text-black uppercase tracking-tight">Move funds between your accounts</span>
           </div>
 
           {/* From Account Selector */}
