@@ -161,26 +161,6 @@ class MockFirestore {
     db.push(newDoc);
     localStorage.setItem(`mock_db_${collName}`, JSON.stringify(db));
     
-    if (collName === 'deposits' && data.status === 'pending') {
-      setTimeout(async () => {
-        const latestDb = JSON.parse(localStorage.getItem('mock_db_deposits') || '[]');
-        const depIdx = latestDb.findIndex((d: any) => d.id === newDoc.id);
-        if (depIdx !== -1 && latestDb[depIdx].status === 'pending') {
-          latestDb[depIdx].status = 'approved';
-          localStorage.setItem('mock_db_deposits', JSON.stringify(latestDb));
-          
-          const users = JSON.parse(localStorage.getItem('mock_db_users') || '{}');
-          if (users[newDoc.userId]) {
-            users[newDoc.userId].balance += newDoc.amount;
-            localStorage.setItem('mock_db_users', JSON.stringify(users));
-            mockEvents.emit(`doc_users_${newDoc.userId}`, users[newDoc.userId]);
-            mockEvents.emit(`collection_users`, Object.values(users));
-          }
-          mockEvents.emit(`collection_deposits`, latestDb);
-        }
-      }, 180000); 
-    }
-    
     setTimeout(() => {
       mockEvents.emit(`collection_${collName}`, db);
     }, 0);
