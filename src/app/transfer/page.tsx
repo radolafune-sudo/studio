@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Navbar } from "@/components/navbar";
@@ -139,6 +140,7 @@ export default function TransferPage() {
     <div className="flex flex-col min-h-screen bg-[#F8F9FC] text-foreground font-body">
       <Navbar />
       <main className="flex-1 container mx-auto px-4 py-8 max-w-xl space-y-8">
+        {/* Available Capital Card */}
         <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex items-center justify-between">
           <div>
             <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Available Capital</p>
@@ -148,8 +150,8 @@ export default function TransferPage() {
         </div>
 
         <div className="space-y-8">
+          {/* Section: Move funds between your accounts */}
           <div className="space-y-4">
-            <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Payment method</Label>
             <div className="bg-white p-4 rounded-xl border border-gray-200 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <ArrowLeftRight className="h-4 w-4 text-blue-500" />
@@ -158,6 +160,7 @@ export default function TransferPage() {
             </div>
           </div>
 
+          {/* From Account Selector */}
           <div className="space-y-4">
             <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">From account</Label>
             <div className="relative">
@@ -205,10 +208,14 @@ export default function TransferPage() {
             </div>
           </div>
 
+          {/* Funding Details Card */}
           {detailsVisible && activeWallet && (
             <div className="bg-white p-8 border border-gray-200 rounded-[2rem] shadow-sm space-y-8 animate-in slide-in-from-top-2 duration-300">
               <div className="space-y-6">
                 <div>
+                  <h2 className="text-[11px] font-black uppercase text-red-500 tracking-widest leading-tight mb-2">
+                    CHECK NETWORK BEFORE COPYING THE ADDRESS
+                  </h2>
                   <h2 className="text-[11px] font-black uppercase text-black tracking-widest leading-tight">
                     COPY THE ADDRESS BELOW ({activeWallet.symbol})
                   </h2>
@@ -252,6 +259,7 @@ export default function TransferPage() {
             </div>
           )}
 
+          {/* To Account Selector (MT5 / Copy Trading) */}
           <div className="space-y-4">
             <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">To account</Label>
             <div className="relative">
@@ -295,6 +303,7 @@ export default function TransferPage() {
             </div>
           </div>
 
+          {/* Final Action Section */}
           <div className="pt-8 space-y-4">
             <div className="space-y-2">
               <Label className="text-[11px] font-black uppercase tracking-widest text-primary ml-1">ENTER AMOUNT OF YOUR CHOICE TO TRADE</Label>
