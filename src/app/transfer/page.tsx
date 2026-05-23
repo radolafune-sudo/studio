@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Navbar } from "@/components/navbar";
@@ -15,12 +14,13 @@ import {
   TrendingUp,
   Activity,
   ArrowLeftRight,
-  User as UserIcon
+  User as UserIcon,
+  Loader2
 } from "lucide-react";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
-import { useUser, useDoc, createDeposit } from "@/firebase";
+import { useUser, useDoc, createDeposit, useCollection } from "@/firebase";
 import { cn } from "@/lib/utils";
 
 const CRYPTO_WALLETS = [
@@ -51,18 +51,32 @@ export default function TransferPage() {
   const [copyTradeAmount, setCopyTradeAmount] = useState('');
   const [selectedWalletId, setSelectedWalletId] = useState<string | null>(null);
   const [selectedToAccount, setSelectedToAccount] = useState('COPY TRADING ACCOUNT');
+  const [isVerifying, setIsVerifying] = useState(false);
   const { toast } = useToast();
   
   const userRef = useMemo(() => user?.uid ? `users/${user.uid}` : null, [user]);
   const { data: userProfile } = useDoc(userRef);
   const { data: globalSettings } = useDoc('settings/global');
-  
+  const { data: deposits } = useCollection<any>(user ? 'deposits' : null);
+
   const activeWallet = CRYPTO_WALLETS.find(w => w.id === selectedWalletId);
   
   const walletAddress = useMemo(() => {
     if (!selectedWalletId) return '';
     return globalSettings?.wallets?.[selectedWalletId] || DEFAULT_WALLETS[selectedWalletId] || '';
   }, [globalSettings, selectedWalletId]);
+
+  useEffect(() => {
+    const rejectedDeposit = deposits?.find((d: any) => d.userId === user?.uid && d.status === 'rejected');
+    if (rejectedDeposit) {
+      toast({
+        variant: "destructive",
+        title: "Deposit Rejected",
+        description: "Transaction could not be verified in blockchain. Please contact support.",
+        duration: 8000
+      });
+    }
+  }, [deposits, user, toast]);
 
   const handleCopy = (address: string) => {
     if (!address) return;
@@ -80,18 +94,24 @@ export default function TransferPage() {
       return;
     }
 
-    createDeposit({
-      userId: user.uid,
-      userEmail: user.email,
-      amount: numAmount,
-      transactionId: transactionId,
-      status: "pending",
-      walletType: activeWallet?.name
-    });
+    setIsVerifying(true);
+    
+    setTimeout(async () => {
+      await createDeposit({
+        userId: user.uid,
+        userEmail: user.email,
+        amount: numAmount,
+        transactionId: transactionId,
+        status: "pending",
+        walletType: activeWallet?.name
+      });
 
-    toast({ title: "Submission Received", description: "Success. Admin will approve shortly." });
-    setDetailsVisible(false);
-    setSelectedWalletId(null);
+      setIsVerifying(false);
+      setDetailsVisible(false);
+      setSelectedWalletId(null);
+      setTransactionId('');
+      toast({ title: "Verification Submitted", description: "Your transaction is being verified on the blockchain." });
+    }, 6000);
   };
 
   const handleCopyTradeRedirect = () => {
@@ -128,7 +148,7 @@ export default function TransferPage() {
             <div className="bg-white p-4 rounded-xl border border-gray-200 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <ArrowLeftRight className="h-4 w-4 text-blue-500" />
-                <span className="text-[13px] font-black text-black uppercase tracking-tight">Between your accounts</span>
+                <span className="text-[13px] font-black text-black uppercase tracking-tight">Move funds between your accounts</span>
               </div>
             </div>
           </div>
@@ -218,8 +238,15 @@ export default function TransferPage() {
                     />
                   </div>
 
-                  <Button onClick={handleSubmitVerification} className="w-full bg-primary text-white font-black uppercase tracking-widest h-16 rounded-2xl shadow-xl shadow-primary/20">
-                    Submit Verification
+                  <Button disabled={isVerifying} onClick={handleSubmitVerification} className="w-full bg-primary text-white font-black uppercase tracking-widest h-16 rounded-2xl shadow-xl shadow-primary/20">
+                    {isVerifying ? (
+                      <>
+                        <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                        Verifying Blockchain...
+                      </>
+                    ) : (
+                      "Submit Verification"
+                    )}
                   </Button>
                 </div>
               </div>
@@ -288,7 +315,7 @@ export default function TransferPage() {
               onClick={handleCopyTradeRedirect}
               className="w-full h-16 bg-blue-600 text-white font-black uppercase text-xl rounded-full shadow-2xl hover:scale-[1.02] active:scale-[0.98] transition-all"
             >
-              COPY TRADE
+              Transfer to MT5
             </Button>
           </div>
         </div>

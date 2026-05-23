@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect } from "react";
@@ -20,6 +19,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { useUser, useDoc, useCollection } from "@/firebase";
+import { cn } from "@/lib/utils";
 
 export default function Dashboard() {
   const router = useRouter();
@@ -27,7 +27,6 @@ export default function Dashboard() {
   const userPath = user ? `users/${user.uid}` : null;
   const { data: userProfile, loading: profileLoading } = useDoc(userPath);
   
-  // REAL-TIME CHECK FOR MESSAGES
   const { data: messages } = useCollection<any>(user ? 'support_messages' : null);
   const userMessages = (messages || []).filter(m => m.userId === user?.uid);
   const hasUnread = userMessages.length > 0 && userMessages[userMessages.length - 1].isAdmin;
@@ -131,12 +130,12 @@ export default function Dashboard() {
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
               <NextLink href="/transfer" className="w-full sm:w-[220px]">
-                <Button className="w-full h-[64px] rounded-full bg-primary/10 hover:bg-primary/20 text-primary border-none flex items-center justify-center gap-3 font-bold text-lg shadow-sm">
-                  <ArrowRightLeft className="h-5 w-5" /> Transfer
+                <Button className="w-full h-[64px] rounded-full bg-accent hover:bg-accent/90 text-white border-none flex items-center justify-center gap-3 font-bold text-lg shadow-lg glow-green">
+                  <ArrowRightLeft className="h-5 w-5" /> Transfer to MT5
                 </Button>
               </NextLink>
               <NextLink href="/withdraw" className="w-full sm:w-[220px]">
-                <Button className="w-full h-[64px] rounded-full bg-accent hover:bg-accent/90 text-white flex items-center justify-center gap-3 font-bold text-lg border-none shadow-lg shadow-accent/20">
+                <Button className="w-full h-[64px] rounded-full bg-primary hover:bg-primary/90 text-white flex items-center justify-center gap-3 font-bold text-lg border-none shadow-lg glow-blue">
                   <ArrowUpRight className="h-5 w-5" /> Withdraw
                 </Button>
               </NextLink>

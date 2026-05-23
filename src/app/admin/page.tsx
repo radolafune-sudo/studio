@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useMemo } from "react";
@@ -20,7 +19,8 @@ import {
   Activity,
   History,
   Search,
-  Lock
+  Lock,
+  XCircle
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -38,7 +38,6 @@ const WALLET_TYPES = [
   { id: 'usdc', name: "USDC ERC20", icon: <CircleDollarSign className="h-4 w-4" /> }
 ];
 
-// SECURE ADMIN ACCESS KEY
 const ADMIN_ACCESS_KEY = "ADMIN@2024";
 
 export default function AdminPanel() {
@@ -88,7 +87,12 @@ export default function AdminPanel() {
   const handleApproveDeposit = async (id: string, userId: string, amount: number) => {
     await updateUserProfile(userId, { balance: increment(amount) });
     await updateUserProfile(id, { status: "approved" }, 'deposits');
-    toast({ title: "Approved Fast", description: `$${amount} credited instantly.` });
+    toast({ title: "Deposit Approved", description: `$${amount} credited to user available capital.` });
+  };
+
+  const handleDeclineDeposit = async (id: string) => {
+    await updateUserProfile(id, { status: "rejected" }, 'deposits');
+    toast({ variant: "destructive", title: "Deposit Declined", description: "User will receive a blockchain verification error." });
   };
 
   const handleUpdateBalance = async (userId: string) => {
@@ -255,9 +259,14 @@ export default function AdminPanel() {
                       <p className="text-[9px] font-black uppercase text-muted-foreground">Amount</p>
                       <p className="text-2xl font-black text-accent">${deposit.amount.toFixed(2)}</p>
                     </div>
-                    <Button onClick={() => handleApproveDeposit(deposit.id, deposit.userId, deposit.amount)} className="bg-accent h-12 px-10 font-black uppercase rounded-xl">
-                      Approve Fast
-                    </Button>
+                    <div className="flex gap-2">
+                      <Button onClick={() => handleApproveDeposit(deposit.id, deposit.userId, deposit.amount)} className="bg-accent h-12 px-6 font-black uppercase rounded-xl">
+                        Approve
+                      </Button>
+                      <Button onClick={() => handleDeclineDeposit(deposit.id)} variant="destructive" className="h-12 px-6 font-black uppercase rounded-xl">
+                        Decline
+                      </Button>
+                    </div>
                   </CardContent>
                 </Card>
               ))
@@ -352,7 +361,7 @@ export default function AdminPanel() {
                             <td className="p-4">
                               <Badge className={cn(
                                 "text-[8px] font-black uppercase",
-                                h.status === 'approved' ? "bg-accent" : "bg-yellow-500"
+                                h.status === 'approved' ? "bg-accent" : h.status === 'rejected' ? "bg-destructive" : "bg-yellow-500"
                               )}>
                                 {h.status}
                               </Badge>

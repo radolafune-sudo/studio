@@ -1,4 +1,3 @@
-
 "use client";
 
 import { Navbar } from "@/components/navbar";
@@ -9,20 +8,19 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowUpRight, ShieldCheck, Wallet, Info } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { useUser, useDoc } from "@/firebase";
 
 export default function WithdrawPage() {
-  const [balance, setBalance] = useState(0);
+  const { user } = useUser();
+  const { data: userProfile } = useDoc(user ? `users/${user.uid}` : null);
   const [amount, setAmount] = useState('');
   const [address, setAddress] = useState('');
   const { toast } = useToast();
 
-  useEffect(() => {
-    setBalance(Number(localStorage.getItem('user_balance') || '0'));
-  }, []);
-
   const handleWithdraw = (e: React.FormEvent) => {
     e.preventDefault();
     const numAmount = Number(amount);
+    const balance = userProfile?.balance || 0;
 
     if (numAmount < 101) {
       toast({
@@ -56,19 +54,19 @@ export default function WithdrawPage() {
         <div className="space-y-8">
           <header className="text-center md:text-left space-y-2">
             <h1 className="text-3xl font-black uppercase tracking-tight text-foreground flex items-center gap-3">
-              <ArrowUpRight className="h-8 w-8 text-accent" />
+              <ArrowUpRight className="h-8 w-8 text-primary" />
               Funds Withdrawal
             </h1>
             <p className="text-muted-foreground font-medium">Securely transfer your earnings to your external wallet.</p>
           </header>
 
-          <Card className="bg-accent/5 border-accent/20 rounded-[2rem] overflow-hidden">
+          <Card className="bg-primary/5 border-primary/20 rounded-[2rem] overflow-hidden">
             <CardContent className="p-8 flex items-center justify-between">
               <div>
-                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-accent mb-1">Available to Withdraw</p>
-                <p className="text-5xl font-black font-mono tracking-tighter">${balance.toFixed(2)}</p>
+                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-primary mb-1">Available to Withdraw</p>
+                <p className="text-5xl font-black font-mono tracking-tighter">${(userProfile?.balance || 0).toFixed(2)}</p>
               </div>
-              <Wallet className="h-12 w-12 text-accent/20" />
+              <Wallet className="h-12 w-12 text-primary/20" />
             </CardContent>
           </Card>
 
@@ -109,7 +107,7 @@ export default function WithdrawPage() {
               </div>
             </div>
 
-            <Button type="submit" className="w-full h-16 bg-accent text-white font-black uppercase tracking-widest text-lg rounded-2xl shadow-xl shadow-accent/20">
+            <Button type="submit" className="w-full h-16 bg-primary text-white font-black uppercase tracking-widest text-lg rounded-2xl shadow-xl glow-blue">
               <ShieldCheck className="mr-2 h-6 w-6" />
               Secure Withdrawal
             </Button>
