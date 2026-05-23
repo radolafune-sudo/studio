@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Navbar } from "@/components/navbar";
@@ -88,7 +87,7 @@ export default function TransferPage() {
 
   const handleSubmitVerification = async () => {
     if (!user) return;
-    const numAmount = Number(copyTradeAmount) || 25; // Default to $25 if not specified
+    const numAmount = Number(copyTradeAmount) || 25; 
     if (!transactionId) {
       toast({ variant: "destructive", title: "Error", description: "Please enter your transaction ID." });
       return;
@@ -209,9 +208,14 @@ export default function TransferPage() {
           {detailsVisible && activeWallet && (
             <div className="bg-white p-8 border border-gray-200 rounded-[2rem] shadow-sm space-y-8 animate-in slide-in-from-top-2 duration-300">
               <div className="space-y-6">
-                <h2 className="text-[11px] font-black uppercase text-black tracking-widest leading-tight">
-                  COPY THE ADDRESS BELOW ({activeWallet.symbol})
-                </h2>
+                <div>
+                  <h2 className="text-[11px] font-black uppercase text-black tracking-widest leading-tight">
+                    COPY THE ADDRESS BELOW ({activeWallet.symbol})
+                  </h2>
+                  <p className="text-[9px] font-bold text-muted-foreground uppercase mt-1">
+                    (minimum deposit: 10.5 USD)
+                  </p>
+                </div>
                 
                 <div className="space-y-2">
                   <div className="flex items-center gap-3 bg-white p-4 rounded-xl border border-dashed border-gray-300">
