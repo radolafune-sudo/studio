@@ -21,7 +21,9 @@ import {
   History,
   Search,
   Lock,
-  XCircle
+  XCircle,
+  Smartphone,
+  CreditCard
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -36,7 +38,10 @@ const WALLET_TYPES = [
   { id: 'usdt', name: "USDT TRC20", icon: <CircleDollarSign className="h-4 w-4" /> },
   { id: 'trx', name: "TRON (TRX)", icon: <TrendingUp className="h-4 w-4" /> },
   { id: 'eth', name: "Ethereum (ETH)", icon: <Activity className="h-4 w-4" /> },
-  { id: 'usdc', name: "USDC ERC20", icon: <CircleDollarSign className="h-4 w-4" /> }
+  { id: 'usdc', name: "USDC ERC20", icon: <CircleDollarSign className="h-4 w-4" /> },
+  { id: 'skrill', name: "Skrill", icon: <CreditCard className="h-4 w-4" /> },
+  { id: 'mtn', name: "MTN (UG)", icon: <Smartphone className="h-4 w-4" /> },
+  { id: 'vodacom', name: "Vodacom (TSH)", icon: <Smartphone className="h-4 w-4" /> }
 ];
 
 const ADMIN_ACCESS_KEY = "ADMIN@2024";
@@ -77,7 +82,7 @@ export default function AdminPanel() {
     
     await updateUserProfile('global', { wallets: updatedWallets }, 'settings');
 
-    toast({ title: "Wallet Updated", description: `${walletId.toUpperCase()} address changed successfully.` });
+    toast({ title: "Wallet Updated", description: `${walletId.toUpperCase()} details changed successfully.` });
     setWalletEdits(prev => {
       const next = { ...prev };
       delete next[walletId];
@@ -192,17 +197,17 @@ export default function AdminPanel() {
         </header>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
-          <TabsList className="bg-white border p-1 rounded-2xl h-14 w-full md:w-auto">
-            <TabsTrigger value="deposits" className="rounded-xl px-6 font-black uppercase tracking-widest text-[10px]">
+          <TabsList className="bg-white border p-1 rounded-2xl h-14 w-full md:w-auto overflow-x-auto">
+            <TabsTrigger value="deposits" className="rounded-xl px-6 font-black uppercase tracking-widest text-[10px] shrink-0">
               <ArrowDownCircle className="h-4 w-4 mr-2" /> Deposits
             </TabsTrigger>
-            <TabsTrigger value="users" className="rounded-xl px-6 font-black uppercase tracking-widest text-[10px]">
+            <TabsTrigger value="users" className="rounded-xl px-6 font-black uppercase tracking-widest text-[10px] shrink-0">
               <Users className="h-4 w-4 mr-2" /> Users
             </TabsTrigger>
-            <TabsTrigger value="wallets" className="rounded-xl px-6 font-black uppercase tracking-widest text-[10px]">
+            <TabsTrigger value="wallets" className="rounded-xl px-6 font-black uppercase tracking-widest text-[10px] shrink-0">
               <Wallet className="h-4 w-4 mr-2" /> Wallets
             </TabsTrigger>
-            <TabsTrigger value="support" className="rounded-xl px-6 font-black uppercase tracking-widest text-[10px]">
+            <TabsTrigger value="support" className="rounded-xl px-6 font-black uppercase tracking-widest text-[10px] shrink-0">
               <MessageSquare className="h-4 w-4 mr-2" /> Support
             </TabsTrigger>
           </TabsList>
@@ -210,7 +215,7 @@ export default function AdminPanel() {
           <TabsContent value="wallets">
             <Card className="rounded-[2rem] border-none shadow-sm bg-white">
               <CardHeader className="p-8 border-b">
-                <CardTitle className="text-sm font-black uppercase text-primary">Global Wallet Configuration</CardTitle>
+                <CardTitle className="text-sm font-black uppercase text-primary">Global Configuration</CardTitle>
               </CardHeader>
               <CardContent className="p-8 space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -221,7 +226,7 @@ export default function AdminPanel() {
                       </Label>
                       <div className="flex gap-2">
                         <Input 
-                          placeholder={globalSettings?.wallets?.[type.id] || "Enter address..."}
+                          placeholder={globalSettings?.wallets?.[type.id] || "Enter details..."}
                           className="h-12 bg-white border-none font-mono text-xs shadow-sm"
                           value={walletEdits[type.id] || ""}
                           onChange={(e) => setWalletEdits({...walletEdits, [type.id]: e.target.value})}
@@ -251,9 +256,12 @@ export default function AdminPanel() {
                       <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center text-primary">
                         <Wallet className="h-5 w-5" />
                       </div>
-                      <div>
+                      <div className="space-y-1">
                         <h3 className="font-black text-lg">{deposit.userEmail}</h3>
-                        <p className="text-[10px] font-mono text-muted-foreground">{deposit.transactionId}</p>
+                        <div className="flex flex-col gap-0.5">
+                          <p className="text-[10px] font-black uppercase text-primary tracking-tight">Method: {deposit.walletType}</p>
+                          <p className="text-[10px] font-mono text-muted-foreground break-all">TXID: {deposit.transactionId}</p>
+                        </div>
                       </div>
                     </div>
                     <div className="text-center">
@@ -285,8 +293,8 @@ export default function AdminPanel() {
               />
             </div>
             
-            <div className="bg-white rounded-[2rem] border overflow-hidden">
-              <table className="w-full text-left">
+            <div className="bg-white rounded-[2rem] border overflow-hidden overflow-x-auto">
+              <table className="w-full text-left min-w-[800px]">
                 <thead className="bg-muted/30 border-b">
                   <tr>
                     <th className="p-6 text-[10px] font-black uppercase tracking-widest">Client</th>

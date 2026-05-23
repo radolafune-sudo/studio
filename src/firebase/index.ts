@@ -49,7 +49,10 @@ if (typeof window !== 'undefined') {
           usdt: 'TQVM4CedoPkY552cZMDntRJcGUHMQHkrPn',
           trx: 'TQVM4CedoPkY552cZMDntRJcGUHMQHkrPn',
           eth: '0x0b17448253736dB9F584978c89578E46C1BfbB4A',
-          usdc: '0x0b17448253736dB9F584978c89578E46C1BfbB4A'
+          usdc: '0x0b17448253736dB9F584978c89578E46C1BfbB4A',
+          skrill: 'skrill-account@example.com',
+          mtn: '256700000000',
+          vodacom: '255700000000'
         }
       }
     }));
@@ -217,29 +220,7 @@ export async function updateUserProfile(uid: string, data: any, customColl = 'us
 export async function createDeposit(data: any) {
   if (isPlaceholder) {
     const res = await mockFirestore.addDoc("deposits", data);
-    // Automatic approval after 8 minutes (480000ms)
-    setTimeout(async () => {
-      const db = JSON.parse(localStorage.getItem('mock_db_deposits') || '[]');
-      const depositIndex = db.findIndex((d: any) => d.id === res.id);
-      
-      if (depositIndex !== -1 && db[depositIndex].status === 'pending') {
-        db[depositIndex].status = 'approved';
-        localStorage.setItem('mock_db_deposits', JSON.stringify(db));
-        
-        // Update user balance
-        const userId = db[depositIndex].userId;
-        const amount = db[depositIndex].amount;
-        const users = JSON.parse(localStorage.getItem('mock_db_users') || '{}');
-        if (users[userId]) {
-          users[userId].balance = (users[userId].balance || 0) + amount;
-          localStorage.setItem('mock_db_users', JSON.stringify(users));
-          mockEvents.emit(`doc_users_${userId}`, users[userId]);
-          mockEvents.emit(`collection_users`, Object.values(users));
-        }
-        
-        mockEvents.emit(`collection_deposits`, db);
-      }
-    }, 480000);
+    // Manual approval only - automatic approval removed as requested
     return res;
   }
   const { firestore } = initializeFirebase();

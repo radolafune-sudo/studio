@@ -16,7 +16,9 @@ import {
   Activity,
   ArrowLeftRight,
   User as UserIcon,
-  Loader2
+  Loader2,
+  Smartphone,
+  CreditCard
 } from "lucide-react";
 import { useState, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -24,12 +26,15 @@ import { useToast } from "@/hooks/use-toast";
 import { useUser, useDoc, createDeposit, useCollection } from "@/firebase";
 import { cn } from "@/lib/utils";
 
-const CRYPTO_WALLETS = [
+const FUNDING_METHODS = [
   { id: 'btc', name: "CRYPTO WALLET (BTC)", icon: <Bitcoin className="h-5 w-5 text-[#F7931A]" />, symbol: "BTC" },
   { id: 'usdt', name: "CRYPTO WALLET (USDT TRC20)", icon: <CircleDollarSign className="h-5 w-5 text-[#26A17B]" />, symbol: "TRC20" },
   { id: 'trx', name: "TRON (TRX)", icon: <TrendingUp className="h-5 w-5 text-[#FF0013]" />, symbol: "TRX" },
   { id: 'eth', name: "ETHEREUM (ETH)", icon: <Activity className="h-5 w-5 text-[#627EEA]" />, symbol: "ETH" },
-  { id: 'usdc', name: "USD COIN (USDC ERC20)", icon: <CircleDollarSign className="h-5 w-5 text-[#2775CA]" />, symbol: "USDC ERC20" }
+  { id: 'usdc', name: "USD COIN (USDC ERC20)", icon: <CircleDollarSign className="h-5 w-5 text-[#2775CA]" />, symbol: "USDC ERC20" },
+  { id: 'skrill', name: "SKRILL", icon: <CreditCard className="h-5 w-5 text-[#811453]" />, symbol: "SKRILL" },
+  { id: 'mtn', name: "LOCAL PAYMENT: MTN (UG)", icon: <Smartphone className="h-5 w-5 text-[#FFCC00]" />, symbol: "MTN UG" },
+  { id: 'vodacom', name: "LOCAL PAYMENT: VODACOM (TSH)", icon: <Smartphone className="h-5 w-5 text-[#E60000]" />, symbol: "VODACOM TSH" }
 ];
 
 const DEFAULT_WALLETS: Record<string, string> = {
@@ -37,7 +42,10 @@ const DEFAULT_WALLETS: Record<string, string> = {
   usdt: 'TQVM4CedoPkY552cZMDntRJcGUHMQHkrPn',
   trx: 'TQVM4CedoPkY552cZMDntRJcGUHMQHkrPn',
   eth: '0x0b17448253736dB9F584978c89578E46C1BfbB4A',
-  usdc: '0x0b17448253736dB9F584978c89578E46C1BfbB4A'
+  usdc: '0x0b17448253736dB9F584978c89578E46C1BfbB4A',
+  skrill: 'skrill-account@example.com',
+  mtn: '256700000000',
+  vodacom: '255700000000'
 };
 
 export default function TransferPage() {
@@ -59,7 +67,7 @@ export default function TransferPage() {
   const { data: globalSettings } = useDoc('settings/global');
   const { data: deposits } = useCollection<any>(user ? 'deposits' : null);
 
-  const activeWallet = CRYPTO_WALLETS.find(w => w.id === selectedWalletId);
+  const activeWallet = FUNDING_METHODS.find(w => w.id === selectedWalletId);
   
   const walletAddress = useMemo(() => {
     if (!selectedWalletId) return '';
@@ -82,7 +90,7 @@ export default function TransferPage() {
     if (!address) return;
     navigator.clipboard.writeText(address);
     setCopied(true);
-    toast({ title: "Address Copied", description: "Wallet address has been copied." });
+    toast({ title: "Address Copied", description: "Payment details have been copied." });
     setTimeout(() => setCopied(false), 2000);
   };
 
@@ -110,7 +118,7 @@ export default function TransferPage() {
       setDetailsVisible(false);
       setSelectedWalletId(null);
       setTransactionId('');
-      toast({ title: "Verification Submitted", description: "Your transaction is being verified on the blockchain. This usually takes 8 minutes." });
+      toast({ title: "Verification Submitted", description: "Your transaction is being verified. This usually takes 8 minutes." });
     }, 6000);
   };
 
@@ -182,8 +190,8 @@ export default function TransferPage() {
               </button>
 
               {fromListOpen && (
-                <div className="absolute top-full left-0 w-full z-50 mt-2 bg-white border border-gray-200 rounded-xl overflow-hidden shadow-2xl divide-y divide-gray-100 animate-in slide-in-from-top-2 duration-200">
-                  {CRYPTO_WALLETS.map((wallet) => (
+                <div className="absolute top-full left-0 w-full z-50 mt-2 bg-white border border-gray-200 rounded-xl overflow-y-auto max-h-80 shadow-2xl divide-y divide-gray-100 animate-in slide-in-from-top-2 duration-200">
+                  {FUNDING_METHODS.map((wallet) => (
                     <div 
                       key={wallet.id} 
                       onClick={() => handleWalletSelect(wallet.id)}
