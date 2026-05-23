@@ -93,8 +93,10 @@ class MockAuth {
     };
     localStorage.setItem('mock_db_users', JSON.stringify(db));
     
-    mockEvents.emit(`collection_users`, Object.values(db).sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
     this.notify();
+    setTimeout(() => {
+      mockEvents.emit(`collection_users`, Object.values(db).sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
+    }, 10);
     return { user };
   }
 
@@ -149,7 +151,7 @@ class MockFirestore {
         mockEvents.emit(`collection_${collectionName}`, list);
       }, 0);
     } else {
-      const index = db.findIndex((item: any) => item.id === docId);
+      const index = Array.isArray(db) ? db.findIndex((item: any) => item.id === docId) : -1;
       if (index !== -1) {
         db[index] = { ...db[index], ...data };
         localStorage.setItem(`mock_db_${collectionName}`, JSON.stringify(db));

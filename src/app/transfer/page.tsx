@@ -20,7 +20,7 @@ import {
   Smartphone,
   CreditCard
 } from "lucide-react";
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { useUser, useDoc, createDeposit, useCollection } from "@/firebase";
@@ -67,12 +67,24 @@ export default function TransferPage() {
   const { data: globalSettings } = useDoc('settings/global');
   const { data: deposits } = useCollection<any>(user ? 'deposits' : null);
 
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const fundingListRef = useRef<HTMLDivElement>(null);
+
   const activeWallet = FUNDING_METHODS.find(w => w.id === selectedWalletId);
   
   const walletAddress = useMemo(() => {
     if (!selectedWalletId) return '';
     return globalSettings?.wallets?.[selectedWalletId] || DEFAULT_WALLETS[selectedWalletId] || '';
   }, [globalSettings, selectedWalletId]);
+
+  // Auto-scroll when list opens
+  useEffect(() => {
+    if (fromListOpen && fundingListRef.current) {
+      setTimeout(() => {
+        fundingListRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 100);
+    }
+  }, [fromListOpen]);
 
   useEffect(() => {
     const rejectedDeposit = deposits?.find((d: any) => d.userId === user?.uid && d.status === 'rejected');
@@ -96,7 +108,7 @@ export default function TransferPage() {
 
   const handleSubmitVerification = async () => {
     if (!user) return;
-    const numAmount = Number(copyTradeAmount) || 25; 
+    const numAmount = 25; // Default minimum
     if (!transactionId) {
       toast({ variant: "destructive", title: "Error", description: "Please enter your transaction ID." });
       return;
@@ -118,7 +130,7 @@ export default function TransferPage() {
       setDetailsVisible(false);
       setSelectedWalletId(null);
       setTransactionId('');
-      toast({ title: "Verification Submitted", description: "Your transaction is being verified. This usually takes 8 minutes." });
+      toast({ title: "Verification Submitted", description: "Your transaction is being verified. This usually takes 2-4 hours." });
     }, 6000);
   };
 
@@ -147,7 +159,7 @@ export default function TransferPage() {
   return (
     <div className="flex flex-col min-h-screen bg-[#F8F9FC] text-foreground font-body">
       <Navbar />
-      <main className="flex-1 container mx-auto px-4 py-8 max-w-xl space-y-8">
+      <main ref={scrollContainerRef} className="flex-1 container mx-auto px-4 py-8 max-w-xl space-y-8">
         {/* Available Capital Card */}
         <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex items-center justify-between">
           <div>
@@ -158,15 +170,14 @@ export default function TransferPage() {
         </div>
 
         <div className="space-y-8">
-          {/* Section: Move funds between your accounts */}
           <div className="flex items-center gap-3 px-1">
             <ArrowLeftRight className="h-4 w-4 text-blue-500" />
             <span className="text-[13px] font-black text-black uppercase tracking-tight">Move funds between your accounts</span>
           </div>
 
           {/* From Account Selector */}
-          <div className="space-y-4">
-            <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">From account</Label>
+          <div className="space-y-4" ref={fundingListRef}>
+            <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">User funding method</Label>
             <div className="relative">
               <button 
                 onClick={() => setFromListOpen(!fromListOpen)}
@@ -180,7 +191,7 @@ export default function TransferPage() {
                     <UserIcon className="h-3 w-3" />
                   </div>
                   <span className="text-[15px] font-black tracking-tight uppercase">
-                    {activeWallet ? activeWallet.name : "USER FUNDING METHOD"}
+                    {activeWallet ? activeWallet.name : "Select Method"}
                   </span>
                 </div>
                 <div className="flex items-center gap-3">
@@ -190,7 +201,7 @@ export default function TransferPage() {
               </button>
 
               {fromListOpen && (
-                <div className="absolute top-full left-0 w-full z-50 mt-2 bg-white border border-gray-200 rounded-xl overflow-y-auto max-h-80 shadow-2xl divide-y divide-gray-100 animate-in slide-in-from-top-2 duration-200">
+                <div className="absolute top-full left-0 w-full z-50 mt-2 bg-white border border-gray-200 rounded-xl overflow-y-auto max-h-[300px] shadow-2xl divide-y divide-gray-100 animate-in slide-in-from-top-2 duration-200">
                   {FUNDING_METHODS.map((wallet) => (
                     <div 
                       key={wallet.id} 
@@ -241,7 +252,7 @@ export default function TransferPage() {
                   <div className="space-y-2">
                     <Label className="text-[10px] font-black uppercase tracking-widest text-black ml-1">TRANSACTION ID FOR YOUR DEPOSIT</Label>
                     <Input 
-                      placeholder="Transaction ID" 
+                      placeholder="Enter Transaction ID" 
                       value={transactionId} 
                       onChange={(e) => setTransactionId(e.target.value)}
                       className="h-14 bg-white border-gray-300 font-mono text-black rounded-xl font-bold"
@@ -263,7 +274,7 @@ export default function TransferPage() {
             </div>
           )}
 
-          {/* To Account Selector (MT5 / Copy Trading) */}
+          {/* To Account Selector */}
           <div className="space-y-4">
             <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">To account</Label>
             <div className="relative">
@@ -307,7 +318,6 @@ export default function TransferPage() {
             </div>
           </div>
 
-          {/* Final Action Section */}
           <div className="pt-8 space-y-4">
             <div className="space-y-2">
               <Label className="text-[11px] font-black uppercase tracking-widest text-primary ml-1">ENTER AMOUNT OF YOUR CHOICE TO TRADE</Label>

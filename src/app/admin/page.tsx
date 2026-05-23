@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Navbar } from "@/components/navbar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -63,10 +63,17 @@ export default function AdminPanel() {
   const [activeTab, setActiveTab] = useState("deposits");
   const [searchQuery, setSearchQuery] = useState("");
 
+  // Persist admin auth
+  useEffect(() => {
+    const isAuth = localStorage.getItem('is_admin_auth') === 'true';
+    if (isAuth) setIsAdminAuthenticated(true);
+  }, []);
+
   const handleAccessSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (accessKeyInput === ADMIN_ACCESS_KEY) {
       setIsAdminAuthenticated(true);
+      localStorage.setItem('is_admin_auth', 'true');
       toast({ title: "Access Granted", description: "Welcome back, Administrator." });
     } else {
       toast({ variant: "destructive", title: "Access Denied", description: "Invalid administration key." });
@@ -121,12 +128,14 @@ export default function AdminPanel() {
 
   const sortedUsers = useMemo(() => {
     if (!users) return [];
-    // Users are already sorted by mock/firebase logic by createdAt DESC
-    return [...users].filter(u => 
-      u.name?.toLowerCase().includes(searchQuery.toLowerCase()) || 
-      u.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      u.uid?.includes(searchQuery)
-    );
+    // Sort by createdAt DESC (most recent first)
+    return [...users]
+      .filter(u => 
+        u.name?.toLowerCase().includes(searchQuery.toLowerCase()) || 
+        u.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        u.uid?.includes(searchQuery)
+      )
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   }, [users, searchQuery]);
 
   const chatGroups = (allMessages || []).reduce((acc: any, msg: any) => {
@@ -184,7 +193,7 @@ export default function AdminPanel() {
               <ShieldCheck className="h-6 w-6 text-primary" />
               <h1 className="text-3xl font-black uppercase tracking-tight text-[#1A1A1A]">Admin Control</h1>
             </div>
-            <p className="text-muted-foreground font-medium">Real-time oversight and system management.</p>
+            <p className="text-muted-foreground font-medium">Real-time oversight and manual balance approval.</p>
           </div>
           <div className="flex items-center gap-2 bg-white p-3 rounded-2xl shadow-sm border border-gray-100">
             <Users className="h-5 w-5 text-primary" />
@@ -248,10 +257,10 @@ export default function AdminPanel() {
                 <p className="font-bold text-muted-foreground uppercase text-xs">No pending requests</p>
               </div>
             ) : (
-              deposits?.filter((d: any) => d.status === 'pending').map((deposit: any) => (
+              [...deposits].filter((d: any) => d.status === 'pending').reverse().map((deposit: any) => (
                 <Card key={deposit.id} className="border-none shadow-sm rounded-[2rem] bg-white">
                   <CardContent className="p-6 flex flex-col md:flex-row items-center justify-between gap-6">
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-4 flex-1">
                       <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center text-primary">
                         <Wallet className="h-5 w-5" />
                       </div>
@@ -259,11 +268,11 @@ export default function AdminPanel() {
                         <h3 className="font-black text-lg">{deposit.userEmail}</h3>
                         <div className="flex flex-col gap-0.5">
                           <p className="text-[10px] font-black uppercase text-primary tracking-tight">Method: {deposit.walletType}</p>
-                          <p className="text-[10px] font-mono text-muted-foreground break-all">TXID: {deposit.transactionId}</p>
+                          <p className="text-[10px] font-mono text-muted-foreground break-all">TXID: <span className="font-black text-foreground">{deposit.transactionId}</span></p>
                         </div>
                       </div>
                     </div>
-                    <div className="text-center">
+                    <div className="text-center px-8">
                       <p className="text-[9px] font-black uppercase text-muted-foreground">Amount</p>
                       <p className="text-2xl font-black text-accent">${deposit.amount.toFixed(2)}</p>
                     </div>
@@ -296,7 +305,7 @@ export default function AdminPanel() {
               <table className="w-full text-left min-w-[800px]">
                 <thead className="bg-muted/30 border-b">
                   <tr>
-                    <th className="p-6 text-[10px] font-black uppercase tracking-widest">Client</th>
+                    <th className="p-6 text-[10px] font-black uppercase tracking-widest">Client (Most Recent First)</th>
                     <th className="p-6 text-[10px] font-black uppercase tracking-widest">Actions</th>
                     <th className="p-6 text-[10px] font-black uppercase tracking-widest">Balance Edit</th>
                     <th className="p-6 text-[10px] font-black uppercase tracking-widest text-right">Current Balance</th>
@@ -307,7 +316,7 @@ export default function AdminPanel() {
                     <tr key={user.uid} className={cn("border-b transition-colors cursor-pointer hover:bg-muted/5", selectedUserId === user.uid && "bg-primary/5")}>
                       <td className="p-6" onClick={() => setSelectedUserId(user.uid)}>
                         <p className="font-bold">{user.name || user.email}</p>
-                        <p className="text-[10px] font-mono text-muted-foreground">{user.uid}</p>
+                        <p className="text-[10px] font-mono text-muted-foreground">{user.uid} • {new Date(user.createdAt).toLocaleDateString()}</p>
                       </td>
                       <td className="p-6">
                         <Button 
@@ -324,7 +333,7 @@ export default function AdminPanel() {
                           <Input 
                             type="number"
                             className="h-10 w-32 font-bold"
-                            value={editingBalance[user.uid] || ""}
+                            value={editingBalance[user.uid] ?? user.balance}
                             onChange={(e) => setEditingBalance({...editingBalance, [user.uid]: e.target.value})}
                           />
                           <Button onClick={() => handleUpdateBalance(user.uid)} size="icon" className="bg-primary h-10 w-10 rounded-xl">
@@ -338,51 +347,6 @@ export default function AdminPanel() {
                 </tbody>
               </table>
             </div>
-
-            {selectedUserId && (
-              <Card className="rounded-[2rem] border-none shadow-lg bg-white overflow-hidden animate-in slide-in-from-bottom-4">
-                <CardHeader className="p-8 bg-muted/20 border-b flex flex-row items-center justify-between">
-                  <div>
-                    <CardTitle className="text-sm font-black uppercase">Transaction History</CardTitle>
-                    <p className="text-[10px] text-muted-foreground uppercase font-bold mt-1">Client: {selectedUserId}</p>
-                  </div>
-                  <History className="h-5 w-5 text-muted-foreground" />
-                </CardHeader>
-                <CardContent className="p-0">
-                  <table className="w-full">
-                    <thead className="bg-muted/10 border-b">
-                      <tr>
-                        <th className="p-4 text-[9px] font-black uppercase">Date</th>
-                        <th className="p-4 text-[9px] font-black uppercase">Type</th>
-                        <th className="p-4 text-[9px] font-black uppercase">Status</th>
-                        <th className="p-4 text-[9px] font-black uppercase text-right">Amount</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {selectedUserHistory.length === 0 ? (
-                        <tr><td colSpan={4} className="p-12 text-center text-xs font-bold text-muted-foreground uppercase">No transactions found</td></tr>
-                      ) : (
-                        selectedUserHistory.map((h: any) => (
-                          <tr key={h.id} className="border-b last:border-0">
-                            <td className="p-4 text-[10px] font-mono">{new Date(h.timestamp).toLocaleDateString()}</td>
-                            <td className="p-4 text-[10px] font-bold uppercase">{h.walletType || 'Deposit'}</td>
-                            <td className="p-4">
-                              <Badge className={cn(
-                                "text-[8px] font-black uppercase",
-                                h.status === 'approved' ? "bg-accent" : h.status === 'rejected' ? "bg-destructive" : "bg-yellow-500"
-                              )}>
-                                {h.status}
-                              </Badge>
-                            </td>
-                            <td className="p-4 text-right font-black text-sm">${h.amount.toFixed(2)}</td>
-                          </tr>
-                        ))
-                      )}
-                    </tbody>
-                  </table>
-                </CardContent>
-              </Card>
-            )}
           </TabsContent>
 
           <TabsContent value="support" className="grid grid-cols-1 md:grid-cols-3 gap-6">
