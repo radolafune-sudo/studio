@@ -43,9 +43,9 @@ const DEFAULT_WALLETS: Record<string, string> = {
   trx: 'TQVM4CedoPkY552cZMDntRJcGUHMQHkrPn',
   eth: '0x0b17448253736dB9F584978c89578E46C1BfbB4A',
   usdc: '0x0b17448253736dB9F584978c89578E46C1BfbB4A',
-  skrill: 'skrill-account@example.com',
-  mtn: '256700000000',
-  vodacom: '255700000000'
+  skrill: 'lewiskipchumba7@gmail.com',
+  mtn: '+256779137966',
+  vodacom: '+255760972014'
 };
 
 export default function TransferPage() {
@@ -280,7 +280,7 @@ export default function TransferPage() {
                 </div>
                 <div className="flex items-center gap-3">
                   <span className="text-[13px] font-bold text-primary">
-                    {selectedToAccount === 'MANUAL TRADING ACCOUNT' ? '0.00' : (userProfile?.balance || 0).toFixed(2)} USD
+                    {(userProfile?.balance || 0).toFixed(2)} USD
                   </span>
                   <ChevronDown className={cn("h-4 w-4 text-gray-500 transition-transform", toListOpen && "rotate-180")} />
                 </div>

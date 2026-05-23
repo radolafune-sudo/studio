@@ -121,13 +121,12 @@ export default function AdminPanel() {
 
   const sortedUsers = useMemo(() => {
     if (!users) return [];
-    return [...users]
-      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-      .filter(u => 
-        u.name?.toLowerCase().includes(searchQuery.toLowerCase()) || 
-        u.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        u.uid?.includes(searchQuery)
-      );
+    // Users are already sorted by mock/firebase logic by createdAt DESC
+    return [...users].filter(u => 
+      u.name?.toLowerCase().includes(searchQuery.toLowerCase()) || 
+      u.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      u.uid?.includes(searchQuery)
+    );
   }, [users, searchQuery]);
 
   const chatGroups = (allMessages || []).reduce((acc: any, msg: any) => {
@@ -423,7 +422,7 @@ export default function AdminPanel() {
                         )}>
                           {msg.text}
                         </div>
-                        <p className="text-[8px] mt-1 text-muted-foreground font-bold uppercase">{msg.isAdmin ? 'Admin' : 'Client'}</p>
+                        <p className="text-[8px] mt-1 text-muted-foreground font-bold uppercase tracking-tighter">{msg.isAdmin ? 'Admin' : 'Client'}</p>
                       </div>
                     ))}
                   </CardContent>

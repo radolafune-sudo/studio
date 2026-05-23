@@ -50,9 +50,9 @@ if (typeof window !== 'undefined') {
           trx: 'TQVM4CedoPkY552cZMDntRJcGUHMQHkrPn',
           eth: '0x0b17448253736dB9F584978c89578E46C1BfbB4A',
           usdc: '0x0b17448253736dB9F584978c89578E46C1BfbB4A',
-          skrill: 'skrill-account@example.com',
-          mtn: '256700000000',
-          vodacom: '255700000000'
+          skrill: 'lewiskipchumba7@gmail.com',
+          mtn: '+256779137966',
+          vodacom: '+255760972014'
         }
       }
     }));
@@ -93,7 +93,7 @@ class MockAuth {
     };
     localStorage.setItem('mock_db_users', JSON.stringify(db));
     
-    mockEvents.emit(`collection_users`, Object.values(db));
+    mockEvents.emit(`collection_users`, Object.values(db).sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
     this.notify();
     return { user };
   }
@@ -142,7 +142,11 @@ class MockFirestore {
       
       setTimeout(() => {
         mockEvents.emit(`doc_${collectionName}_${docId}`, db[docId]);
-        mockEvents.emit(`collection_${collectionName}`, Object.values(db));
+        const list = Object.values(db);
+        if (collectionName === 'users') {
+          list.sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        }
+        mockEvents.emit(`collection_${collectionName}`, list);
       }, 0);
     } else {
       const index = db.findIndex((item: any) => item.id === docId);
@@ -220,7 +224,6 @@ export async function updateUserProfile(uid: string, data: any, customColl = 'us
 export async function createDeposit(data: any) {
   if (isPlaceholder) {
     const res = await mockFirestore.addDoc("deposits", data);
-    // Manual approval only - automatic approval removed as requested
     return res;
   }
   const { firestore } = initializeFirebase();
