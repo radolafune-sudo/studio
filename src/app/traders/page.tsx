@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Navbar } from "@/components/navbar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
@@ -17,9 +17,10 @@ import {
   Settings2,
   Users
 } from "lucide-react";
-import Image from "next/image";
+import Image from "image";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
+import { useUser, useDoc } from "@/firebase";
 
 const INITIAL_TRADERS = [
   { id: 1, name: "Alex Sterling", strategy: "Elite Scalp Master", assets: ["Forex", "XAUUSD"], risk: 2, return: 84.5, successRate: 92.4, followers: 12402, avatar: "https://picsum.photos/seed/t1/100/100" },
@@ -34,6 +35,9 @@ export default function TraderDiscovery() {
   const [traders, setTraders] = useState(INITIAL_TRADERS);
   const router = useRouter();
   const { toast } = useToast();
+  const { user } = useUser();
+  const userRef = useMemo(() => user?.uid ? `users/${user.uid}` : null, [user]);
+  const { data: userProfile } = useDoc(userRef);
 
   useEffect(() => {
     const statsInterval = setInterval(() => {
@@ -49,11 +53,17 @@ export default function TraderDiscovery() {
   }, []);
 
   const handleCopyAction = () => {
-    const balance = Number(localStorage.getItem('user_balance') || '0');
-    if (balance <= 0) {
+    if (!user) {
+      router.push('/login');
+      return;
+    }
+    
+    const balance = userProfile?.balance || 0;
+    if (balance < 25) {
       toast({
-        title: "Account Empty",
-        description: "Please fund your account to start copying professional traders.",
+        variant: "destructive",
+        title: "Insufficient Balance",
+        description: "A minimum of $25 capital is required to start copy trading. Please fund your account.",
       });
       router.push('/transfer');
     } else {
@@ -93,12 +103,10 @@ export default function TraderDiscovery() {
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-4">
                     <div className="relative w-16 h-16 rounded-full overflow-hidden border-2 border-primary/10">
-                      <Image 
+                      <img 
                         src={trader.avatar} 
                         alt={trader.name} 
-                        fill 
-                        className="object-cover"
-                        data-ai-hint="trader profile"
+                        className="object-cover w-full h-full"
                       />
                     </div>
                     <div>
@@ -145,7 +153,7 @@ export default function TraderDiscovery() {
                 </div>
               </CardContent>
               <CardFooter className="pt-0 pb-8 px-6 flex gap-3">
-                <Button onClick={handleCopyAction} className="flex-1 h-14 bg-accent hover:bg-accent/90 text-white font-black uppercase tracking-widest rounded-2xl shadow-lg shadow-accent/20 border-none">
+                <Button onClick={handleCopyAction} className="flex-1 h-14 bg-accent hover:bg-accent/90 text-white font-black uppercase tracking-widest rounded-2xl shadow-lg shadow-accent/20 border-none glow-green">
                   Copy Trader
                 </Button>
                 <Button variant="outline" size="icon" onClick={handleCopyAction} className="h-14 w-14 shrink-0 rounded-2xl border-none bg-[#F8FAFC] hover:bg-muted text-muted-foreground shadow-sm">

@@ -48,7 +48,6 @@ export default function TransferPage() {
   const [detailsVisible, setDetailsVisible] = useState(false);
   const [copied, setCopied] = useState(false);
   const [transactionId, setTransactionId] = useState('');
-  const [depositAmount, setDepositAmount] = useState('25');
   const [copyTradeAmount, setCopyTradeAmount] = useState('');
   const [selectedWalletId, setSelectedWalletId] = useState<string | null>(null);
   const [selectedToAccount, setSelectedToAccount] = useState('COPY TRADING ACCOUNT');
@@ -89,9 +88,9 @@ export default function TransferPage() {
 
   const handleSubmitVerification = async () => {
     if (!user) return;
-    const numAmount = Number(depositAmount);
-    if (!numAmount || numAmount <= 0 || !transactionId) {
-      toast({ variant: "destructive", title: "Error", description: "Fill all details correctly." });
+    const numAmount = Number(copyTradeAmount) || 25; // Default to $25 if not specified
+    if (!transactionId) {
+      toast({ variant: "destructive", title: "Error", description: "Please enter your transaction ID." });
       return;
     }
 
@@ -111,15 +110,21 @@ export default function TransferPage() {
       setDetailsVisible(false);
       setSelectedWalletId(null);
       setTransactionId('');
-      toast({ title: "Verification Submitted", description: "Your transaction is being verified on the blockchain." });
+      toast({ title: "Verification Submitted", description: "Your transaction is being verified on the blockchain. This usually takes 8 minutes." });
     }, 6000);
   };
 
   const handleCopyTradeRedirect = () => {
     const balance = userProfile?.balance || 0;
+    
+    if (balance < 25) {
+      toast({ variant: "destructive", title: "Insufficient Balance", description: "A minimum of $25 capital is required to start copy trading." });
+      return;
+    }
+
     const amount = Number(copyTradeAmount);
     if (!amount || amount <= 0 || balance < amount) {
-      toast({ variant: "destructive", title: "Insufficient Capital", description: "Deposit funds to proceed." });
+      toast({ variant: "destructive", title: "Invalid Amount", description: "Please enter a valid amount within your available capital." });
       return;
     }
     router.push('/copied-trades');
@@ -219,18 +224,7 @@ export default function TransferPage() {
 
                 <div className="grid grid-cols-1 gap-6 pt-6 border-t border-gray-100">
                   <div className="space-y-2">
-                    <Label className="text-[10px] font-black uppercase tracking-widest text-black ml-1">Amount</Label>
-                    <Input 
-                      placeholder="25" 
-                      type="number" 
-                      value={depositAmount} 
-                      onChange={(e) => setDepositAmount(e.target.value)}
-                      className="h-14 bg-white border-gray-300 text-xl font-black rounded-xl text-black"
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label className="text-[10px] font-black uppercase tracking-widest text-black ml-1">Transaction ID</Label>
+                    <Label className="text-[10px] font-black uppercase tracking-widest text-black ml-1">TRANSACTION ID FOR YOUR DEPOSIT</Label>
                     <Input 
                       placeholder="Transaction ID" 
                       value={transactionId} 
@@ -246,7 +240,7 @@ export default function TransferPage() {
                         Verifying Blockchain...
                       </>
                     ) : (
-                      "Submit Verification"
+                      "SUBMIT AND VERIFY"
                     )}
                   </Button>
                 </div>
@@ -314,7 +308,7 @@ export default function TransferPage() {
             
             <Button 
               onClick={handleCopyTradeRedirect}
-              className="w-full h-16 bg-blue-600 text-white font-black uppercase text-xl rounded-full shadow-2xl hover:scale-[1.02] active:scale-[0.98] transition-all"
+              className="w-full h-16 bg-accent text-white font-black uppercase text-xl rounded-full shadow-2xl hover:scale-[1.02] active:scale-[0.98] transition-all glow-green"
             >
               Transfer to MT5
             </Button>

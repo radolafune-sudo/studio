@@ -142,7 +142,7 @@ export default function Register() {
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div className="space-y-1.5 sm:col-span-1">
-                  <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Code</Label>
+                  <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Country Code</Label>
                   <div className="relative">
                     <div className="absolute left-3 top-1/2 -translate-y-1/2 h-4 flex items-center gap-1 z-10">
                       <Globe className="h-4 w-4 text-muted-foreground" />
