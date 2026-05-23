@@ -76,7 +76,7 @@ class MockAuth {
     return () => { this.listeners = this.listeners.filter(l => l !== cb); };
   }
 
-  async createUserWithEmailAndPassword(email: string) {
+  async createUserWithEmailAndPassword(email: string, password?: string) {
     const numericId = Math.floor(100000000 + Math.random() * 900000000).toString();
     const user = { uid: numericId, email };
     this.currentUser = user;
@@ -86,6 +86,7 @@ class MockAuth {
     db[user.uid] = { 
       uid: user.uid, 
       email, 
+      password, // Persist password for mock sign-in
       balance: 0, 
       role: 'user', 
       name: email.split('@')[0], 
@@ -100,10 +101,10 @@ class MockAuth {
     return { user };
   }
 
-  async signInWithEmailAndPassword(email: string) {
+  async signInWithEmailAndPassword(email: string, pass: string) {
     const users = JSON.parse(localStorage.getItem('mock_db_users') || '{}');
-    const user = Object.values(users).find((u: any) => u.email === email);
-    if (!user) throw new Error("User not found");
+    const user = Object.values(users).find((u: any) => u.email === email && u.password === pass);
+    if (!user) throw new Error("Invalid email or password");
     this.currentUser = { uid: (user as any).uid, email: (user as any).email };
     localStorage.setItem('mock_user', JSON.stringify(this.currentUser));
     this.notify();
@@ -132,6 +133,7 @@ class MockFirestore {
       const currentDoc = db[docId] || {};
       const updateData = { ...data };
       
+      // Handle increment mock
       Object.keys(updateData).forEach(key => {
         if (updateData[key] && typeof updateData[key] === 'object' && updateData[key]._methodName === 'increment') {
           const currentVal = currentDoc[key] || 0;
@@ -142,6 +144,7 @@ class MockFirestore {
       db[docId] = { ...currentDoc, ...updateData };
       localStorage.setItem(`mock_db_${collectionName}`, JSON.stringify(db));
       
+      // Critical: Emit events for real-time synchronization
       setTimeout(() => {
         mockEvents.emit(`doc_${collectionName}_${docId}`, db[docId]);
         const list = Object.values(db);
@@ -200,13 +203,13 @@ export function initializeFirebase() {
 }
 
 export async function loginUser(email: string, pass: string) {
-  if (isPlaceholder) return mockAuth.signInWithEmailAndPassword(email);
+  if (isPlaceholder) return mockAuth.signInWithEmailAndPassword(email, pass);
   const { auth } = initializeFirebase();
   return firebaseSignIn(auth, email, pass);
 }
 
 export async function registerUser(email: string, pass: string) {
-  if (isPlaceholder) return mockAuth.createUserWithEmailAndPassword(email);
+  if (isPlaceholder) return mockAuth.createUserWithEmailAndPassword(email, pass);
   const { auth } = initializeFirebase();
   return firebaseCreateUser(auth, email, pass);
 }

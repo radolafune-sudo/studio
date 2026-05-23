@@ -31,7 +31,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { useCollection, useDoc, updateUserProfile, increment, sendSupportMessage } from "@/firebase";
 import { cn } from "@/lib/utils";
-import { Badge } from "@/components/ui/badge";
 
 const WALLET_TYPES = [
   { id: 'btc', name: "Bitcoin (BTC)", icon: <Bitcoin className="h-4 w-4" /> },
@@ -63,7 +62,7 @@ export default function AdminPanel() {
   const [activeTab, setActiveTab] = useState("deposits");
   const [searchQuery, setSearchQuery] = useState("");
 
-  // Persist admin auth
+  // Persist admin auth reliably
   useEffect(() => {
     const isAuth = localStorage.getItem('is_admin_auth') === 'true';
     if (isAuth) setIsAdminAuthenticated(true);
@@ -143,8 +142,6 @@ export default function AdminPanel() {
     acc[msg.userId].push(msg);
     return acc;
   }, {});
-
-  const selectedUserHistory = deposits?.filter((d: any) => d.userId === selectedUserId) || [];
 
   if (!isAdminAuthenticated) {
     return (
