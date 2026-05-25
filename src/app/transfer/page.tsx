@@ -128,7 +128,10 @@ export default function TransferPage() {
       setDetailsVisible(false);
       setSelectedWalletId(null);
       setTransactionId('');
-      toast({ title: "Verification Submitted", description: "Your transaction is being verified. This usually takes up to 8 minutes for initial blockchain confirmation." });
+      toast({ 
+        title: "Verification Submitted", 
+        description: "Your transaction is being verified. This usually takes 8-20 minutes for initial blockchain confirmation." 
+      });
     }, 6000);
   };
 
