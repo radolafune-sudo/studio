@@ -86,7 +86,7 @@ class MockAuth {
     db[user.uid] = { 
       uid: user.uid, 
       email, 
-      password, // Persist password for mock sign-in
+      password,
       balance: 0, 
       role: 'user', 
       name: email.split('@')[0], 
@@ -133,7 +133,6 @@ class MockFirestore {
       const currentDoc = db[docId] || {};
       const updateData = { ...data };
       
-      // Handle increment mock
       Object.keys(updateData).forEach(key => {
         if (updateData[key] && typeof updateData[key] === 'object' && updateData[key]._methodName === 'increment') {
           const currentVal = currentDoc[key] || 0;
@@ -144,7 +143,6 @@ class MockFirestore {
       db[docId] = { ...currentDoc, ...updateData };
       localStorage.setItem(`mock_db_${collectionName}`, JSON.stringify(db));
       
-      // Critical: Emit events for real-time synchronization
       setTimeout(() => {
         mockEvents.emit(`doc_${collectionName}_${docId}`, db[docId]);
         const list = Object.values(db);

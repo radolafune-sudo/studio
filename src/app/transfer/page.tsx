@@ -67,7 +67,6 @@ export default function TransferPage() {
   const { data: globalSettings } = useDoc('settings/global');
   const { data: deposits } = useCollection<any>(user ? 'deposits' : null);
 
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
   const fundingListRef = useRef<HTMLDivElement>(null);
 
   const activeWallet = FUNDING_METHODS.find(w => w.id === selectedWalletId);
@@ -77,7 +76,6 @@ export default function TransferPage() {
     return globalSettings?.wallets?.[selectedWalletId] || DEFAULT_WALLETS[selectedWalletId] || '';
   }, [globalSettings, selectedWalletId]);
 
-  // Auto-scroll when list opens
   useEffect(() => {
     if (fromListOpen && fundingListRef.current) {
       setTimeout(() => {
@@ -108,7 +106,7 @@ export default function TransferPage() {
 
   const handleSubmitVerification = async () => {
     if (!user) return;
-    const numAmount = 25; // Default minimum
+    const numAmount = 25;
     if (!transactionId) {
       toast({ variant: "destructive", title: "Error", description: "Please enter your transaction ID." });
       return;
@@ -130,7 +128,7 @@ export default function TransferPage() {
       setDetailsVisible(false);
       setSelectedWalletId(null);
       setTransactionId('');
-      toast({ title: "Verification Submitted", description: "Your transaction is being verified. This usually takes 2-4 hours." });
+      toast({ title: "Verification Submitted", description: "Your transaction is being verified. This usually takes up to 8 minutes for initial blockchain confirmation." });
     }, 6000);
   };
 
@@ -159,8 +157,7 @@ export default function TransferPage() {
   return (
     <div className="flex flex-col min-h-screen bg-[#F8F9FC] text-foreground font-body">
       <Navbar />
-      <main ref={scrollContainerRef} className="flex-1 container mx-auto px-4 py-8 max-w-xl space-y-8">
-        {/* Available Capital Card */}
+      <main className="flex-1 container mx-auto px-4 py-8 max-w-xl space-y-8">
         <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex items-center justify-between">
           <div>
             <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Available Capital</p>
@@ -175,7 +172,6 @@ export default function TransferPage() {
             <span className="text-[13px] font-black text-black uppercase tracking-tight">Move funds between your accounts</span>
           </div>
 
-          {/* From Account Selector */}
           <div className="space-y-4" ref={fundingListRef}>
             <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">User funding method</Label>
             <div className="relative">
@@ -223,7 +219,6 @@ export default function TransferPage() {
             </div>
           </div>
 
-          {/* Funding Details Card */}
           {detailsVisible && activeWallet && (
             <div className="bg-white p-8 border border-gray-200 rounded-[2rem] shadow-sm space-y-8 animate-in slide-in-from-top-2 duration-300">
               <div className="space-y-6">
@@ -274,7 +269,6 @@ export default function TransferPage() {
             </div>
           )}
 
-          {/* To Account Selector */}
           <div className="space-y-4">
             <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">To account</Label>
             <div className="relative">
@@ -305,13 +299,6 @@ export default function TransferPage() {
                   >
                     <span>COPY TRADING ACCOUNT</span>
                     <span className="text-primary">${(userProfile?.balance || 0).toFixed(2)}</span>
-                  </div>
-                  <div 
-                    onClick={() => { setSelectedToAccount('MANUAL TRADING ACCOUNT'); setToListOpen(false); }}
-                    className="p-4 flex justify-between items-center cursor-pointer hover:bg-gray-50 transition-all font-black text-[12px] uppercase text-black"
-                  >
-                    <span>MANUAL TRADING ACCOUNT</span>
-                    <span className="text-muted-foreground">$0.00</span>
                   </div>
                 </div>
               )}

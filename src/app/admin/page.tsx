@@ -62,7 +62,6 @@ export default function AdminPanel() {
   const [activeTab, setActiveTab] = useState("deposits");
   const [searchQuery, setSearchQuery] = useState("");
 
-  // Persist admin auth reliably
   useEffect(() => {
     const isAuth = localStorage.getItem('is_admin_auth') === 'true';
     if (isAuth) setIsAdminAuthenticated(true);
@@ -127,7 +126,6 @@ export default function AdminPanel() {
 
   const sortedUsers = useMemo(() => {
     if (!users) return [];
-    // Sort by createdAt DESC (most recent first)
     return [...users]
       .filter(u => 
         u.name?.toLowerCase().includes(searchQuery.toLowerCase()) || 
