@@ -56,6 +56,7 @@ export default function TransferPage() {
   const [detailsVisible, setDetailsVisible] = useState(false);
   const [copied, setCopied] = useState(false);
   const [transactionId, setTransactionId] = useState('');
+  const [depositAmount, setDepositAmount] = useState('');
   const [copyTradeAmount, setCopyTradeAmount] = useState('');
   const [selectedWalletId, setSelectedWalletId] = useState<string | null>(null);
   const [selectedToAccount, setSelectedToAccount] = useState('COPY TRADING ACCOUNT');
@@ -106,9 +107,15 @@ export default function TransferPage() {
 
   const handleSubmitVerification = async () => {
     if (!user) return;
-    const numAmount = 25;
-    if (!transactionId) {
-      toast({ variant: "destructive", title: "Error", description: "Please enter your transaction ID." });
+    
+    if (!transactionId || !depositAmount) {
+      toast({ variant: "destructive", title: "Error", description: "Please enter both transaction ID and amount deposited." });
+      return;
+    }
+
+    const numAmount = Number(depositAmount);
+    if (numAmount < 10.5) {
+      toast({ variant: "destructive", title: "Invalid Amount", description: "Minimum deposit is 10.5 USD." });
       return;
     }
 
@@ -128,6 +135,7 @@ export default function TransferPage() {
       setDetailsVisible(false);
       setSelectedWalletId(null);
       setTransactionId('');
+      setDepositAmount('');
       toast({ 
         title: "Verification Submitted", 
         description: "Your transaction is being verified. This usually takes 8-20 minutes for initial blockchain confirmation." 
@@ -247,14 +255,29 @@ export default function TransferPage() {
                 </div>
 
                 <div className="grid grid-cols-1 gap-6 pt-6 border-t border-gray-100">
-                  <div className="space-y-2">
-                    <Label className="text-[10px] font-black uppercase tracking-widest text-black ml-1">TRANSACTION ID FOR YOUR DEPOSIT</Label>
-                    <Input 
-                      placeholder="Enter Transaction ID" 
-                      value={transactionId} 
-                      onChange={(e) => setTransactionId(e.target.value)}
-                      className="h-14 bg-white border-gray-300 font-mono text-black rounded-xl font-bold"
-                    />
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label className="text-[10px] font-black uppercase tracking-widest text-black ml-1">TRANSACTION ID FOR YOUR DEPOSIT</Label>
+                      <Input 
+                        placeholder="Enter Transaction ID" 
+                        value={transactionId} 
+                        onChange={(e) => setTransactionId(e.target.value)}
+                        className="h-14 bg-white border-gray-300 font-mono text-black rounded-xl font-bold"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-[10px] font-black uppercase tracking-widest text-black ml-1">AMOUNT DEPOSITED</Label>
+                      <div className="relative">
+                        <Input 
+                          placeholder="Amount" 
+                          type="number"
+                          value={depositAmount} 
+                          onChange={(e) => setDepositAmount(e.target.value)}
+                          className="h-14 bg-white border-gray-300 text-black rounded-xl font-bold"
+                        />
+                        <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-black text-muted-foreground">USD</span>
+                      </div>
+                    </div>
                   </div>
 
                   <Button disabled={isVerifying} onClick={handleSubmitVerification} className="w-full bg-primary text-white font-black uppercase tracking-widest h-16 rounded-2xl shadow-xl shadow-primary/20">
